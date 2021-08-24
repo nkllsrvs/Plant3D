@@ -126,7 +126,7 @@ namespace Plant3D
                 Id = "CHPS",
                 CommandHandler = new FFRibbonButtonCommandHandler(),
                 //actual AutoCAD command passed to ICommand.Execute().
-                CommandParameter = ".CHPS "
+                CommandParameter = "_CHPS "
             };
             RibbonButton button5 = new RibbonButton
             {
@@ -139,7 +139,7 @@ namespace Plant3D
                 Id = "CHPM",
                 CommandHandler = new FFRibbonButtonCommandHandler(),
                 //actual AutoCAD command passed to ICommand.Execute().
-                CommandParameter = ".CHPM "
+                CommandParameter = "_CHPM "
             };
             RibbonButton button6 = new RibbonButton
             {
@@ -152,7 +152,7 @@ namespace Plant3D
                 Id = "CHPP",
                 CommandHandler = new FFRibbonButtonCommandHandler(),
                 //actual AutoCAD command passed to ICommand.Execute().
-                CommandParameter = ".CHPP "
+                CommandParameter = "_CHPP "
             };
 
             List<RibbonButton> ribbonButtons = new List<RibbonButton> { button1, button2, button3, button4, button5, button6 };
@@ -185,102 +185,29 @@ namespace Plant3D
     }
     public class Commands
     {
-        public class PropertyChangerCmds
+        //public class PropertyChangerCmds
+
+        //{
+
+        [CommandMethod("_CHPS", CommandFlags.Modal | CommandFlags.Redraw | CommandFlags.UsePickSet)]
+
+        public void ChangePropertyOnSelectedEntities()
 
         {
 
-            [CommandMethod("CHPS", CommandFlags.Modal | CommandFlags.Redraw | CommandFlags.UsePickSet)]
+            Document doc = Application.DocumentManager.MdiActiveDocument;
 
-            public void ChangePropertyOnSelectedEntities()
-
-            {
-
-                Document doc = Application.DocumentManager.MdiActiveDocument;
-
-                Editor ed = doc.Editor;
+            Editor ed = doc.Editor;
 
 
-                try
-
-                {
-
-                    PromptSelectionResult psr = ed.GetSelection();
-
-
-                    if (psr.Status == PromptStatus.OK)
-
-                    {
-
-                        System.Type objType;
-
-                        string propName;
-
-                        object newPropValue;
-
-                        bool recurse;
-
-
-                        if (SelectClassPropertyAndValue(out objType, out propName, out newPropValue, out recurse))
-
-                        {
-
-                            int count = ChangePropertyOfEntitiesOfType(psr.Value.GetObjectIds(), objType, propName, newPropValue, recurse);
-
-                            // Update the display, and print the count
-
-                            ed.Regen();
-
-                            ed.WriteMessage("\nChanged " + count + " object" + (count == 1 ? "" : "s") + " of type " + objType.Name + " to have a " + propName + " of " + newPropValue + ".");
-
-                        }
-
-                    }
-
-                }
-
-                catch (System.Exception ex)
-
-                {
-
-                    ed.WriteMessage("Exception: " + ex);
-
-                }
-
-            }
-
-
-            [CommandMethod("CHPM")]
-
-            public void ChangePropertyOnModelSpaceContents()
+            try
 
             {
 
-                ChangePropertyOnSpaceContents(BlockTableRecord.ModelSpace);
-
-            }
+                PromptSelectionResult psr = ed.GetSelection();
 
 
-            [CommandMethod("CHPP")]
-
-            public void ChangePropertyOnPaperSpaceContents()
-
-            {
-
-                ChangePropertyOnSpaceContents(BlockTableRecord.PaperSpace);
-
-            }
-
-
-            private void ChangePropertyOnSpaceContents(string spaceName)
-
-            {
-
-                Document doc = Application.DocumentManager.MdiActiveDocument;
-
-                Editor ed = doc.Editor;
-
-
-                try
+                if (psr.Status == PromptStatus.OK)
 
                 {
 
@@ -297,30 +224,7 @@ namespace Plant3D
 
                     {
 
-                        ObjectId spaceId;
-
-                        Transaction tr = doc.TransactionManager.StartTransaction();
-
-                        using (tr)
-
-                        {
-
-                            BlockTable bt = (BlockTable)tr.GetObject(doc.Database.BlockTableId, OpenMode.ForRead);
-
-                            spaceId = bt[spaceName];
-
-
-                            // Not needed, but quicker than aborting
-
-                            tr.Commit();
-
-                        }
-
-                        // Call our recursive function to set the new
-
-                        // value in our nested objects
-
-                        int count = ChangePropertyOfEntitiesOfType(spaceId, objType, propName, newPropValue, recurse);
+                        int count = ChangePropertyOfEntitiesOfType(psr.Value.GetObjectIds(), objType, propName, newPropValue, recurse);
 
                         // Update the display, and print the count
 
@@ -332,319 +236,310 @@ namespace Plant3D
 
                 }
 
-                catch (System.Exception ex)
-
-                {
-
-                    ed.WriteMessage("Exception: " + ex);
-
-                }
-
             }
 
-
-            private bool SelectClassPropertyAndValue(out System.Type objType,out string propName,out object newPropValue,out bool recurse)
+            catch (System.Exception ex)
 
             {
 
-                Document doc = Application.DocumentManager.MdiActiveDocument;
+                ed.WriteMessage("Exception: " + ex);
 
-                Editor ed = doc.Editor;
-
-
-                objType = null;
-
-                propName = "";
-
-                newPropValue = null;
-
-                recurse = true;
-
-
-                // Let's first get the class to query for
-
-                PromptResult ps = ed.GetString("\nEnter type of objects to look for: ");
-
-
-                if (ps.Status == PromptStatus.OK)
-
-                {
-
-                    string typeName = ps.StringResult;
-
-
-                    // Use reflection to get the type from the string
-
-                    objType = System.Type.GetType(typeName, false, true);
-
-
-                    // If we didn't find it, try prefixing with
-
-                    // "Autodesk.AutoCAD.DatabaseServices."
-
-
-                    if (objType == null)
-
-                    {
-
-                        objType = System.Type.GetType("Autodesk.AutoCAD.DatabaseServices." + typeName + ", acdbmgd", false, true);
-
-                    }
-
-
-                    if (objType == null)
-
-                    {
-
-                        ed.WriteMessage("\nType " + typeName + " not found.");
-
-                    }
-
-                    else
-
-                    {
-
-                        // If we have a valid type then let's
-
-                        // first list its writable properties
-
-                        ListProperties(objType);
-
-
-                        // Prompt for a property
-
-                        ps = ed.GetString("\nEnter property to modify: ");
-
-
-                        if (ps.Status == PromptStatus.OK)
-
-                        {
-
-                            propName = ps.StringResult;
-
-
-                            // Make sure the property exists...
-
-                            System.Reflection.PropertyInfo propInfo = objType.GetProperty(propName);
-
-                            if (propInfo == null)
-
-                            {
-
-                                ed.WriteMessage("\nProperty " + propName + " for type " + typeName + " not found.");
-
-                            }
-
-                            else
-
-                            {
-
-                                if (!propInfo.CanWrite)
-
-                                {
-
-                                    ed.WriteMessage("\nProperty " + propName + " of type " + typeName + " is not writable.");
-
-                                }
-
-                                else
-
-                                {
-
-                                    // If the property is writable...
-
-                                    // ask for the new value
-
-                                    System.Type propType = propInfo.PropertyType;
-
-                                    string prompt = "\nEnter new value of " + propName + " property for all objects of type " + typeName + ": ";
-
-                                    // Only certain property types are currently
-
-                                    // supported: Int32, Double, String, Boolean
-
-                                    switch (propType.ToString())
-                                    {
-                                        case "System.Int32":
-                                            PromptIntegerResult pir = ed.GetInteger(prompt);
-                                            if (pir.Status == PromptStatus.OK)
-                                                newPropValue = pir.Value;
-                                            break;
-                                        case "System.Double":
-                                            PromptDoubleResult pdr = ed.GetDouble(prompt);
-                                            if (pdr.Status == PromptStatus.OK)
-                                                newPropValue = pdr.Value;
-                                            break;
-
-                                        case "System.String":
-                                            PromptResult psr = ed.GetString(prompt);
-                                            if (psr.Status == PromptStatus.OK)
-                                                newPropValue = psr.StringResult;
-                                            break;
-                                        case "System.Boolean":
-                                            PromptKeywordOptions pko = new PromptKeywordOptions(prompt);
-
-                                            pko.Keywords.Add("True");
-                                            pko.Keywords.Add("False");
-                                            PromptResult pkr = ed.GetKeywords(pko);
-
-                                            if (pkr.Status == PromptStatus.OK)
-                                            {
-                                                if (pkr.StringResult == "True")
-                                                    newPropValue = true;
-                                                else
-                                                    newPropValue = false;
-                                            }
-                                            break;
-                                        default:
-                                            ed.WriteMessage("\nProperties of type " + propType.ToString() + " are not currently supported.");
-                                            break;
-                                    }
-                                    if (newPropValue != null)
-                                    {
-                                        PromptKeywordOptions pko = new PromptKeywordOptions("\nChange properties in nested blocks: ");
-
-                                        pko.AllowNone = true;
-                                        pko.Keywords.Add("Yes");
-                                        pko.Keywords.Add("No");
-                                        pko.Keywords.Default = "Yes";
-                                        PromptResult pkr = ed.GetKeywords(pko);
-
-                                        if (pkr.Status == PromptStatus.None | pkr.Status == PromptStatus.OK)
-                                        {
-                                            if (pkr.Status == PromptStatus.None | pkr.StringResult == "Yes")
-                                                recurse = true;
-                                            else
-                                                recurse = false;
-                                            return true;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                return false;
             }
 
+        }
 
-            private void ListProperties(System.Type objType)
+
+        [CommandMethod("_CHPM")]
+
+        public void ChangePropertyOnModelSpaceContents()
+
+        {
+
+            ChangePropertyOnSpaceContents(BlockTableRecord.ModelSpace);
+
+        }
+
+
+        [CommandMethod("_CHPP")]
+
+        public void ChangePropertyOnPaperSpaceContents()
+
+        {
+
+            ChangePropertyOnSpaceContents(BlockTableRecord.PaperSpace);
+
+        }
+
+
+        private void ChangePropertyOnSpaceContents(string spaceName)
+        {
+            Document doc = Application.DocumentManager.MdiActiveDocument;
+            Editor ed = doc.Editor;
+            try
             {
-                Document doc = Application.DocumentManager.MdiActiveDocument;
-                Editor ed = doc.Editor;
-                ed.WriteMessage("\nWritable properties for " + objType.Name + ": ");
-                PropertyInfo[] propInfos = objType.GetProperties();
-                foreach (PropertyInfo propInfo in propInfos)
+                System.Type objType;
+                string propName;
+                object newPropValue;
+                bool recurse;
+
+                if (SelectClassPropertyAndValue(out objType, out propName, out newPropValue, out recurse))
                 {
-                    if (propInfo.CanWrite)
+                    ObjectId spaceId;
+                    Transaction tr = doc.TransactionManager.StartTransaction();
+                    using (tr)
                     {
-                        ed.WriteMessage("\n  " + propInfo.Name + " : " + propInfo.PropertyType);
+                        BlockTable bt = (BlockTable)tr.GetObject(doc.Database.BlockTableId, OpenMode.ForRead);
+                        spaceId = bt[spaceName];
+                        // Not needed, but quicker than aborting
+                        tr.Commit();
                     }
+                    // Call our recursive function to set the new
+                    // value in our nested objects
+                    int count = ChangePropertyOfEntitiesOfType(spaceId, objType, propName, newPropValue, recurse);
+                    // Update the display, and print the count
+                    ed.Regen();
+                    ed.WriteMessage("\nChanged " + count + " object" + (count == 1 ? "" : "s") + " of type " + objType.Name + " to have a " + propName + " of " + newPropValue + ".");
                 }
-                ed.WriteMessage("\n");
             }
-
-            // Version of the function that takes a container ID
-
-            private int ChangePropertyOfEntitiesOfType(ObjectId btrId, System.Type objType, string propName, object newValue, bool recurse)
+            catch (System.Exception ex)
             {
-
-                // We simply open the container, extract the IDs
-
-                // and pass them to another version of the function...
-
-                // If efficiency is an issue, then this could be
-
-                // streamlined (i.e. duplicated, rather than factored)
-
-
-                ObjectIdCollection btrContents = new ObjectIdCollection();
-
-                Document doc = Application.DocumentManager.MdiActiveDocument;
-
-                Transaction tr = doc.TransactionManager.StartTransaction();
-
-                using (tr)
-                {
-                    BlockTableRecord btr = (BlockTableRecord)tr.GetObject(btrId, OpenMode.ForRead);
-
-                    foreach (ObjectId entId in btr)
-                    {
-                        btrContents.Add(entId);
-                    }
-                    tr.Commit();
-                }
-                ObjectId[] ids = new ObjectId[btrContents.Count];
-                btrContents.CopyTo(ids, 0);
-
-                // Call the other version of this function
-
-                return ChangePropertyOfEntitiesOfType(ids, objType, propName, newValue, recurse);
-            }
-
-            // Version of the function that takes a list of ents
-
-            private int ChangePropertyOfEntitiesOfType(ObjectId[] objIds, System.Type objType, string propName, object newValue, bool recurse)
-            {
-                int changedCount = 0;
-                Document doc = Application.DocumentManager.MdiActiveDocument;
-                Transaction tr = doc.TransactionManager.StartTransaction();
-                using (tr)
-                {
-                    foreach (ObjectId entId in objIds)
-                    {
-                        Entity ent = tr.GetObject(entId, OpenMode.ForRead) as Entity;
-                        // Change each entity, one by one
-
-                        if (ent != null)
-                        {
-                            changedCount += ChangeSingleProperty(ent, objType, propName, newValue);
-                        }
-
-                        // If we are to recurse and it's a blockref...
-
-                        if (recurse)
-                        {
-                            BlockReference br = ent as BlockReference;
-                            if (br != null)
-                            {
-                                // ...then recurse
-                                changedCount += ChangePropertyOfEntitiesOfType(br.BlockTableRecord, objType, propName, newValue, recurse);
-                            }
-                        }
-                    }
-                    tr.Commit();
-                }
-                return changedCount;
-            }
-
-            // Function to change an individual entity's property
-
-            private int ChangeSingleProperty(Entity ent, System.Type objType, string propName, object newValue)
-            {
-                int changedCount = 0;
-
-                // Are we dealing with an entity we care about?
-
-                if (objType.IsInstanceOfType(ent))
-                {
-                    // Check the existing value
-                    object res = objType.InvokeMember(propName, BindingFlags.GetProperty, null, ent, new object[0]);
-                    // If it is not the same then change it
-                    if (!res.Equals(newValue))
-                    {
-                        // Entity is only open for read
-                        ent.UpgradeOpen();
-                        object[] args = new object[1];
-                        args[0] = newValue;
-                        res = objType.InvokeMember(propName, BindingFlags.SetProperty, null, ent, args);
-                        changedCount++;
-                        ent.DowngradeOpen();
-                    }
-                }
-                return changedCount;
+                ed.WriteMessage("Exception: " + ex);
             }
         }
+
+        private bool SelectClassPropertyAndValue(out System.Type objType, out string propName, out object newPropValue, out bool recurse)
+        {
+            Document doc = Application.DocumentManager.MdiActiveDocument;
+            Editor ed = doc.Editor;
+            objType = null;
+            propName = "";
+            newPropValue = null;
+            recurse = true;
+            // Let's first get the class to query for
+            PromptResult ps = ed.GetString("\nEnter type of objects to look for: ");
+            if (ps.Status == PromptStatus.OK)
+            {
+                string typeName = ps.StringResult;
+                // Use reflection to get the type from the string
+                objType = System.Type.GetType(typeName, false, true);
+                // If we didn't find it, try prefixing with
+                // "Autodesk.AutoCAD.DatabaseServices."
+                if (objType == null)
+                {
+                    objType = System.Type.GetType("Autodesk.AutoCAD.DatabaseServices." + typeName + ", acdbmgd", false, true);
+                }
+                if (objType == null)
+                {
+                    ed.WriteMessage("\nType " + typeName + " not found.");
+                }
+                else
+                {
+                    // If we have a valid type then let's
+                    // first list its writable properties
+                    ListProperties(objType);
+                    // Prompt for a property
+                    ps = ed.GetString("\nEnter property to modify: ");
+                    if (ps.Status == PromptStatus.OK)
+                    {
+                        propName = ps.StringResult;
+                        // Make sure the property exists...
+                        System.Reflection.PropertyInfo propInfo = objType.GetProperty(propName);
+                        if (propInfo == null)
+                        {
+                            ed.WriteMessage("\nProperty " + propName + " for type " + typeName + " not found.");
+                        }
+                        else
+                        {
+                            if (!propInfo.CanWrite)
+                            {
+                                ed.WriteMessage("\nProperty " + propName + " of type " + typeName + " is not writable.");
+                            }
+                            else
+                            {
+                                // If the property is writable...
+                                // ask for the new value
+                                System.Type propType = propInfo.PropertyType;
+                                string prompt = "\nEnter new value of " + propName + " property for all objects of type " + typeName + ": ";
+                                // Only certain property types are currently
+                                // supported: Int32, Double, String, Boolean
+                                switch (propType.ToString())
+                                {
+                                    case "System.Int32":
+                                        PromptIntegerResult pir = ed.GetInteger(prompt);
+                                        if (pir.Status == PromptStatus.OK)
+                                            newPropValue = pir.Value;
+                                        break;
+                                    case "System.Double":
+                                        PromptDoubleResult pdr = ed.GetDouble(prompt);
+                                        if (pdr.Status == PromptStatus.OK)
+                                            newPropValue = pdr.Value;
+                                        break;
+                                    case "System.String":
+                                        PromptResult psr = ed.GetString(prompt);
+                                        if (psr.Status == PromptStatus.OK)
+                                            newPropValue = psr.StringResult;
+                                        break;
+                                    case "System.Boolean":
+                                        PromptKeywordOptions pko = new PromptKeywordOptions(prompt);
+                                        pko.Keywords.Add("True");
+                                        pko.Keywords.Add("False");
+                                        PromptResult pkr = ed.GetKeywords(pko);
+                                        if (pkr.Status == PromptStatus.OK)
+                                        {
+                                            if (pkr.StringResult == "True")
+                                                newPropValue = true;
+                                            else
+                                                newPropValue = false;
+                                        }
+                                        break;
+                                    default:
+                                        ed.WriteMessage("\nProperties of type " + propType.ToString() + " are not currently supported.");
+                                        break;
+                                }
+                                if (newPropValue != null)
+                                {
+                                    PromptKeywordOptions pko = new PromptKeywordOptions("\nChange properties in nested blocks: ");
+
+                                    pko.AllowNone = true;
+                                    pko.Keywords.Add("Yes");
+                                    pko.Keywords.Add("No");
+                                    pko.Keywords.Default = "Yes";
+                                    PromptResult pkr = ed.GetKeywords(pko);
+                                    if (pkr.Status == PromptStatus.None | pkr.Status == PromptStatus.OK)
+                                    {
+                                        if (pkr.Status == PromptStatus.None | pkr.StringResult == "Yes")
+                                            recurse = true;
+                                        else
+                                            recurse = false;
+                                        return true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+
+        private void ListProperties(System.Type objType)
+        {
+            Document doc = Application.DocumentManager.MdiActiveDocument;
+            Editor ed = doc.Editor;
+            ed.WriteMessage("\nWritable properties for " + objType.Name + ": ");
+            PropertyInfo[] propInfos = objType.GetProperties();
+            foreach (PropertyInfo propInfo in propInfos)
+            {
+                if (propInfo.CanWrite)
+                {
+                    ed.WriteMessage("\n  " + propInfo.Name + " : " + propInfo.PropertyType);
+                }
+            }
+            ed.WriteMessage("\n");
+        }
+
+        // Version of the function that takes a container ID
+
+        private int ChangePropertyOfEntitiesOfType(ObjectId btrId, System.Type objType, string propName, object newValue, bool recurse)
+        {
+
+            // We simply open the container, extract the IDs
+
+            // and pass them to another version of the function...
+
+            // If efficiency is an issue, then this could be
+
+            // streamlined (i.e. duplicated, rather than factored)
+
+
+            ObjectIdCollection btrContents = new ObjectIdCollection();
+
+            Document doc = Application.DocumentManager.MdiActiveDocument;
+
+            Transaction tr = doc.TransactionManager.StartTransaction();
+
+            using (tr)
+            {
+                BlockTableRecord btr = (BlockTableRecord)tr.GetObject(btrId, OpenMode.ForRead);
+
+                foreach (ObjectId entId in btr)
+                {
+                    btrContents.Add(entId);
+                }
+                tr.Commit();
+            }
+            ObjectId[] ids = new ObjectId[btrContents.Count];
+            btrContents.CopyTo(ids, 0);
+
+            // Call the other version of this function
+
+            return ChangePropertyOfEntitiesOfType(ids, objType, propName, newValue, recurse);
+        }
+
+        // Version of the function that takes a list of ents
+
+        private int ChangePropertyOfEntitiesOfType(ObjectId[] objIds, System.Type objType, string propName, object newValue, bool recurse)
+        {
+            int changedCount = 0;
+            Document doc = Application.DocumentManager.MdiActiveDocument;
+            Transaction tr = doc.TransactionManager.StartTransaction();
+            using (tr)
+            {
+                foreach (ObjectId entId in objIds)
+                {
+                    Entity ent = tr.GetObject(entId, OpenMode.ForRead) as Entity;
+                    // Change each entity, one by one
+
+                    if (ent != null)
+                    {
+                        changedCount += ChangeSingleProperty(ent, objType, propName, newValue);
+                    }
+
+                    // If we are to recurse and it's a blockref...
+
+                    if (recurse)
+                    {
+                        BlockReference br = ent as BlockReference;
+                        if (br != null)
+                        {
+                            // ...then recurse
+                            changedCount += ChangePropertyOfEntitiesOfType(br.BlockTableRecord, objType, propName, newValue, recurse);
+                        }
+                    }
+                }
+                tr.Commit();
+            }
+            return changedCount;
+        }
+
+        // Function to change an individual entity's property
+
+        private int ChangeSingleProperty(Entity ent, System.Type objType, string propName, object newValue)
+        {
+            int changedCount = 0;
+
+            // Are we dealing with an entity we care about?
+
+            if (objType.IsInstanceOfType(ent))
+            {
+                // Check the existing value
+                object res = objType.InvokeMember(propName, BindingFlags.GetProperty, null, ent, new object[0]);
+                // If it is not the same then change it
+                if (!res.Equals(newValue))
+                {
+                    // Entity is only open for read
+                    ent.UpgradeOpen();
+                    object[] args = new object[1];
+                    args[0] = newValue;
+                    res = objType.InvokeMember(propName, BindingFlags.SetProperty, null, ent, args);
+                    changedCount++;
+                    ent.DowngradeOpen();
+                }
+            }
+            return changedCount;
+        }
+        //}
 
 
 
