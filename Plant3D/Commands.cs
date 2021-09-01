@@ -19,6 +19,9 @@ using MessageBox = System.Windows.Forms.MessageBox;
 using Orientation = System.Windows.Controls.Orientation;
 using System.Reflection;
 using Application = Autodesk.AutoCAD.ApplicationServices.Application;
+using Autodesk.ProcessPower.DataLinks;
+using Autodesk.ProcessPower.DataObjects;
+using System.Collections.Specialized;
 
 [assembly: CommandClass(typeof(Plant3D.Commands))]
 [assembly: CommandClass(typeof(Plant3D.FFRibbon))]
@@ -44,7 +47,6 @@ namespace Plant3D
                     IsContextualTab = false
                 };
                 //Add the Tab
-
                 control.Tabs.Add(tab);
                 control.ActiveTab = tab;
                 tab.Panels.Add(AddOnePanel());
@@ -68,11 +70,8 @@ namespace Plant3D
             {
                 Source = panelSource
             };
-
-
             //assign the Command Item to the DialgLauncher which auto-enables
             // the little button at the lower right of a Panel
-
             RibbonButton button1 = new RibbonButton
             {
                 Text = "RelatedTo",
@@ -86,7 +85,6 @@ namespace Plant3D
                 //actual AutoCAD command passed to ICommand.Execute().
                 CommandParameter = "._PBRT "
             };
-
             RibbonButton button2 = new RibbonButton
             {
                 Text = "SelectAll",
@@ -100,7 +98,6 @@ namespace Plant3D
                 //actual AutoCAD command passed to ICommand.Execute().
                 CommandParameter = "._SANF "
             };
-
             RibbonButton button3 = new RibbonButton
             {
                 Text = "Dump",
@@ -114,7 +111,6 @@ namespace Plant3D
                 //actual AutoCAD command passed to ICommand.Execute().
                 CommandParameter = "._DUMP "
             };
-
             RibbonButton button4 = new RibbonButton
             {
                 Text = "CHPS",
@@ -154,13 +150,11 @@ namespace Plant3D
                 //actual AutoCAD command passed to ICommand.Execute().
                 CommandParameter = "_CHPP "
             };
-
             List<RibbonButton> ribbonButtons = new List<RibbonButton> { button1, button2, button3, button4, button5, button6 };
             foreach (RibbonButton rb in ribbonButtons)
             {
                 panelSource.Items.Add(rb);
             }
-
             return panel;
         }
         public class FFRibbonButtonCommandHandler : System.Windows.Input.ICommand
@@ -171,105 +165,57 @@ namespace Plant3D
             }
             public event EventHandler CanExecuteChanged;
             public void Execute(object parameter)
-
             {
                 RibbonCommandItem cmd = (RibbonCommandItem)parameter;
-
                 Document dwg = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
-
                 dwg.SendStringToExecute(cmd.CommandParameter.ToString(), true, false, true);
             }
         }
-
-
     }
     public class Commands
     {
         //public class PropertyChangerCmds
-
         //{
-
         [CommandMethod("_CHPS", CommandFlags.Modal | CommandFlags.Redraw | CommandFlags.UsePickSet)]
-
         public void ChangePropertyOnSelectedEntities()
-
         {
-
             Document doc = Application.DocumentManager.MdiActiveDocument;
-
             Editor ed = doc.Editor;
-
-
             try
-
             {
-
                 PromptSelectionResult psr = ed.GetSelection();
-
-
                 if (psr.Status == PromptStatus.OK)
-
                 {
-
                     System.Type objType;
-
                     string propName;
-
                     object newPropValue;
-
                     bool recurse;
-
-
                     if (SelectClassPropertyAndValue(out objType, out propName, out newPropValue, out recurse))
-
                     {
-
                         int count = ChangePropertyOfEntitiesOfType(psr.Value.GetObjectIds(), objType, propName, newPropValue, recurse);
-
                         // Update the display, and print the count
-
                         ed.Regen();
-
                         ed.WriteMessage("\nChanged " + count + " object" + (count == 1 ? "" : "s") + " of type " + objType.Name + " to have a " + propName + " of " + newPropValue + ".");
-
                     }
-
                 }
-
             }
-
             catch (System.Exception ex)
-
             {
-
                 ed.WriteMessage("Exception: " + ex);
-
             }
-
         }
-
 
         [CommandMethod("_CHPM")]
-
         public void ChangePropertyOnModelSpaceContents()
-
         {
-
             ChangePropertyOnSpaceContents(BlockTableRecord.ModelSpace);
-
         }
-
 
         [CommandMethod("_CHPP")]
-
         public void ChangePropertyOnPaperSpaceContents()
-
         {
-
             ChangePropertyOnSpaceContents(BlockTableRecord.PaperSpace);
-
         }
-
 
         private void ChangePropertyOnSpaceContents(string spaceName)
         {
@@ -668,23 +614,92 @@ namespace Plant3D
         [CommandMethod("_DUMP")]
         public void Dump()
         {
+            PlantProject proj = PlantApplication.CurrentProject;
+            ProjectPartCollection projParts = proj.ProjectParts;
+            PnIdProject pnidProj = (PnIdProject)projParts["PnId"];
+            DataLinksManager dlm = pnidProj.DataLinksManager;
+            PnPDatabase db = dlm.GetPnPDatabase();
             Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
-            Database db = doc.Database;
             Editor ed = doc.Editor;
-            var result = ed.GetEntity("\nSelecione uma  entidade: ");
-            if (result.Status == PromptStatus.OK)
-                PrintDump(result.ObjectId, ed);
-            Autodesk.AutoCAD.ApplicationServices.Application.DisplayTextScreen = true;
+            List<PromptEntityResult> Instruments = new List<PromptEntityResult>();
+            PromptEntityResult result;
 
+            bool loop = true;
+            while (loop)
+            {
+                result = ed.GetEntity("\nSelecione um  Instrumento: ");
+
+                if (result.Status == PromptStatus.OK)
+                    Instruments.Add(result);
+                DialogResult dr = MessageBox.Show("Deseja continuar a selecionar Instrumentos?", "RelatedTo", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+                if (dr == DialogResult.No)
+                    break;
+            }
+
+            PromptEntityResult equipment = ed.GetEntity("\nSelecione um Equipamento: ");
+            if (equipment.Status == PromptStatus.OK)
+            {
+                int equipmentRowId = dlm.FindAcPpRowId(equipment.ObjectId);
+                StringCollection eKeys = new StringCollection
+                {
+                    "Description",
+                    "Tag",
+                    "RelatedTo"
+                };
+                StringCollection eVals = dlm.GetProperties(equipmentRowId, eKeys, true);
+                foreach (PromptEntityResult entityResult in Instruments)
+                {
+                    int instrumentRowId = dlm.FindAcPpRowId(entityResult.ObjectId);
+                    StringCollection iKeys = new StringCollection
+                    {
+                        "Description",
+                        "Tag",
+                        "RelatedTo"
+                    };
+                    StringCollection iVals = dlm.GetProperties(instrumentRowId, iKeys, true);
+
+                    iVals[2] = eVals[1];
+
+                    db.StartTransaction();
+                    dlm.SetProperties(entityResult.ObjectId, iKeys, iVals);
+                    db.CommitTransaction();
+                }
+            }
         }
 
-        private void PrintDump(ObjectId id, Editor ed)
+        private void PrintDump(PromptEntityResult id, Editor ed)
         {
             var flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly;
 
-            using (var tr = id.Database.TransactionManager.StartTransaction())
+            //Database db = Application.DocumentManager.MdiActiveDocument.Database;
+            Database db = id.ObjectId.Database;
+            DataLinksManager dlm = DataLinksManager.GetManager(db);
+            PnPRowIdArray aPid = dlm.SelectAcPpRowIds(db);
+            var tr = id.ObjectId.Database.TransactionManager.StartTransaction();
+
+            // get line segment
+            var lineSegment = tr.GetObject(id.ObjectId, OpenMode.ForRead);
+            if (lineSegment == null) ;
+            // get line segment row id
+            var lineSegmentRowId = dlm.FindAcPpRowId(id.ObjectId);
+
+
+            foreach (int rid in aPid)
             {
-                var dbObj = tr.GetObject(id, OpenMode.ForRead);
+                if (rid == lineSegmentRowId)
+                {
+                    StringCollection sKeys = new StringCollection();
+                    sKeys.Add("Description");
+                    sKeys.Add("Tag");
+                    sKeys.Add("RelatedTo");
+                    StringCollection sVals = dlm.GetProperties(rid, sKeys, true);
+                    MessageBox.Show("\nDescription - " + sVals[0] + "\nTag - " + sVals[1] + "\nRelatedTo - " + sVals[2] + "");
+                }
+            }
+
+            using (tr)
+            {
+                var dbObj = tr.GetObject(id.ObjectId, OpenMode.ForWrite);
                 var types = new List<Type>();
                 types.Add(dbObj.GetType());
                 while (true)
@@ -701,6 +716,7 @@ namespace Plant3D
                     if (t.Name == "Entity")
                     {
                         ed.WriteMessage($"\n\n - {t.Name} -");
+
                         foreach (var prop in t.GetProperties(flags))
                         {
                             if (prop.Name == "Layer")

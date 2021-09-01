@@ -1,4 +1,13 @@
-﻿namespace Plant3D
+﻿using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.ProcessPower.DataLinks;
+using Autodesk.ProcessPower.DataObjects;
+using Autodesk.ProcessPower.PlantInstance;
+using Autodesk.ProcessPower.ProjectManager;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+
+namespace Plant3D
 {
     partial class FormVALE
     {
@@ -28,6 +37,14 @@
         /// </summary>
         private void InitializeComponent()
         {
+            PlantProject proj = PlantApplication.CurrentProject;
+            ProjectPartCollection projParts = proj.ProjectParts;
+            PnIdProject pnidProj = (PnIdProject)projParts["PnId"];
+            DataLinksManager dlm = pnidProj.DataLinksManager;
+            PnPDatabase db = dlm.GetPnPDatabase();
+            Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
+            Editor ed = doc.Editor;
+
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormVALE));
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
@@ -125,7 +142,45 @@
             this.PerformLayout();
 
         }
+        //private void RelatedTo(Editor ed, DataLinksManager dlm, PnPDatabase db)
+        //{
+        //    List<PromptEntityResult>
+        //    PromptEntityResult instrument = ed.GetEntity("\nSelecione um  Instrumento: ");
+        //    if (instrument.Status == PromptStatus.OK)
+        //    {
+        //        int instrumentRowId = dlm.FindAcPpRowId(instrument.ObjectId);
+        //        StringCollection iKeys = new StringCollection
+        //        {
+        //            "Description",
+        //            "Tag",
+        //            "RelatedTo"
+        //        };
+        //        StringCollection iVals = dlm.GetProperties(instrumentRowId, iKeys, true);
+        //        MessageBox.Show("\n Instrumento \n\n" + iKeys[0] + " - " + iVals[0] + "\n" + iKeys[1] + " - " + iVals[1] + "\n" + iKeys[2] + " - " + iVals[2] + "");
 
+        //        PromptEntityResult equipment = ed.GetEntity("\nSelecione um Equipamento: ");
+        //        if (equipment.Status == PromptStatus.OK)
+        //        {
+        //            int equipmentRowId = dlm.FindAcPpRowId(equipment.ObjectId);
+        //            StringCollection eKeys = new StringCollection
+        //            {
+        //                "Description",
+        //                "Tag",
+        //                "RelatedTo"
+        //            };
+        //            StringCollection eVals = dlm.GetProperties(equipmentRowId, eKeys, true);
+        //            MessageBox.Show("\n Equipamento \n\n" + eKeys[0] + " - " + eVals[0] + "\n" + eKeys[1] + " - " + eVals[1] + "\n" + eKeys[2] + " - " + eVals[2] + "");
+
+        //            iVals[2] = eVals[1];
+
+        //            db.StartTransaction();
+        //            dlm.SetProperties(instrument.ObjectId, iKeys, iVals);
+        //            db.CommitTransaction();
+
+        //        }
+
+        //    }
+        //}
         #endregion
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.ProgressBar progressBar1;
