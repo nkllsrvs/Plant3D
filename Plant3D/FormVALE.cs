@@ -1,5 +1,12 @@
-﻿using System;
+﻿using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.ProcessPower.DataLinks;
+using Autodesk.ProcessPower.DataObjects;
+using Autodesk.ProcessPower.PlantInstance;
+using Autodesk.ProcessPower.ProjectManager;
+using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
@@ -17,49 +24,69 @@ namespace Plant3D
             InitializeComponent();
         }
 
-
-
-        private void groupBox2_Enter(object sender, EventArgs e)
+        private void buttonSelection_Click(object sender, EventArgs e)
         {
+            PlantProject proj = PlantApplication.CurrentProject;
+            ProjectPartCollection projParts = proj.ProjectParts;
+            PnIdProject pnidProj = (PnIdProject)projParts["PnId"];
+            DataLinksManager dlm = pnidProj.DataLinksManager;
+            PnPDatabase db = dlm.GetPnPDatabase();
+            Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
+            Editor ed = doc.Editor;
 
+            List<PromptEntityResult> Instruments = new List<PromptEntityResult>();
+            PromptEntityResult result;
+
+            bool loop = true;
+            while (loop)
+            {
+                result = ed.GetEntity("\nSelecione um  Instrumento: ");
+
+                if (result.Status == PromptStatus.OK){
+                    if (Instruments.Contains(result))
+                        MessageBox.Show("O instrumento já foi selecionado!!");
+                    else
+                    {
+                        Instruments.Add(result);
+                    }
+                }
+                else
+                    break;
+            }
+            PromptEntityResult equipment = ed.GetEntity("\nSelecione um Equipamento: ");
+            if (equipment.Status == PromptStatus.OK)
+            {
+                int equipmentRowId = dlm.FindAcPpRowId(equipment.ObjectId);
+                StringCollection eKeys = new StringCollection
+                {
+                    "Description",
+                    "Tag",
+                    "RelatedTo"
+                };
+                StringCollection eVals = dlm.GetProperties(equipmentRowId, eKeys, true);
+                foreach (PromptEntityResult entityResult in Instruments)
+                {
+                    int instrumentRowId = dlm.FindAcPpRowId(entityResult.ObjectId);
+                    StringCollection iKeys = new StringCollection
+                    {
+                        "Description",
+                        "Tag",
+                        "RelatedTo"
+                    };
+                    StringCollection iVals = dlm.GetProperties(instrumentRowId, iKeys, true);
+
+                    iVals[2] = eVals[1];
+
+                    db.StartTransaction();
+                    dlm.SetProperties(entityResult.ObjectId, iKeys, iVals);
+                    db.CommitTransaction();
+                }
+            }
         }
 
-        private void textBox1_TextChanged(object sender, EventArgs e)
+        private void buttonRelatedTo_Click(bool loop, EventArgs e)
         {
-            
-        }
-        public void textBox1_Test(string s)
-        {
-            this.textBox1.Text = s;
-        }
-
-        private void label2_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void richTextBox1_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            
-        }
-        public bool button1_Click_Return(object sender, EventArgs e)
-        {
-            return false;
-        }
-
-        private void button2_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void FormVALE_Load(object sender, EventArgs e)
-        {
-
+            loop = false;
         }
     }
 }

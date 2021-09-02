@@ -6,6 +6,7 @@ using Autodesk.ProcessPower.PlantInstance;
 using Autodesk.ProcessPower.ProjectManager;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Windows.Forms;
 
 namespace Plant3D
 {
@@ -37,6 +38,66 @@ namespace Plant3D
         /// </summary>
         private void InitializeComponent()
         {
+            this.buttonSelection = new System.Windows.Forms.Button();
+            this.listView = new System.Windows.Forms.ListView();
+            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.buttonRelatedTo = new System.Windows.Forms.Button();
+            this.SuspendLayout();
+            // 
+            // buttonSelection
+            // 
+            this.buttonSelection.Location = new System.Drawing.Point(242, 333);
+            this.buttonSelection.Name = "buttonSelection";
+            this.buttonSelection.Size = new System.Drawing.Size(98, 23);
+            this.buttonSelection.TabIndex = 0;
+            this.buttonSelection.Text = "Selection";
+            this.buttonSelection.UseVisualStyleBackColor = true;
+            this.buttonSelection.Click += new System.EventHandler(this.buttonSelection_Click);
+            // 
+            // listView
+            // 
+            this.listView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader1,
+            this.columnHeader2});
+            this.listView.HideSelection = false;
+            this.listView.Location = new System.Drawing.Point(175, 51);
+            this.listView.Name = "listView";
+            this.listView.Size = new System.Drawing.Size(387, 232);
+            this.listView.TabIndex = 1;
+            this.listView.UseCompatibleStateImageBehavior = false;
+            this.listView.View = System.Windows.Forms.View.Details;
+            // 
+            // columnHeader1
+            // 
+            this.columnHeader1.Text = "RowID";
+            // 
+            // columnHeader2
+            // 
+            this.columnHeader2.Text = "InstrumentName";
+            // 
+            // buttonRelatedTo
+            // 
+            this.buttonRelatedTo.Location = new System.Drawing.Point(395, 333);
+            this.buttonRelatedTo.Name = "buttonRelatedTo";
+            this.buttonRelatedTo.Size = new System.Drawing.Size(89, 23);
+            this.buttonRelatedTo.TabIndex = 2;
+            this.buttonRelatedTo.Text = "RelatedTo";
+            this.buttonRelatedTo.UseVisualStyleBackColor = true;
+            this.buttonRelatedTo.Click += new System.EventHandler(this.buttonRelatedTo_Click);
+            // 
+            // FormVALE
+            // 
+            this.ClientSize = new System.Drawing.Size(596, 395);
+            this.Controls.Add(this.buttonRelatedTo);
+            this.Controls.Add(this.listView);
+            this.Controls.Add(this.buttonSelection);
+            this.Name = "FormVALE";
+            this.ResumeLayout(false);
+
+        }
+        private void RelatedTo()
+        {
             PlantProject proj = PlantApplication.CurrentProject;
             ProjectPartCollection projParts = proj.ProjectParts;
             PnIdProject pnidProj = (PnIdProject)projParts["PnId"];
@@ -45,149 +106,58 @@ namespace Plant3D
             Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
             Editor ed = doc.Editor;
 
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormVALE));
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.progressBar1 = new System.Windows.Forms.ProgressBar();
-            this.button1 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
-            this.label2 = new System.Windows.Forms.Label();
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
-            this.checkedListBox1 = new System.Windows.Forms.CheckedListBox();
-            this.SuspendLayout();
-            // 
-            // textBox1
-            // 
-            this.textBox1.Location = new System.Drawing.Point(379, 22);
-            this.textBox1.Multiline = true;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(239, 128);
-            this.textBox1.TabIndex = 1;
-            this.textBox1.Text = "campo de texto apra exibir como de ser ultilizado o plugin.";
-            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
-            // 
-            // progressBar1
-            // 
-            this.progressBar1.Location = new System.Drawing.Point(30, 405);
-            this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(588, 10);
-            this.progressBar1.TabIndex = 2;
-            // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(379, 358);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(101, 23);
-            this.button1.TabIndex = 3;
-            this.button1.Text = "FLIST";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
-            // 
-            // button2
-            // 
-            this.button2.Location = new System.Drawing.Point(514, 358);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(104, 23);
-            this.button2.TabIndex = 4;
-            this.button2.Text = "FINAL";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(27, 22);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(29, 13);
-            this.label2.TabIndex = 5;
-            this.label2.Text = "Guia";
-            this.label2.Click += new System.EventHandler(this.label2_Click);
-            // 
-            // richTextBox1
-            // 
-            this.richTextBox1.Location = new System.Drawing.Point(30, 52);
-            this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.ReadOnly = true;
-            this.richTextBox1.Size = new System.Drawing.Size(289, 289);
-            this.richTextBox1.TabIndex = 6;
-            this.richTextBox1.Text = resources.GetString("richTextBox1.Text");
-            this.richTextBox1.TextChanged += new System.EventHandler(this.richTextBox1_TextChanged);
-            // 
-            // checkedListBox1
-            // 
-            this.checkedListBox1.FormattingEnabled = true;
-            this.checkedListBox1.Location = new System.Drawing.Point(379, 175);
-            this.checkedListBox1.Name = "checkedListBox1";
-            this.checkedListBox1.Size = new System.Drawing.Size(239, 139);
-            this.checkedListBox1.TabIndex = 7;
-            // 
-            // FormVALE
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(652, 427);
-            this.Controls.Add(this.checkedListBox1);
-            this.Controls.Add(this.richTextBox1);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.button2);
-            this.Controls.Add(this.button1);
-            this.Controls.Add(this.progressBar1);
-            this.Controls.Add(this.textBox1);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Name = "FormVALE";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "VALE - FF Solutions";
-            this.TopMost = true;
-            this.Load += new System.EventHandler(this.FormVALE_Load);
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            List<PromptEntityResult> Instruments = new List<PromptEntityResult>();
+            PromptEntityResult result;
 
+            bool loop = true;
+            while (loop)
+            {
+                result = ed.GetEntity("\nSelecione um  Instrumento: ");
+
+                if (result.Status == PromptStatus.OK){
+                    Instruments.Add(result); 
+                }
+                DialogResult dr = MessageBox.Show("Deseja continuar a selecionar Instrumentos?", "RelatedTo", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+                if (dr == DialogResult.No)
+                    break;
+            }
+
+            PromptEntityResult equipment = ed.GetEntity("\nSelecione um Equipamento: ");
+            if (equipment.Status == PromptStatus.OK)
+            {
+                int equipmentRowId = dlm.FindAcPpRowId(equipment.ObjectId);
+                StringCollection eKeys = new StringCollection
+                {
+                    "Description",
+                    "Tag",
+                    "RelatedTo"
+                };
+                StringCollection eVals = dlm.GetProperties(equipmentRowId, eKeys, true);
+                foreach (PromptEntityResult entityResult in Instruments)
+                {
+                    int instrumentRowId = dlm.FindAcPpRowId(entityResult.ObjectId);
+                    StringCollection iKeys = new StringCollection
+                    {
+                        "Description",
+                        "Tag",
+                        "RelatedTo"
+                    };
+                    StringCollection iVals = dlm.GetProperties(instrumentRowId, iKeys, true);
+
+                    iVals[2] = eVals[1];
+
+                    db.StartTransaction();
+                    dlm.SetProperties(entityResult.ObjectId, iKeys, iVals);
+                    db.CommitTransaction();
+                }
+            }
         }
-        //private void RelatedTo(Editor ed, DataLinksManager dlm, PnPDatabase db)
-        //{
-        //    List<PromptEntityResult>
-        //    PromptEntityResult instrument = ed.GetEntity("\nSelecione um  Instrumento: ");
-        //    if (instrument.Status == PromptStatus.OK)
-        //    {
-        //        int instrumentRowId = dlm.FindAcPpRowId(instrument.ObjectId);
-        //        StringCollection iKeys = new StringCollection
-        //        {
-        //            "Description",
-        //            "Tag",
-        //            "RelatedTo"
-        //        };
-        //        StringCollection iVals = dlm.GetProperties(instrumentRowId, iKeys, true);
-        //        MessageBox.Show("\n Instrumento \n\n" + iKeys[0] + " - " + iVals[0] + "\n" + iKeys[1] + " - " + iVals[1] + "\n" + iKeys[2] + " - " + iVals[2] + "");
-
-        //        PromptEntityResult equipment = ed.GetEntity("\nSelecione um Equipamento: ");
-        //        if (equipment.Status == PromptStatus.OK)
-        //        {
-        //            int equipmentRowId = dlm.FindAcPpRowId(equipment.ObjectId);
-        //            StringCollection eKeys = new StringCollection
-        //            {
-        //                "Description",
-        //                "Tag",
-        //                "RelatedTo"
-        //            };
-        //            StringCollection eVals = dlm.GetProperties(equipmentRowId, eKeys, true);
-        //            MessageBox.Show("\n Equipamento \n\n" + eKeys[0] + " - " + eVals[0] + "\n" + eKeys[1] + " - " + eVals[1] + "\n" + eKeys[2] + " - " + eVals[2] + "");
-
-        //            iVals[2] = eVals[1];
-
-        //            db.StartTransaction();
-        //            dlm.SetProperties(instrument.ObjectId, iKeys, iVals);
-        //            db.CommitTransaction();
-
-        //        }
-
-        //    }
-        //}
         #endregion
-        private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.ProgressBar progressBar1;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.RichTextBox richTextBox1;
-        private System.Windows.Forms.CheckedListBox checkedListBox1;
+        private Button buttonSelection;
+        private ListView listView;
+        private Button buttonRelatedTo;
+        private ColumnHeader columnHeader1;
+        private ColumnHeader columnHeader2;
     }
 }
