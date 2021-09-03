@@ -41,8 +41,18 @@ namespace Plant3D
             while (loop)
             {
                 result = ed.GetEntity("\nSelecione um  Instrumento: ");
-
-                if (result.Status == PromptStatus.OK){
+                StringCollection eKeys = new StringCollection
+                {
+                    "Description",
+                    "Tag",
+                    "RelatedTo",
+                    "Class",
+                    "ClassName",
+                    "TagFormatName"
+                };
+                StringCollection eVals = dlm.GetProperties(dlm.FindAcPpRowId(result.ObjectId), eKeys, true);
+                if (result.Status == PromptStatus.OK)
+                {
                     if (Instruments.Contains(result))
                         MessageBox.Show("O instrumento já foi selecionado!!");
                     else
@@ -50,7 +60,8 @@ namespace Plant3D
                         Instruments.Add(result);
                     }
                 }
-                else
+                DialogResult messageBox = MessageBox.Show("Deseja selecionar outro Instrumento?", "Related To", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if(messageBox == DialogResult.No)
                     break;
             }
             PromptEntityResult equipment = ed.GetEntity("\nSelecione um Equipamento: ");
@@ -61,7 +72,10 @@ namespace Plant3D
                 {
                     "Description",
                     "Tag",
-                    "RelatedTo"
+                    "RelatedTo",
+                    "Class",
+                    "ClassName"
+
                 };
                 StringCollection eVals = dlm.GetProperties(equipmentRowId, eKeys, true);
                 foreach (PromptEntityResult entityResult in Instruments)
@@ -84,9 +98,9 @@ namespace Plant3D
             }
         }
 
-        private void buttonRelatedTo_Click(bool loop, EventArgs e)
+        private void buttonRelatedTo_Click(object sender, EventArgs e)
         {
-            loop = false;
+
         }
     }
 }

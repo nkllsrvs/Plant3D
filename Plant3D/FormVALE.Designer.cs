@@ -113,7 +113,16 @@ namespace Plant3D
             while (loop)
             {
                 result = ed.GetEntity("\nSelecione um  Instrumento: ");
+                StringCollection eKeys = new StringCollection
+                {
 
+                    "Description",
+                    "Tag",
+                    "RelatedTo",
+                    "ClassName",
+                    "Class"
+                };
+                StringCollection eVals = dlm.GetProperties(dlm.FindAcPpRowId(result.ObjectId), eKeys, true);
                 if (result.Status == PromptStatus.OK){
                     Instruments.Add(result); 
                 }
@@ -127,10 +136,13 @@ namespace Plant3D
             {
                 int equipmentRowId = dlm.FindAcPpRowId(equipment.ObjectId);
                 StringCollection eKeys = new StringCollection
-                {
+                {   
+                    
                     "Description",
                     "Tag",
-                    "RelatedTo"
+                    "RelatedTo",
+                    "ClassName",
+                    "Class"
                 };
                 StringCollection eVals = dlm.GetProperties(equipmentRowId, eKeys, true);
                 foreach (PromptEntityResult entityResult in Instruments)
@@ -140,7 +152,9 @@ namespace Plant3D
                     {
                         "Description",
                         "Tag",
-                        "RelatedTo"
+                        "RelatedTo",
+                        "ClassName",
+                        "Class"
                     };
                     StringCollection iVals = dlm.GetProperties(instrumentRowId, iKeys, true);
 
