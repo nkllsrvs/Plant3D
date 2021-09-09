@@ -29,33 +29,15 @@ namespace Plant3D
 
         private void buttonSelection_Click(object sender, EventArgs e)
         {
-            if (toggleLight)
-            {
-                buttonSelection.BackColor = Color.LightGreen;
-                toggleLight = false;
-            }
-            else
-            {
-                buttonSelection.BackColor = Color.Gray;
-                toggleLight = true;
-            }
-            if (display)
-            {
-                buttonSelection.Text = "Instruments";
-                display = false;
-            }
-            else
-            {
-                buttonSelection.Text = "";
-                buttonSelection.BackColor = Color.Gray;
-                display = true;
-            }
+            buttonSelection.BackColor = Color.LightGreen;
+            buttonSelection.Text = "Instruments";
+
             PlantProject proj = PlantApplication.CurrentProject;
             ProjectPartCollection projParts = proj.ProjectParts;
             PnIdProject pnidProj = (PnIdProject)projParts["PnId"];
             DataLinksManager dlm = pnidProj.DataLinksManager;
-            //PnPDatabase db = dlm.GetPnPDatabase();
-            Database db = HostApplicationServices.WorkingDatabase;
+            PnPDatabase db = dlm.GetPnPDatabase();
+            //Database db = HostApplicationServices.WorkingDatabase;
             Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
             Editor ed = doc.Editor;
 
@@ -77,12 +59,12 @@ namespace Plant3D
                     "ObjectClass"
                 };
                 StringCollection eVals = dlm.GetProperties(dlm.FindAcPpRowId(result.ObjectId), eKeys, true);
-                var className = dlm.GetObjectClassname(result.ObjectId);
-                var type = dlm.GetType();
-                var typeResult = result.ObjectId.GetType();
-                var allProperties = dlm.GetAllProperties(dlm.FindAcPpRowId(result.ObjectId), true);
-                    DBObject obj = db.TransactionManager.StartTransaction().GetObject(result.ObjectId, OpenMode.ForRead);
-                    db.TransactionManager.StartTransaction().Commit();
+                //var className = dlm.GetObjectClassname(result.ObjectId);
+                //var type = dlm.GetType();
+                //var typeResult = result.ObjectId.GetType();
+                //var allProperties = dlm.GetAllProperties(dlm.FindAcPpRowId(result.ObjectId), true);
+                //DBObject obj = db.TransactionManager.StartTransaction().GetObject(result.ObjectId, OpenMode.ForRead);
+                //db.TransactionManager.StartTransaction().Commit();
 
                 if (result.Status == PromptStatus.OK)
                 {
@@ -97,6 +79,9 @@ namespace Plant3D
                 if (messageBox == DialogResult.No)
                     break;
             }
+            buttonSelection.BackColor = Color.Blue;
+            buttonSelection.Text = "Equipment";
+
             PromptEntityResult equipment = ed.GetEntity("\nSelecione um Equipamento: ");
             if (equipment.Status == PromptStatus.OK)
             {
@@ -124,11 +109,17 @@ namespace Plant3D
 
                     iVals[2] = eVals[1];
 
-                    //db.StartTransaction();
-                    //dlm.SetProperties(entityResult.ObjectId, iKeys, iVals);
-                    //db.CommitTransaction();
+                    db.StartTransaction();
+                    ListViewItem item = new ListViewItem(instrumentRowId.ToString());
+                    item.SubItems.Add(iVals[1]);
+                    listView.Items.Add(item);
+                    dlm.SetProperties(entityResult.ObjectId, iKeys, iVals);
+                    db.CommitTransaction();
                 }
             }
+            buttonSelection.BackColor = Color.Gray;
+            buttonSelection.Text = "Selection";
+
         }
 
         private void buttonRelatedTo_Click(object sender, EventArgs e)
