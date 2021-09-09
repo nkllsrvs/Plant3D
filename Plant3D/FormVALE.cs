@@ -1,4 +1,5 @@
 ﻿using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.ProcessPower.DataLinks;
 using Autodesk.ProcessPower.DataObjects;
@@ -19,6 +20,8 @@ namespace Plant3D
 {
     public partial class FormVALE : Form
     {
+        bool display = true;
+        bool toggleLight = true;
         public FormVALE()
         {
             InitializeComponent();
@@ -26,11 +29,33 @@ namespace Plant3D
 
         private void buttonSelection_Click(object sender, EventArgs e)
         {
+            if (toggleLight)
+            {
+                buttonSelection.BackColor = Color.LightGreen;
+                toggleLight = false;
+            }
+            else
+            {
+                buttonSelection.BackColor = Color.Gray;
+                toggleLight = true;
+            }
+            if (display)
+            {
+                buttonSelection.Text = "Instruments";
+                display = false;
+            }
+            else
+            {
+                buttonSelection.Text = "";
+                buttonSelection.BackColor = Color.Gray;
+                display = true;
+            }
             PlantProject proj = PlantApplication.CurrentProject;
             ProjectPartCollection projParts = proj.ProjectParts;
             PnIdProject pnidProj = (PnIdProject)projParts["PnId"];
             DataLinksManager dlm = pnidProj.DataLinksManager;
-            PnPDatabase db = dlm.GetPnPDatabase();
+            //PnPDatabase db = dlm.GetPnPDatabase();
+            Database db = HostApplicationServices.WorkingDatabase;
             Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
             Editor ed = doc.Editor;
 
@@ -48,9 +73,17 @@ namespace Plant3D
                     "RelatedTo",
                     "Class",
                     "ClassName",
-                    "TagFormatName"
+                    "TagFormatName",
+                    "ObjectClass"
                 };
                 StringCollection eVals = dlm.GetProperties(dlm.FindAcPpRowId(result.ObjectId), eKeys, true);
+                var className = dlm.GetObjectClassname(result.ObjectId);
+                var type = dlm.GetType();
+                var typeResult = result.ObjectId.GetType();
+                var allProperties = dlm.GetAllProperties(dlm.FindAcPpRowId(result.ObjectId), true);
+                    DBObject obj = db.TransactionManager.StartTransaction().GetObject(result.ObjectId, OpenMode.ForRead);
+                    db.TransactionManager.StartTransaction().Commit();
+
                 if (result.Status == PromptStatus.OK)
                 {
                     if (Instruments.Contains(result))
@@ -61,7 +94,7 @@ namespace Plant3D
                     }
                 }
                 DialogResult messageBox = MessageBox.Show("Deseja selecionar outro Instrumento?", "Related To", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                if(messageBox == DialogResult.No)
+                if (messageBox == DialogResult.No)
                     break;
             }
             PromptEntityResult equipment = ed.GetEntity("\nSelecione um Equipamento: ");
@@ -91,9 +124,9 @@ namespace Plant3D
 
                     iVals[2] = eVals[1];
 
-                    db.StartTransaction();
-                    dlm.SetProperties(entityResult.ObjectId, iKeys, iVals);
-                    db.CommitTransaction();
+                    //db.StartTransaction();
+                    //dlm.SetProperties(entityResult.ObjectId, iKeys, iVals);
+                    //db.CommitTransaction();
                 }
             }
         }
@@ -101,6 +134,26 @@ namespace Plant3D
         private void buttonRelatedTo_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void listView_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void FormVALE_Load(object sender, EventArgs e)
+        {
+            buttonSelection.Text = "Selection";
         }
     }
 }

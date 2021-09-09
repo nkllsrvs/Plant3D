@@ -38,21 +38,27 @@ namespace Plant3D
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormVALE));
             this.buttonSelection = new System.Windows.Forms.Button();
             this.listView = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.buttonRelatedTo = new System.Windows.Forms.Button();
+            this.anotherDwg = new System.Windows.Forms.CheckBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // buttonSelection
             // 
-            this.buttonSelection.Location = new System.Drawing.Point(242, 333);
+            this.buttonSelection.BackColor = System.Drawing.Color.Gray;
+            this.buttonSelection.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonSelection.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.buttonSelection.Location = new System.Drawing.Point(544, 404);
             this.buttonSelection.Name = "buttonSelection";
-            this.buttonSelection.Size = new System.Drawing.Size(98, 23);
+            this.buttonSelection.Size = new System.Drawing.Size(103, 41);
             this.buttonSelection.TabIndex = 0;
             this.buttonSelection.Text = "Selection";
-            this.buttonSelection.UseVisualStyleBackColor = true;
+            this.buttonSelection.UseVisualStyleBackColor = false;
             this.buttonSelection.Click += new System.EventHandler(this.buttonSelection_Click);
             // 
             // listView
@@ -61,12 +67,13 @@ namespace Plant3D
             this.columnHeader1,
             this.columnHeader2});
             this.listView.HideSelection = false;
-            this.listView.Location = new System.Drawing.Point(175, 51);
+            this.listView.Location = new System.Drawing.Point(544, 41);
             this.listView.Name = "listView";
-            this.listView.Size = new System.Drawing.Size(387, 232);
+            this.listView.Size = new System.Drawing.Size(224, 327);
             this.listView.TabIndex = 1;
             this.listView.UseCompatibleStateImageBehavior = false;
             this.listView.View = System.Windows.Forms.View.Details;
+            this.listView.SelectedIndexChanged += new System.EventHandler(this.listView_SelectedIndexChanged);
             // 
             // columnHeader1
             // 
@@ -78,7 +85,7 @@ namespace Plant3D
             // 
             // buttonRelatedTo
             // 
-            this.buttonRelatedTo.Location = new System.Drawing.Point(395, 333);
+            this.buttonRelatedTo.Location = new System.Drawing.Point(679, 404);
             this.buttonRelatedTo.Name = "buttonRelatedTo";
             this.buttonRelatedTo.Size = new System.Drawing.Size(89, 23);
             this.buttonRelatedTo.TabIndex = 2;
@@ -86,14 +93,39 @@ namespace Plant3D
             this.buttonRelatedTo.UseVisualStyleBackColor = true;
             this.buttonRelatedTo.Click += new System.EventHandler(this.buttonRelatedTo_Click);
             // 
+            // anotherDwg
+            // 
+            this.anotherDwg.AutoSize = true;
+            this.anotherDwg.Location = new System.Drawing.Point(37, 74);
+            this.anotherDwg.Name = "anotherDwg";
+            this.anotherDwg.Size = new System.Drawing.Size(194, 17);
+            this.anotherDwg.TabIndex = 3;
+            this.anotherDwg.Text = "O equipamento está em outro dwg?";
+            this.anotherDwg.UseVisualStyleBackColor = true;
+            this.anotherDwg.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(16, 122);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(387, 104);
+            this.label1.TabIndex = 4;
+            this.label1.Text = resources.GetString("label1.Text");
+            this.label1.Click += new System.EventHandler(this.label1_Click);
+            // 
             // FormVALE
             // 
-            this.ClientSize = new System.Drawing.Size(596, 395);
+            this.ClientSize = new System.Drawing.Size(838, 490);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.anotherDwg);
             this.Controls.Add(this.buttonRelatedTo);
             this.Controls.Add(this.listView);
             this.Controls.Add(this.buttonSelection);
             this.Name = "FormVALE";
+            this.Load += new System.EventHandler(this.FormVALE_Load);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
         private void RelatedTo()
@@ -173,5 +205,7 @@ namespace Plant3D
         private Button buttonRelatedTo;
         private ColumnHeader columnHeader1;
         private ColumnHeader columnHeader2;
+        private CheckBox anotherDwg;
+        private Label label1;
     }
 }
