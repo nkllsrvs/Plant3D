@@ -56,7 +56,7 @@ namespace Plant3D
                     "Class",
                     "ClassName",
                     "TagFormatName",
-                    "ObjectClass"
+                    "Status"
                 };
                 StringCollection eVals = dlm.GetProperties(dlm.FindAcPpRowId(result.ObjectId), eKeys, true);
                 //var className = dlm.GetObjectClassname(result.ObjectId);
