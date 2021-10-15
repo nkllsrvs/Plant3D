@@ -59,12 +59,11 @@ namespace Plant3D
                     "Status"
                 };
                 StringCollection eVals = dlm.GetProperties(dlm.FindAcPpRowId(result.ObjectId), eKeys, true);
-                //var className = dlm.GetObjectClassname(result.ObjectId);
-                //var type = dlm.GetType();
-                //var typeResult = result.ObjectId.GetType();
-                //var allProperties = dlm.GetAllProperties(dlm.FindAcPpRowId(result.ObjectId), true);
-                //DBObject obj = db.TransactionManager.StartTransaction().GetObject(result.ObjectId, OpenMode.ForRead);
-                //db.TransactionManager.StartTransaction().Commit();
+                var className = dlm.GetObjectClassname(result.ObjectId);
+                var type = dlm.GetType();
+                var typeResult = result.ObjectId.GetType();
+                var allProperties = dlm.GetAllProperties(dlm.FindAcPpRowId(result.ObjectId), true);
+                
 
                 if (result.Status == PromptStatus.OK)
                 {
@@ -73,6 +72,15 @@ namespace Plant3D
                     else
                     {
                         Instruments.Add(result);
+                        Invoke((MethodInvoker)delegate {
+
+                            StringCollection keyTag = new StringCollection { "Tag" };
+                            StringCollection valTag = dlm.GetProperties(dlm.FindAcPpRowId(result.ObjectId), keyTag, true);
+                            ListViewItem item = new ListViewItem(dlm.FindAcPpRowId(result.ObjectId).ToString());
+                            item.SubItems.Add(valTag[0]);
+                            listView.Items.Add(item);
+
+                        });
                     }
                 }
                 DialogResult messageBox = MessageBox.Show("Deseja selecionar outro Instrumento?", "Related To", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
@@ -110,9 +118,9 @@ namespace Plant3D
                     iVals[2] = eVals[1];
 
                     db.StartTransaction();
-                    ListViewItem item = new ListViewItem(instrumentRowId.ToString());
-                    item.SubItems.Add(iVals[1]);
-                    listView.Items.Add(item);
+                    //ListViewItem item = new ListViewItem(instrumentRowId.ToString());
+                    //item.SubItems.Add(iVals[1]);
+                    //listView.Items.Add(item);
                     dlm.SetProperties(entityResult.ObjectId, iKeys, iVals);
                     db.CommitTransaction();
                 }
