@@ -55,8 +55,10 @@ namespace Plant3D
                     "RelatedTo",
                     "Class",
                     "ClassName",
-                    "TagFormatName",
-                    "Status"
+                    "Status", 
+                    "Linetype",
+                    "Color",
+                    "Layer"
                 };
                 StringCollection eVals = dlm.GetProperties(dlm.FindAcPpRowId(result.ObjectId), eKeys, true);
                 var className = dlm.GetObjectClassname(result.ObjectId);
