@@ -96,7 +96,7 @@ namespace Plant3D
                 CommandParameter = "._SBTTT "
             };
 
-            List<RibbonButton> ribbonButtons = new List<RibbonButton> { button1, button2 };
+            List<RibbonButton> ribbonButtons = new List<RibbonButton> { /*button1,*/ button2 };
             foreach (RibbonButton rb in ribbonButtons)
             {
                 panelSource.Items.Add(rb);
