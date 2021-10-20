@@ -39,27 +39,14 @@ namespace Plant3D
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormVALE));
-            this.buttonSelection = new System.Windows.Forms.Button();
             this.listView = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.buttonRelatedTo = new System.Windows.Forms.Button();
-            this.anotherDwg = new System.Windows.Forms.CheckBox();
+            this.buttonEquipment = new System.Windows.Forms.Button();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.buttonInstruments = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.SuspendLayout();
-            // 
-            // buttonSelection
-            // 
-            this.buttonSelection.BackColor = System.Drawing.Color.Gray;
-            this.buttonSelection.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.buttonSelection.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.buttonSelection.Location = new System.Drawing.Point(544, 404);
-            this.buttonSelection.Name = "buttonSelection";
-            this.buttonSelection.Size = new System.Drawing.Size(103, 41);
-            this.buttonSelection.TabIndex = 0;
-            this.buttonSelection.Text = "Selection";
-            this.buttonSelection.UseVisualStyleBackColor = false;
-            this.buttonSelection.Click += new System.EventHandler(this.buttonSelection_Click);
             // 
             // listView
             // 
@@ -67,9 +54,9 @@ namespace Plant3D
             this.columnHeader1,
             this.columnHeader2});
             this.listView.HideSelection = false;
-            this.listView.Location = new System.Drawing.Point(544, 41);
+            this.listView.Location = new System.Drawing.Point(12, 12);
             this.listView.Name = "listView";
-            this.listView.Size = new System.Drawing.Size(224, 327);
+            this.listView.Size = new System.Drawing.Size(255, 380);
             this.listView.TabIndex = 1;
             this.listView.UseCompatibleStateImageBehavior = false;
             this.listView.View = System.Windows.Forms.View.Details;
@@ -83,47 +70,64 @@ namespace Plant3D
             // 
             this.columnHeader2.Text = "InstrumentName";
             // 
-            // buttonRelatedTo
+            // buttonEquipment
             // 
-            this.buttonRelatedTo.Location = new System.Drawing.Point(679, 404);
-            this.buttonRelatedTo.Name = "buttonRelatedTo";
-            this.buttonRelatedTo.Size = new System.Drawing.Size(89, 23);
-            this.buttonRelatedTo.TabIndex = 2;
-            this.buttonRelatedTo.Text = "RelatedTo";
-            this.buttonRelatedTo.UseVisualStyleBackColor = true;
-            this.buttonRelatedTo.Click += new System.EventHandler(this.buttonRelatedTo_Click);
+            this.buttonEquipment.BackColor = System.Drawing.Color.LightGreen;
+            this.buttonEquipment.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonEquipment.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.buttonEquipment.Location = new System.Drawing.Point(334, 339);
+            this.buttonEquipment.Name = "buttonEquipment";
+            this.buttonEquipment.Size = new System.Drawing.Size(224, 42);
+            this.buttonEquipment.TabIndex = 6;
+            this.buttonEquipment.Text = "Equipment / RelatedTo";
+            this.buttonEquipment.UseVisualStyleBackColor = false;
+            this.buttonEquipment.Click += new System.EventHandler(this.buttonEquipment_Click);
             // 
-            // anotherDwg
+            // textBox1
             // 
-            this.anotherDwg.AutoSize = true;
-            this.anotherDwg.Location = new System.Drawing.Point(37, 74);
-            this.anotherDwg.Name = "anotherDwg";
-            this.anotherDwg.Size = new System.Drawing.Size(194, 17);
-            this.anotherDwg.TabIndex = 3;
-            this.anotherDwg.Text = "O equipamento está em outro dwg?";
-            this.anotherDwg.UseVisualStyleBackColor = true;
-            this.anotherDwg.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            this.textBox1.Enabled = false;
+            this.textBox1.Location = new System.Drawing.Point(292, 63);
+            this.textBox1.Multiline = true;
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(312, 174);
+            this.textBox1.TabIndex = 7;
+            this.textBox1.Text = resources.GetString("textBox1.Text");
+            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
+            // 
+            // buttonInstruments
+            // 
+            this.buttonInstruments.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            this.buttonInstruments.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.buttonInstruments.Location = new System.Drawing.Point(334, 279);
+            this.buttonInstruments.Name = "buttonInstruments";
+            this.buttonInstruments.Size = new System.Drawing.Size(224, 45);
+            this.buttonInstruments.TabIndex = 8;
+            this.buttonInstruments.Text = "Instruments";
+            this.buttonInstruments.UseVisualStyleBackColor = false;
+            this.buttonInstruments.Click += new System.EventHandler(this.buttonInstruments_Click);
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(16, 122);
+            this.label1.Location = new System.Drawing.Point(307, 37);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(387, 104);
-            this.label1.TabIndex = 4;
-            this.label1.Text = resources.GetString("label1.Text");
-            this.label1.Click += new System.EventHandler(this.label1_Click);
+            this.label1.Size = new System.Drawing.Size(59, 13);
+            this.label1.TabIndex = 9;
+            this.label1.Text = "Instruções:";
             // 
             // FormVALE
             // 
-            this.ClientSize = new System.Drawing.Size(838, 490);
+            this.ClientSize = new System.Drawing.Size(616, 416);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.anotherDwg);
-            this.Controls.Add(this.buttonRelatedTo);
+            this.Controls.Add(this.buttonInstruments);
+            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.buttonEquipment);
             this.Controls.Add(this.listView);
-            this.Controls.Add(this.buttonSelection);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "FormVALE";
-            this.Load += new System.EventHandler(this.FormVALE_Load);
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "VALE - Related To";
+            this.TopMost = true;
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -200,12 +204,12 @@ namespace Plant3D
         }
         #endregion
         private System.Windows.Forms.ProgressBar progressBar1;
-        private Button buttonSelection;
         private ListView listView;
-        private Button buttonRelatedTo;
         private ColumnHeader columnHeader1;
         private ColumnHeader columnHeader2;
-        private CheckBox anotherDwg;
+        private Button buttonEquipment;
+        private TextBox textBox1;
+        private Button buttonInstruments;
         private Label label1;
     }
 }

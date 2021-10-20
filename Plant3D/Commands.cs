@@ -96,7 +96,7 @@ namespace Plant3D
                 CommandParameter = "._SBTTT "
             };
 
-            List<RibbonButton> ribbonButtons = new List<RibbonButton> { /*button1,*/ button2 };
+            List<RibbonButton> ribbonButtons = new List<RibbonButton> { button1, button2 };
             foreach (RibbonButton rb in ribbonButtons)
             {
                 panelSource.Items.Add(rb);
@@ -148,15 +148,17 @@ namespace Plant3D
                         {
                             StringCollection eKeys = new StringCollection { "Status" };
                             StringCollection eVals = dlm.GetProperties(dlm.FindAcPpRowId(ent.ObjectId), eKeys, true);
-                            var gap = dlm.GetAllProperties(dlm.FindAcPpRowId(ent.ObjectId), true);
                             if (eVals[0] != null)
                             {
                                 ent.UpgradeOpen();
-                                //ent.LinetypeId.Open(OpenMode.ForWrite, true);
                                 var ltd = new LinetypeDialog();
-
-                                ltd.Linetype = doc.Database.GetObjectId(false, RetornaLinetypeHandle(eVals[0]), 0);
-                                ent.LinetypeId = ltd.Linetype;
+                                Handle handle = RetornaLinetypeHandle(eVals[0]);
+                                if(handle.Value != 0)
+                                {
+                                    ltd.Linetype = doc.Database.GetObjectId(false, handle, 0);
+                                    if (ent.LinetypeId != ltd.Linetype)
+                                    ent.LinetypeId = ltd.Linetype;
+                                }
                                 ent.DowngradeOpen();
                             }
                             //Object LinetypeId = tr.GetObject(RetornaLinetype(eVals[0]).);
@@ -170,22 +172,86 @@ namespace Plant3D
             } // if
 
         }
+
+        [CommandMethod("SLT", CommandFlags.UsePickSet)]
+        public void SetLineType()
+        {
+            var doc = Application.DocumentManager.MdiActiveDocument;
+            if (doc == null)
+                return;
+            var ed = doc.Editor;
+            var psr = ed.GetSelection();
+            if (psr.Status != PromptStatus.OK || psr.Value.Count == 0)
+                return;
+            using (var tr = doc.TransactionManager.StartTransaction())
+            {
+                var ids = psr.Value.GetObjectIds();
+                var ltId = ObjectId.Null;
+                bool different = false;
+                foreach (ObjectId id in ids)
+                {
+                    var ent = (Entity)tr.GetObject(id, OpenMode.ForRead);
+                    if (ltId == ObjectId.Null)
+                        ltId = ent.LinetypeId;
+                    else
+                    {
+                        if (ltId != ent.LinetypeId)
+                        {
+                            different = true;
+                            break;
+                        }
+                    }
+                }
+                var ltd = new LinetypeDialog();
+                if (!different)
+                    ltd.Linetype = ltId;
+                var dr = ltd.ShowDialog();
+                if (dr != System.Windows.Forms.DialogResult.OK)
+                    return; // We might also commit before returning
+
+                if (different || ltId != ltd.Linetype)
+                {
+                    foreach (ObjectId id in ids)
+                    {
+                        // This time we need write access
+                        var ent = (Entity)tr.GetObject(id, OpenMode.ForWrite);
+                        if (ent.LinetypeId != ltd.Linetype)
+                            ent.LinetypeId = ltd.Linetype;
+                    }
+                }
+                tr.Commit();
+            }
+        }
         private Handle RetornaLinetypeHandle(string descricao)
         {
             switch (descricao)
             {
+                //CONTINUOUS
+                case "Novo":
+                    return new Handle(22);
+                //DASHDOT
+                case "Futuro":
+                    return new Handle(13122);
+                //HIDDEN2
+                case "Existente":
+                    return new Handle(167);
                 //HIDDEN
+                case "Alternativo/Intermitente":
+                    return new Handle(4934);
+
+                //HIDDEN2
                 case "Existing":
-                    return new Handle(4554);
+                    return new Handle(167);
                 //PNEUMATIC
                 case "Demolition":
-                    return new Handle(4934);
-                //HIDDEN2
+                    return new Handle(4554);
+                //CONTINUOUS
                 case "New":
-                    return new Handle(167);
-                //Continuos
-                default:
                     return new Handle(22);
+
+                //Defalt
+                default:
+                    return new Handle(0);
             }
         }
     }
