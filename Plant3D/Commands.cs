@@ -72,7 +72,7 @@ namespace Plant3D
             RibbonButton button1 = new RibbonButton
             {
                 Text = "Related To",
-                LargeImage = new BitmapImage(new Uri(@"C:\PlantImg\img\navigate_plus.png")),
+                LargeImage = new BitmapImage(new Uri(@"C:\Program Files\Autodesk\AutoCAD 2022\Support\en-us\img\navigate_plus.png")),
                 Orientation = Orientation.Vertical,
                 Size = RibbonItemSize.Large,
                 ShowText = true,
@@ -85,7 +85,7 @@ namespace Plant3D
             RibbonButton button2 = new RibbonButton
             {
                 Text = "Substitute",
-                LargeImage = new BitmapImage(new Uri(@"C:\PlantImg\img\satellite32.png")),
+                LargeImage = new BitmapImage(new Uri(@"C:\Program Files\Autodesk\AutoCAD 2022\Support\en-us\img\satellite32.png")),
                 Orientation = Orientation.Vertical,
                 Size = RibbonItemSize.Large,
                 ShowText = true,

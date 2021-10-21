@@ -211,15 +211,5 @@
       <DependentUpon>FormVALE.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="img\map_location32.png" />
-    <Content Include="img\map_location64.png" />
-    <Content Include="img\navigate_plus.png" />
-    <Content Include="img\satellite32.png" />
-    <Content Include="img\satellite64.png" />
-    <Content Include="img\VALE-32x32.png" />
-    <Content Include="img\VALE.ico" />
-    <Content Include="img\VALE.png" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
