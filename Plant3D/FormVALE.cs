@@ -21,6 +21,7 @@ namespace Plant3D
 {
     public partial class FormVALE : Form
     {
+        private readonly List<Instruments> InstrumentsOld = new List<Instruments>();
         private readonly List<ObjectId> Instruments = new List<ObjectId>();
         private Document docInstruments;
         DataLinksManager dlmInstruments;
@@ -134,17 +135,22 @@ namespace Plant3D
                 {
                     using (var tr = docInstruments.TransactionManager.StartTransaction())
                     {
-                        //Entity ent = (Entity)tr.GetObject(instrument.ObjectId, OpenMode.ForRead);
                         if (HaveRelatedToEquip(dlmInstruments.GetAllProperties(instrument.ObjectId, true)))
                         {
                             if (Instruments.Contains(instrument.ObjectId))
                                 MessageBox.Show("O instrumento já foi selecionado!!");
                             else
                             {
+                                Entity ent = (Entity)tr.GetObject(instrument.ObjectId, OpenMode.ForRead);
                                 Instruments.Add(instrument.ObjectId);
+                                Instruments iOld = new Instruments();
+                                iOld.Id = ent.ObjectId;
+                                iOld.Layer = ent.Layer;
+                                iOld.LayerId = ent.LayerId;
+                                InstrumentsOld.Add(iOld);
                                 Invoke((MethodInvoker)delegate
                                 {
-                                    StringCollection keyTag = new StringCollection { "Tag", "RelatedTo" };
+                                    StringCollection keyTag = new StringCollection { "Tag", "RelatedTo", "Layer" };
                                     StringCollection valTag = dlmInstruments.GetProperties(dlmInstruments.FindAcPpRowId(instrument.ObjectId), keyTag, true);
                                     ListViewItem item = new ListViewItem(valTag[0]);
                                     item.SubItems.Add(valTag[1]);
@@ -191,6 +197,8 @@ namespace Plant3D
                                     iVals[1] = eVals[0];
                                     dbInstruments.StartTransaction();
                                     dlmInstruments.SetProperties(intrumentId, iKeys, iVals);
+                                    Entity entEdited = (Entity)trEquipment.GetObject(intrumentId, OpenMode.ForWrite);
+                                    
                                     dbInstruments.CommitTransaction();
                                 }
                                 MessageBox.Show("Related To executado com sucesso!!");
@@ -198,6 +206,7 @@ namespace Plant3D
                                     this.listView.Items.Remove(item);
                                 this.listView.Items.Clear();
                                 Instruments.Clear();
+                                InstrumentsOld.Clear();
                                 trEquipment.Commit();
                                 break;
                             }
@@ -210,7 +219,6 @@ namespace Plant3D
                 }
             }
         }
-
         private void checkBoxEquipmentOtherDWG_CheckedChanged(object sender, EventArgs e)
         {
             try
@@ -228,7 +236,6 @@ namespace Plant3D
             }
             catch { }
         }
-
         private bool HaveRelatedToEquip(List<KeyValuePair<string, string>> keyValuePairs)
         {
             foreach (KeyValuePair<string, string> kvp in keyValuePairs)
@@ -238,6 +245,21 @@ namespace Plant3D
             }
             return false;
         }
+        private void ReplacePropertys(Entity ent, Instruments instruments)
+        {
+            if(ent.ObjectId == instruments.Id)
+            {
+                ent.Layer = instruments.Layer;
+                ent.LayerId = instruments.LayerId;
+            }
+        }
 
+    }
+
+    public class  Instruments
+    {
+        public ObjectId Id { get; set; }
+        public String Layer { get; set; }
+        public ObjectId LayerId { get; set; }
     }
 }
