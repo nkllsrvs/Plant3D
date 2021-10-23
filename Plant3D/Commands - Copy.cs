@@ -1,146 +1,166 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
-//using System.Threading.Tasks;
-//using System.Windows;
-
-////Autocad namespaces
-//using Autodesk.AutoCAD.ApplicationServices;
-//using Autodesk.AutoCAD.Runtime;
+﻿//using Autodesk.AutoCAD.DatabaseServices;
 //using Autodesk.AutoCAD.EditorInput;
-
-////Plant3D nasmespaces
-//using Autodesk.ProcessPower.ProjectManager;
 //using Autodesk.ProcessPower.PlantInstance;
-//using Autodesk.Windows;
-//using System.Windows.Media.Imaging;
-//using System.Windows.Controls;
-//using System.Windows.Input;
+//using Autodesk.ProcessPower.ProjectManager;
+//using System.Windows.Forms;
+//using System;
 
-//[assembly:  CommandClass(typeof(Plant3D.TestRibbon))]
-//[assembly:  CommandClass(typeof(Plant3D.Commands))]
-//namespace Plant3D
+//private void buttonInstruments_Click(object sender, EventArgs e)
 //{
-//    public class TestRibbon
+//    PlantProject proj = PlantApplication.CurrentProject;
+//    ProjectPartCollection projParts = proj.ProjectParts;
+//    PnIdProject pnidProj = (PnIdProject)projParts["PnId"];
+//    dlmInstruments = pnidProj.DataLinksManager;
+//    dbInstruments = dlmInstruments.GetPnPDatabase();
+//    docInstruments = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
+//    Editor ed = docInstruments.Editor;
+//    PromptEntityResult instrument;
+//    while (true)
 //    {
-//        public void Testme()
-//        {
-//            RibbonControl ribbon = ComponentManager.Ribbon;
-//            if (ribbon != null)
-//            {
-//                RibbonTab rtab = ribbon.FindTab("VALE");
-//                if (rtab != null)
+//        instrument = ed.GetEntity("\nSelecione um  Instrumento: ");
+//        StringCollection eKeys = new StringCollection
 //                {
-//                    ribbon.Tabs.Remove(rtab);
-//                }
-//                rtab = new RibbonTab
-//                {
-//                    Title = "VALE",
-//                    Id = "VALE Ribbon"
+//                    "Description",
+//                    "Tag",
+//                    "RelatedTo",
+//                    "ClassName"
 //                };
-//                //Add the Tab
-
-//                ribbon.Tabs.Add(rtab);
-//                addContent(rtab);
-//            }
-//        }
-
-//        static void addContent(RibbonTab rtab)
+//        StringCollection eVals = dlmInstruments.GetProperties(dlmInstruments.FindAcPpRowId(instrument.ObjectId), eKeys, true);
+//        if (instrument.Status == PromptStatus.OK)
 //        {
-//            rtab.Panels.Add(AddOnePanel());
-//        }
-
-//        static RibbonPanel AddOnePanel()
-//        {
-//            RibbonButton rb;
-//            RibbonPanelSource rps = new RibbonPanelSource();
-//            rps.Title = "Teste VALE";
-//            RibbonPanel rp = new RibbonPanel();
-//            rp.Source = rps;
-
-//            //Create a Command Item that the Dialog Launcher can use,
-//            // for this test it is just a place holder.
-//            RibbonButton rci = new RibbonButton
+//            using (var tr = docInstruments.TransactionManager.StartTransaction())
 //            {
-//                Name = "TestCommand"
-//            };
+//                //Entity ent = (Entity)tr.GetObject(instrument.ObjectId, OpenMode.ForRead);
+//                if (HaveRelatedToEquip(dlmInstruments.GetAllProperties(instrument.ObjectId, true)))
+//                {
+//                    if (Instruments.Contains(instrument.ObjectId))
+//                        MessageBox.Show("O instrumento já foi selecionado!!");
+//                    else
+//                    {
+//                        Instruments.Add(instrument.ObjectId);
+//                        Invoke((MethodInvoker)delegate
+//                        {
+//                            StringCollection keyTag = new StringCollection { "Tag", "RelatedTo" };
 
-//            //assign the Command Item to the DialgLauncher which auto-enables
-//            // the little button at the lower right of a Panel
-//            rps.DialogLauncher = rci;
 
-//            rb = new RibbonButton();
-//            Uri uriImage = new Uri(@"C:\PlantImg\img\navigate_plus.png");
-//            BitmapImage largeImage = new BitmapImage(uriImage);
-//            rb.LargeImage = largeImage;
-//            rb.Name = "Test Button";
-//            rb.ShowText = true;
-//            rb.Text = "Test Button";
-//            rb.ShowImage = true;
-//            rb.Size = RibbonItemSize.Large;
-//            //Add the Button to the Tab
 
-//            rb.CommandHandler = new MyRibbonButtonCommandHandler();
 
-//            rb.CommandParameter = "._getProjectParts "; //actual AutoCAD command passed to ICommand.Execute().
 
-//            //Add the new button to a ribbon panel in a ribbon tab here
 
-//            rps.Items.Add(rb);
-//            return rp;
-//        }
 
-//        public class MyRibbonButtonCommandHandler : System.Windows.Input.ICommand
-//        {
-//            public bool CanExecute(object parameter)
-//            {
-//                return true; //return true means the button always enabled
-//            }
-//            public event EventHandler CanExecuteChanged;
-//            public void Execute(object parameter)
 
-//            {
-//                RibbonCommandItem cmd = parameter as RibbonCommandItem;
-
-//                Document dwg = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
-
-//                dwg.SendStringToExecute(cmd.CommandParameter.ToString(), true, false, true);
-//            }
-//        }
-//    }
-
-//    public class Commandsj
+//[CommandMethod("testmyRibbon", CommandFlags.Transparent)]
+//public void Testme()
+//{
+//    RibbonControl ribbon = ComponentManager.Ribbon;
+//    if (ribbon != null)
 //    {
-//        //sempre que chamar pelo plant a exec getProjectParts ele executa o metodo descrito abaixo
-//        [CommandMethod("getProjectParts")]
-//        public void CmdGetProjectParts()
+//        RibbonTab rtab = ribbon.FindTab("TESTME");
+//        if (rtab != null)
 //        {
-//            MessageBox.Show("TESTE!!!");
-
-
-//            //Editor ed = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor;
-
-//            //// pega o projeto atual
-//            //PlantProject currentProject = PlantApplication.CurrentProject;
-
-//            //// pega todas as partes do projeto atual
-//            //ProjectPartCollection currentProjectPartsColl = currentProject.ProjectParts;
-//            //foreach (Project project in currentProjectPartsColl)
-//            //{
-//            //    // pegar o nome das partes
-//            //    string projectPartName = currentProject.ProjectPartName(project);
-
-//            //    //escrever a informação
-//            //    ed.WriteMessage("\nProject {0} - Part {1} de {2}", project.ProjectName, projectPartName, project.ProjectDwgDirectory);
-
-//            //    // pegar todas os arquivos
-//            //    List<PnPProjectDrawing> dwgList = project.GetPnPDrawingFiles();
-//            //    foreach (PnPProjectDrawing dwg in dwgList)
-//            //    {
-//            //        ed.WriteMessage("\n\t{0}", dwg.AbsoluteFileName);
-//            //    }
-//            //}
+//            ribbon.Tabs.Remove(rtab);
 //        }
+//        rtab = new RibbonTab();
+//        rtab.Title = "TEST  ME";
+//        rtab.Id = "Testing";
+//        //Add the Tab
+//        ribbon.Tabs.Add(rtab);
+//        addContent(rtab);
 //    }
+//}
+
+//static void addContent(RibbonTab rtab)
+//{
+//    rtab.Panels.Add(AddOnePanel());
+//}
+
+//static RibbonPanel AddOnePanel()
+//{
+//    RibbonButton rb;
+//    RibbonPanelSource rps = new RibbonPanelSource();
+//    rps.Title = "Test One";
+//    RibbonPanel rp = new RibbonPanel();
+//    rp.Source = rps;
+
+//    //Create a Command Item that the Dialog Launcher can use,
+//    // for this test it is just a place holder.
+//    RibbonButton rci = new RibbonButton();
+//    rci.Name = "TestCommand";
+
+//    //assign the Command Item to the DialgLauncher which auto-enables
+//    // the little button at the lower right of a Panel
+//    rps.DialogLauncher = rci;
+
+//    rb = new RibbonButton();
+//    rb.Name = "Test Button";
+//    rb.ShowText = true;
+//    rb.Text = "Test Button";
+//    //Add the Button to the Tab
+//    rps.Items.Add(rb);
+//    return rp;
+//}
+
+
+
+
+
+
+
+
+
+
+//        }
+//        DialogResult messageBox = MessageBox.Show("Deseja selecionar outro Instrumento?", "Related To", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+//        if (messageBox == DialogResult.No)
+//            break;
+//    }
+//    if (!(checkBoxEquipmentOtherDWG.Checked))
+//    {
+//        PromptEntityResult equipment = ed.GetEntity("\nSelecione um Equipamento: ");
+//        if (equipment.Status == PromptStatus.OK)
+//        {
+//            while (true)
+//            {
+//                using (var trEquipment = docInstruments.TransactionManager.StartTransaction())
+//                {
+//                    Entity ent = (Entity)trEquipment.GetObject(equipment.ObjectId, OpenMode.ForRead);
+//                    //Pegando o nome da classe que aparace no PLants como parametro de filtro entre linha e equipamento
+//                    if (ent.Id.ObjectClass.DxfName == "ACPPASSET" | ent.Id.ObjectClass.DxfName == "SLINE")
+//                    {
+//                        int equipmentRowId = dlmInstruments.FindAcPpRowId(equipment.ObjectId);
+//                        StringCollection eKeys = new StringCollection { "Tag" };
+//                        StringCollection eVals = dlmInstruments.GetProperties(equipmentRowId, eKeys, true);
+//                        foreach (ObjectId intrumentId in Instruments)
+//                        {
+//                            int instrumentRowId = dlmInstruments.FindAcPpRowId(intrumentId);
+//                            StringCollection iKeys = new StringCollection
+//                                    {
+//                                        "Tag",
+//                                        "RelatedTo"
+//                                    };
+//                            StringCollection iVals = dlmInstruments.GetProperties(instrumentRowId, iKeys, true);
+//                            iVals[1] = eVals[0];
+//                            dbInstruments.StartTransaction();
+//                            dlmInstruments.SetProperties(intrumentId, iKeys, iVals);
+//                            dbInstruments.CommitTransaction();
+//                        }
+//                        MessageBox.Show("Related To executado com sucesso!!");
+//                        foreach (ListViewItem item in listView.Items)
+//                            this.listView.Items.Remove(item);
+//                        this.listView.Items.Clear();
+//                        Instruments.Clear();
+//                        trEquipment.Commit();
+//                        break;
+//                    }
+//                    else
+//                    {
+//                        MessageBox.Show("Selecione um equipamento ou linha!!");
+//                    }
+
+//                }
+//            }
+//        }
+
+//    }
+
 //}

@@ -21,7 +21,7 @@ namespace Plant3D
 {
     public partial class FormVALE : Form
     {
-        private List<ObjectId> Instruments = new List<ObjectId>();
+        private readonly List<ObjectId> Instruments = new List<ObjectId>();
         private Document docInstruments;
         DataLinksManager dlmInstruments;
         PnPDatabase dbInstruments;
@@ -29,84 +29,85 @@ namespace Plant3D
         public FormVALE()
         {
             InitializeComponent();
+
         }
 
         private void ButtonRelatedTo_Click(object sender, EventArgs e)
         {
 
         }
-
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
 
         }
-
         private void label1_Click(object sender, EventArgs e)
         {
 
         }
-
         private void listView_SelectedIndexChanged(object sender, EventArgs e)
         {
 
         }
-
         private void buttonEquipment_Click(object sender, EventArgs e)
         {
-            PlantProject proj = PlantApplication.CurrentProject;
-            ProjectPartCollection projParts = proj.ProjectParts;
-            PnIdProject pnidProj = (PnIdProject)projParts["PnId"];
-            DataLinksManager dlm = pnidProj.DataLinksManager;
-            Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
-            Editor ed = doc.Editor;
-
-            PromptEntityResult equipment = ed.GetEntity("\nSelecione um Equipamento: ");
-            if (equipment.Status == PromptStatus.OK)
+            if(Instruments.Count > 0)
             {
-                using (var trEquipment = doc.TransactionManager.StartTransaction())
+                PlantProject proj = PlantApplication.CurrentProject;
+                ProjectPartCollection projParts = proj.ProjectParts;
+                PnIdProject pnidProj = (PnIdProject)projParts["PnId"];
+                DataLinksManager dlm = pnidProj.DataLinksManager;
+                Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
+                Editor ed = doc.Editor;
+
+                PromptEntityResult equipment = ed.GetEntity("\nSelecione um Equipamento ou  Linha: ");
+                if (equipment.Status == PromptStatus.OK)
                 {
-                    Entity ent = (Entity)trEquipment.GetObject(equipment.ObjectId, OpenMode.ForRead);
-                    if (ent.ToString() == "Autodesk.AutoCAD.DatabaseServices.ImpEntity" | ent.Layer == "Equipment")
+                    while (true)
                     {
-
-                        int equipmentRowId = dlm.FindAcPpRowId(equipment.ObjectId);
-                        StringCollection eKeys = new StringCollection
+                        using (var trEquipment = docInstruments.TransactionManager.StartTransaction())
                         {
-                            "Description",
-                            "Tag",
-                            "RelatedTo",
-                            "Class",
-                            "ClassName"
-                        };
-                        StringCollection eVals = dlm.GetProperties(equipmentRowId, eKeys, true);
-                        foreach (ObjectId intrumentId in Instruments)
-                        {
-                            int instrumentRowId = dlmInstruments.FindAcPpRowId(intrumentId);
-                            StringCollection iKeys = new StringCollection
+                            Entity ent = (Entity)trEquipment.GetObject(equipment.ObjectId, OpenMode.ForRead);
+                            //Pegando o nome da classe que aparace no PLants como parametro de filtro entre linha e equipamento
+                            if (ent.Id.ObjectClass.DxfName == "ACPPASSET" | ent.Id.ObjectClass.DxfName == "SLINE")
                             {
-                                "Description",
-                                "Tag",
-                                "RelatedTo"
-                            };
-                            StringCollection iVals = dlmInstruments.GetProperties(instrumentRowId, iKeys, true);
-                            iVals[2] = eVals[1];
-                            dbInstruments.StartTransaction();
-                            dlmInstruments.SetProperties(intrumentId, iKeys, iVals);
-                            dbInstruments.CommitTransaction();
+                                int equipmentRowId = dlmInstruments.FindAcPpRowId(equipment.ObjectId);
+                                StringCollection eKeys = new StringCollection { "Tag" };
+                                StringCollection eVals = dlmInstruments.GetProperties(equipmentRowId, eKeys, true);
+                                foreach (ObjectId intrumentId in Instruments)
+                                {
+                                    int instrumentRowId = dlmInstruments.FindAcPpRowId(intrumentId);
+                                    StringCollection iKeys = new StringCollection
+                                    {
+                                        "Tag",
+                                        "RelatedTo"
+                                    };
+                                    StringCollection iVals = dlmInstruments.GetProperties(instrumentRowId, iKeys, true);
+                                    iVals[1] = eVals[0];
+                                    dbInstruments.StartTransaction();
+                                    dlmInstruments.SetProperties(intrumentId, iKeys, iVals);
+                                    dbInstruments.CommitTransaction();
+                                }
+                                MessageBox.Show("Related To executado com sucesso!!");
+                                foreach (ListViewItem item in listView.Items)
+                                    this.listView.Items.Remove(item);
+                                this.listView.Items.Clear();
+                                Instruments.Clear();
+                                trEquipment.Commit();
+                                break;
+                            }
+                            else
+                            {
+                                MessageBox.Show("Selecione um equipamento ou linha!!");
+                            }
                         }
-                        MessageBox.Show("RelatedTo executado com sucesso!!");
-                        foreach (ListViewItem item in listView.Items)
-                            this.listView.Items.Remove(item);
-                        this.listView.Items.Clear();
-                        Instruments.Clear();
                     }
-                    else
-                    {
-                        MessageBox.Show("Objeto não é um equipamento!!");                    }
-                    trEquipment.Commit();
                 }
-            }
 
+            }
+            else
+            {
+                MessageBox.Show("Lista de Instrumentos está vazia, selecione instrumentos!!");
+            }
         }
         private void buttonInstruments_Click(object sender, EventArgs e)
         {
@@ -126,20 +127,15 @@ namespace Plant3D
                     "Description",
                     "Tag",
                     "RelatedTo",
-                    "Class",
-                    "ClassName",
-                    "Status",
-                    "Linetype",
-                    "Color",
-                    "Layer"
+                    "ClassName"
                 };
                 StringCollection eVals = dlmInstruments.GetProperties(dlmInstruments.FindAcPpRowId(instrument.ObjectId), eKeys, true);
                 if (instrument.Status == PromptStatus.OK)
                 {
                     using (var tr = docInstruments.TransactionManager.StartTransaction())
                     {
-                        Entity ent = (Entity)tr.GetObject(instrument.ObjectId, OpenMode.ForRead);
-                        if (ent.ToString() == "Autodesk.AutoCAD.DatabaseServices.ImpEntity" | ent.Layer == "Instrument")
+                        //Entity ent = (Entity)tr.GetObject(instrument.ObjectId, OpenMode.ForRead);
+                        if (HaveRelatedToEquip(dlmInstruments.GetAllProperties(instrument.ObjectId, true)))
                         {
                             if (Instruments.Contains(instrument.ObjectId))
                                 MessageBox.Show("O instrumento já foi selecionado!!");
@@ -148,17 +144,17 @@ namespace Plant3D
                                 Instruments.Add(instrument.ObjectId);
                                 Invoke((MethodInvoker)delegate
                                 {
-                                    StringCollection keyTag = new StringCollection { "Tag" };
+                                    StringCollection keyTag = new StringCollection { "Tag", "RelatedTo" };
                                     StringCollection valTag = dlmInstruments.GetProperties(dlmInstruments.FindAcPpRowId(instrument.ObjectId), keyTag, true);
-                                    ListViewItem item = new ListViewItem(dlmInstruments.FindAcPpRowId(instrument.ObjectId).ToString());
-                                    item.SubItems.Add(valTag[0]);
+                                    ListViewItem item = new ListViewItem(valTag[0]);
+                                    item.SubItems.Add(valTag[1]);
                                     listView.Items.Add(item);
                                 });
                             }
                         }
                         else
                         {
-                            MessageBox.Show("Objeto não é um instrumento!!");
+                            MessageBox.Show(dlmInstruments.GetProperties(dlmInstruments.FindAcPpRowId(instrument.ObjectId), eKeys, true)[1] + " não é um instrumento!!");
                         }
                         tr.Commit();
                     }
@@ -167,12 +163,81 @@ namespace Plant3D
                 if (messageBox == DialogResult.No)
                     break;
             }
-
+            if (!(checkBoxEquipmentOtherDWG.Checked) & Instruments.Count > 0)
+            {
+                PromptEntityResult equipment = ed.GetEntity("\nSelecione um Equipamento ou Linhas: ");
+                if (equipment.Status == PromptStatus.OK)
+                {
+                    while (true)
+                    {
+                        using (var trEquipment = docInstruments.TransactionManager.StartTransaction())
+                        {
+                            Entity ent = (Entity)trEquipment.GetObject(equipment.ObjectId, OpenMode.ForRead);
+                            //Pegando o nome da classe que aparace no PLants como parametro de filtro entre linha e equipamento
+                            if (ent.Id.ObjectClass.DxfName == "ACPPASSET" | ent.Id.ObjectClass.DxfName == "SLINE")
+                            {
+                                int equipmentRowId = dlmInstruments.FindAcPpRowId(equipment.ObjectId);
+                                StringCollection eKeys = new StringCollection {"Tag"};
+                                StringCollection eVals = dlmInstruments.GetProperties(equipmentRowId, eKeys, true);
+                                foreach (ObjectId intrumentId in Instruments)
+                                {
+                                    int instrumentRowId = dlmInstruments.FindAcPpRowId(intrumentId);
+                                    StringCollection iKeys = new StringCollection
+                                    {
+                                        "Tag",
+                                        "RelatedTo"
+                                    };
+                                    StringCollection iVals = dlmInstruments.GetProperties(instrumentRowId, iKeys, true);
+                                    iVals[1] = eVals[0];
+                                    dbInstruments.StartTransaction();
+                                    dlmInstruments.SetProperties(intrumentId, iKeys, iVals);
+                                    dbInstruments.CommitTransaction();
+                                }
+                                MessageBox.Show("Related To executado com sucesso!!");
+                                foreach (ListViewItem item in listView.Items)
+                                    this.listView.Items.Remove(item);
+                                this.listView.Items.Clear();
+                                Instruments.Clear();
+                                trEquipment.Commit();
+                                break;
+                            }
+                            else
+                            {
+                                MessageBox.Show("Selecione um equipamento ou linha!!");
+                            }
+                        }
+                    }
+                }
+            }
         }
 
-        private void textBox1_TextChanged(object sender, EventArgs e)
+        private void checkBoxEquipmentOtherDWG_CheckedChanged(object sender, EventArgs e)
         {
-
+            try
+            {
+                if (checkBoxEquipmentOtherDWG.Checked == true)
+                {
+                    buttonEquipment.Enabled = true;
+                    buttonEquipment.BackColor = Color.LightGreen;
+                }
+                if (checkBoxEquipmentOtherDWG.Checked == false)
+                {
+                    buttonEquipment.Enabled = false;
+                    buttonEquipment.BackColor = Color.Silver;
+                }
+            }
+            catch { }
         }
+
+        private bool HaveRelatedToEquip(List<KeyValuePair<string, string>> keyValuePairs)
+        {
+            foreach (KeyValuePair<string, string> kvp in keyValuePairs)
+            {
+                if(kvp.Key.Equals("RelatedTo"))
+                    return true;
+            }
+            return false;
+        }
+
     }
 }

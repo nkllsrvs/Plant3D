@@ -1,6 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
 
 //Autocad namespaces
 using Autodesk.AutoCAD.ApplicationServices;
@@ -25,27 +31,37 @@ namespace Plant3D
 {
     public class FFRibbon
     {
+
         [CommandMethod("vale", CommandFlags.Transparent)]
         public void TestRibbonTab()
         {
-            RibbonControl control = ComponentManager.Ribbon;
-            if (control != null)
+            RibbonControl ribbonControl = ComponentManager.Ribbon;
+            if (ribbonControl != null)
             {
-                RibbonTab tab = control.FindTab("VALE");
-                if (tab != null)
+                RibbonTab ribbonTab = ribbonControl.FindTab("VALE");
+                if (ribbonTab != null)
                 {
-                    control.Tabs.Remove(tab);
+                    ribbonControl.Tabs.Remove(ribbonTab);
                 }
-                tab = new RibbonTab
+                ribbonTab = new RibbonTab
                 {
                     Title = "VALE",
-                    Id = "VALE Ribbon",
-                    IsContextualTab = false
+                    Id = "VALE Ribbon"
+                };
+                RibbonPanel panel = ribbonControl.FindPanel("VALE", true);
+                if (panel != null)
+                {
+                    ribbonControl.Tabs.Remove(ribbonTab);
+                }
+                ribbonTab = new RibbonTab
+                {
+                    Title = "VALE",
+                    Id = "VALE Ribbon"
                 };
                 //Add the Tab
-                control.Tabs.Add(tab);
-                control.ActiveTab = tab;
-                tab.Panels.Add(AddOnePanel());
+                ribbonControl.Tabs.Add(ribbonTab);
+                ribbonControl.ActiveTab = ribbonTab;
+                ribbonTab.Panels.Add(AddOnePanel());
             }
         }
 
@@ -60,7 +76,6 @@ namespace Plant3D
             RibbonPanelSource panelSource = new RibbonPanelSource
             {
                 Title = "VALE",
-                DialogLauncher = commandItem
             };
             RibbonPanel panel = new RibbonPanel
             {
@@ -120,11 +135,19 @@ namespace Plant3D
     }
     public class Commands
     {
+        FormVALE formVALE = new FormVALE();
+
         [CommandMethod("_RLTT")]
         public void RelatedTo()
         {
-            FormVALE formVALE = new FormVALE();
-            formVALE.Show();
+            try
+            {
+                if(formVALE == null || formVALE.IsDisposed)
+                    formVALE = new FormVALE();
+                formVALE.Show();
+            }
+            catch(Autodesk.AutoCAD.Runtime.Exception e)
+            { }
         }
         [CommandMethod("_SBTTT")]
         public void Substitute()
@@ -153,11 +176,11 @@ namespace Plant3D
                                 ent.UpgradeOpen();
                                 var ltd = new LinetypeDialog();
                                 Handle handle = RetornaLinetypeHandle(eVals[0]);
-                                if(handle.Value != 0)
+                                if (handle.Value != 0)
                                 {
                                     ltd.Linetype = doc.Database.GetObjectId(false, handle, 0);
                                     if (ent.LinetypeId != ltd.Linetype)
-                                    ent.LinetypeId = ltd.Linetype;
+                                        ent.LinetypeId = ltd.Linetype;
                                 }
                                 ent.DowngradeOpen();
                             }
