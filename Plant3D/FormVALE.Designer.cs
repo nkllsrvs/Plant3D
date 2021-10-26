@@ -43,10 +43,11 @@ namespace Plant3D
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.buttonEquipment = new System.Windows.Forms.Button();
-            this.textBox1 = new System.Windows.Forms.TextBox();
             this.buttonInstruments = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.checkBoxEquipmentOtherDWG = new System.Windows.Forms.CheckBox();
+            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.buttonClearSelection = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // listView
@@ -57,7 +58,7 @@ namespace Plant3D
             this.listView.HideSelection = false;
             this.listView.Location = new System.Drawing.Point(9, 237);
             this.listView.Name = "listView";
-            this.listView.Size = new System.Drawing.Size(255, 212);
+            this.listView.Size = new System.Drawing.Size(289, 212);
             this.listView.TabIndex = 1;
             this.listView.UseCompatibleStateImageBehavior = false;
             this.listView.View = System.Windows.Forms.View.Details;
@@ -79,7 +80,7 @@ namespace Plant3D
             this.buttonEquipment.Enabled = false;
             this.buttonEquipment.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonEquipment.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.buttonEquipment.Location = new System.Drawing.Point(25, 534);
+            this.buttonEquipment.Location = new System.Drawing.Point(43, 534);
             this.buttonEquipment.Name = "buttonEquipment";
             this.buttonEquipment.Size = new System.Drawing.Size(224, 42);
             this.buttonEquipment.TabIndex = 6;
@@ -87,21 +88,11 @@ namespace Plant3D
             this.buttonEquipment.UseVisualStyleBackColor = false;
             this.buttonEquipment.Click += new System.EventHandler(this.buttonEquipment_Click);
             // 
-            // textBox1
-            // 
-            this.textBox1.Enabled = false;
-            this.textBox1.Location = new System.Drawing.Point(9, 19);
-            this.textBox1.Multiline = true;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(255, 212);
-            this.textBox1.TabIndex = 7;
-            this.textBox1.Text = resources.GetString("textBox1.Text");
-            // 
             // buttonInstruments
             // 
             this.buttonInstruments.BackColor = System.Drawing.SystemColors.ActiveCaption;
             this.buttonInstruments.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.buttonInstruments.Location = new System.Drawing.Point(25, 483);
+            this.buttonInstruments.Location = new System.Drawing.Point(43, 483);
             this.buttonInstruments.Name = "buttonInstruments";
             this.buttonInstruments.Size = new System.Drawing.Size(224, 45);
             this.buttonInstruments.TabIndex = 8;
@@ -121,7 +112,7 @@ namespace Plant3D
             // checkBoxEquipmentOtherDWG
             // 
             this.checkBoxEquipmentOtherDWG.AutoSize = true;
-            this.checkBoxEquipmentOtherDWG.Location = new System.Drawing.Point(12, 456);
+            this.checkBoxEquipmentOtherDWG.Location = new System.Drawing.Point(9, 460);
             this.checkBoxEquipmentOtherDWG.Name = "checkBoxEquipmentOtherDWG";
             this.checkBoxEquipmentOtherDWG.Size = new System.Drawing.Size(168, 17);
             this.checkBoxEquipmentOtherDWG.TabIndex = 10;
@@ -129,13 +120,36 @@ namespace Plant3D
             this.checkBoxEquipmentOtherDWG.UseVisualStyleBackColor = true;
             this.checkBoxEquipmentOtherDWG.Click += new System.EventHandler(this.checkBoxEquipmentOtherDWG_CheckedChanged);
             // 
+            // richTextBox1
+            // 
+            this.richTextBox1.Location = new System.Drawing.Point(9, 20);
+            this.richTextBox1.Name = "richTextBox1";
+            this.richTextBox1.ReadOnly = true;
+            this.richTextBox1.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.ForcedVertical;
+            this.richTextBox1.Size = new System.Drawing.Size(289, 211);
+            this.richTextBox1.TabIndex = 11;
+            this.richTextBox1.Text = resources.GetString("richTextBox1.Text");
+            this.richTextBox1.TextChanged += new System.EventHandler(this.richTextBox1_TextChanged);
+            // 
+            // buttonClearSelection
+            // 
+            this.buttonClearSelection.BackColor = System.Drawing.Color.LightCoral;
+            this.buttonClearSelection.Location = new System.Drawing.Point(209, 456);
+            this.buttonClearSelection.Name = "buttonClearSelection";
+            this.buttonClearSelection.Size = new System.Drawing.Size(89, 23);
+            this.buttonClearSelection.TabIndex = 12;
+            this.buttonClearSelection.Text = "Clear Selection";
+            this.buttonClearSelection.UseVisualStyleBackColor = false;
+            this.buttonClearSelection.Click += new System.EventHandler(this.buttonClearClick);
+            // 
             // FormVALE
             // 
-            this.ClientSize = new System.Drawing.Size(276, 590);
+            this.ClientSize = new System.Drawing.Size(310, 590);
+            this.Controls.Add(this.buttonClearSelection);
+            this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.checkBoxEquipmentOtherDWG);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.buttonInstruments);
-            this.Controls.Add(this.textBox1);
             this.Controls.Add(this.buttonEquipment);
             this.Controls.Add(this.listView);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -223,9 +237,10 @@ namespace Plant3D
         private ColumnHeader columnHeader1;
         private ColumnHeader columnHeader2;
         private Button buttonEquipment;
-        private TextBox textBox1;
         private Button buttonInstruments;
         private Label label1;
         private CheckBox checkBoxEquipmentOtherDWG;
+        private RichTextBox richTextBox1;
+        private Button buttonClearSelection;
     }
 }

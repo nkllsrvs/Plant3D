@@ -1,12 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Windows;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
 
 //Autocad namespaces
 using Autodesk.AutoCAD.ApplicationServices;
@@ -24,12 +17,13 @@ using Application = Autodesk.AutoCAD.ApplicationServices.Application;
 using Autodesk.ProcessPower.DataLinks;
 using System.Collections.Specialized;
 using Autodesk.AutoCAD.Windows;
+using System.Collections;
 
 [assembly: CommandClass(typeof(Plant3D.Commands))]
-[assembly: CommandClass(typeof(Plant3D.FFRibbon))]
+[assembly: CommandClass(typeof(Plant3D.VALERibbon))]
 namespace Plant3D
 {
-    public class FFRibbon
+    public class VALERibbon
     {
 
         [CommandMethod("vale", CommandFlags.Transparent)]
@@ -46,7 +40,7 @@ namespace Plant3D
                 ribbonTab = new RibbonTab
                 {
                     Title = "VALE",
-                    Id = "VALE Ribbon"
+                    Id = "VALE"
                 };
                 RibbonPanel panel = ribbonControl.FindPanel("VALE", true);
                 if (panel != null)
@@ -56,7 +50,7 @@ namespace Plant3D
                 ribbonTab = new RibbonTab
                 {
                     Title = "VALE",
-                    Id = "VALE Ribbon"
+                    Id = "VALE"
                 };
                 //Add the Tab
                 ribbonControl.Tabs.Add(ribbonTab);
@@ -93,7 +87,7 @@ namespace Plant3D
                 ShowText = true,
                 ShowImage = true,
                 Id = "1",
-                CommandHandler = new FFRibbonButtonCommandHandler(),
+                CommandHandler = new VALERibbonButtonCommandeHandler(),
                 //actual AutoCAD command passed to ICommand.Execute().
                 CommandParameter = "._RLTT "
             };
@@ -106,7 +100,7 @@ namespace Plant3D
                 ShowText = true,
                 ShowImage = true,
                 Id = "2",
-                CommandHandler = new FFRibbonButtonCommandHandler(),
+                CommandHandler = new VALERibbonButtonCommandeHandler(),
                 //actual AutoCAD command passed to ICommand.Execute().
                 CommandParameter = "._SBTTT "
             };
@@ -118,7 +112,7 @@ namespace Plant3D
             }
             return panel;
         }
-        public class FFRibbonButtonCommandHandler : System.Windows.Input.ICommand
+        public class VALERibbonButtonCommandeHandler : System.Windows.Input.ICommand
         {
             public bool CanExecute(object parameter)
             {
@@ -136,17 +130,24 @@ namespace Plant3D
     public class Commands
     {
         FormVALE formVALE = new FormVALE();
+        static StringCollection linetypesSubstitute = new StringCollection
+        {
+            "Continuous",
+            "DASHDOT",
+            "HIDDEN",
+            "HIDDEN2"
+        };
 
         [CommandMethod("_RLTT")]
         public void RelatedTo()
         {
             try
             {
-                if(formVALE == null || formVALE.IsDisposed)
+                if (formVALE == null || formVALE.IsDisposed)
                     formVALE = new FormVALE();
                 formVALE.Show();
             }
-            catch(Autodesk.AutoCAD.Runtime.Exception e)
+            catch (Autodesk.AutoCAD.Runtime.Exception e)
             { }
         }
         [CommandMethod("_SBTTT")]
@@ -158,7 +159,9 @@ namespace Plant3D
             ProjectPartCollection projParts = proj.ProjectParts;
             PnIdProject pnidProj = (PnIdProject)projParts["PnId"];
             DataLinksManager dlm = pnidProj.DataLinksManager;
+            LoadLineTypes(doc.Database);
             PromptSelectionResult selection = ed.SelectAll();
+
             if (selection.Status == PromptStatus.OK)
             {
                 using (Transaction tr = doc.Database.TransactionManager.StartOpenCloseTransaction())
@@ -167,21 +170,16 @@ namespace Plant3D
                     {
                         Entity ent = (Entity)tr.GetObject(id, OpenMode.ForRead);
                         LayerTableRecord layer = (LayerTableRecord)tr.GetObject(ent.LayerId, OpenMode.ForRead);
-                        if (!layer.IsFrozen & ent.ToString() == "Autodesk.AutoCAD.DatabaseServices.ImpCurve")
+                        if (!layer.IsFrozen & ent.Id.ObjectClass.DxfName == "SLINE")
                         {
                             StringCollection eKeys = new StringCollection { "Status" };
                             StringCollection eVals = dlm.GetProperties(dlm.FindAcPpRowId(ent.ObjectId), eKeys, true);
-                            if (eVals[0] != null)
+                            if (!String.IsNullOrEmpty(eVals[0]))
                             {
                                 ent.UpgradeOpen();
                                 var ltd = new LinetypeDialog();
-                                Handle handle = RetornaLinetypeHandle(eVals[0]);
-                                if (handle.Value != 0)
-                                {
-                                    ltd.Linetype = doc.Database.GetObjectId(false, handle, 0);
-                                    if (ent.LinetypeId != ltd.Linetype)
-                                        ent.LinetypeId = ltd.Linetype;
-                                }
+                                if (ent.LinetypeId != ltd.Linetype)
+                                    ent.LinetypeId = RetornaLinetypeId(eVals[0], tr, doc.Database);
                                 ent.DowngradeOpen();
                             }
                             //Object LinetypeId = tr.GetObject(RetornaLinetype(eVals[0]).);
@@ -196,86 +194,87 @@ namespace Plant3D
 
         }
 
-        [CommandMethod("SLT", CommandFlags.UsePickSet)]
-        public void SetLineType()
+        private ObjectId RetornaLinetypeId(string descricao, Transaction tr, Database db)
         {
-            var doc = Application.DocumentManager.MdiActiveDocument;
-            if (doc == null)
-                return;
-            var ed = doc.Editor;
-            var psr = ed.GetSelection();
-            if (psr.Status != PromptStatus.OK || psr.Value.Count == 0)
-                return;
-            using (var tr = doc.TransactionManager.StartTransaction())
+            LinetypeTable tbl = (LinetypeTable)tr.GetObject(db.LinetypeTableId, OpenMode.ForWrite);
+            List<Linetype> lines = new List<Linetype>();
+            ObjectId linetype = new ObjectId();
+            foreach (var linetypeId in tbl)
             {
-                var ids = psr.Value.GetObjectIds();
-                var ltId = ObjectId.Null;
-                bool different = false;
-                foreach (ObjectId id in ids)
-                {
-                    var ent = (Entity)tr.GetObject(id, OpenMode.ForRead);
-                    if (ltId == ObjectId.Null)
-                        ltId = ent.LinetypeId;
-                    else
+                LinetypeTableRecord obj = (LinetypeTableRecord)tr.GetObject(linetypeId, OpenMode.ForRead);
+                lines.Add(new Linetype { Id = obj.ObjectId, Name = obj.Name });
+            }
+            switch (descricao)
+            {
+                case "New":
+                    foreach (Linetype ltr in lines)
                     {
-                        if (ltId != ent.LinetypeId)
-                        {
-                            different = true;
-                            break;
-                        }
+                        if (ltr.Name == "Continuous")
+                            linetype = ltr.Id;
                     }
-                }
-                var ltd = new LinetypeDialog();
-                if (!different)
-                    ltd.Linetype = ltId;
-                var dr = ltd.ShowDialog();
-                if (dr != System.Windows.Forms.DialogResult.OK)
-                    return; // We might also commit before returning
-
-                if (different || ltId != ltd.Linetype)
-                {
-                    foreach (ObjectId id in ids)
+                    return linetype;
+                case "Future":
+                    foreach (Linetype ltr in lines)
                     {
-                        // This time we need write access
-                        var ent = (Entity)tr.GetObject(id, OpenMode.ForWrite);
-                        if (ent.LinetypeId != ltd.Linetype)
-                            ent.LinetypeId = ltd.Linetype;
+                        if (ltr.Name == "DASHDOT")
+                            linetype = ltr.Id;
+                    }
+                    return linetype;
+                case "Existing":
+                    foreach (Linetype ltr in lines)
+                    {
+                        if (ltr.Name == "HIDDEN2")
+                            linetype = ltr.Id;
+                    }
+                    return linetype;
+                case "Alternative / Intermittent":
+                    foreach (Linetype ltr in lines)
+                    {
+                        if (ltr.Name == "HIDDEN")
+                            linetype = ltr.Id;
+                    }
+                    return linetype;
+            }
+            foreach (Linetype ltr in lines)
+            {
+                if (ltr.Name == "Continuous")
+                    linetype = ltr.Id;
+            }
+            return linetype;
+        }
+
+        static public void LoadLineTypes(Database db)
+        {
+            using (Transaction tr = db.TransactionManager.StartTransaction())
+            {
+                LinetypeTable tbl = (LinetypeTable)tr.GetObject(db.LinetypeTableId, OpenMode.ForWrite);
+                foreach (string linetype in linetypesSubstitute)
+                {
+                    if (!tbl.Has(linetype))
+                    {
+                        db.LoadLineTypeFile(linetype, "acad.lin");
                     }
                 }
                 tr.Commit();
             }
         }
-        private Handle RetornaLinetypeHandle(string descricao)
+
+        public class Linetype : IEnumerable
         {
-            switch (descricao)
+            public Linetype() { }
+            public Linetype(ObjectId Id, String Name)
             {
-                //CONTINUOUS
-                case "Novo":
-                    return new Handle(22);
-                //DASHDOT
-                case "Futuro":
-                    return new Handle(13122);
-                //HIDDEN2
-                case "Existente":
-                    return new Handle(167);
-                //HIDDEN
-                case "Alternativo/Intermitente":
-                    return new Handle(4934);
+                this.Id = Id;
+                this.Name = Name;
+            }
+            public Autodesk.AutoCAD.DatabaseServices.ObjectId Id { get; set; }
+            public String Name { get; set; }
 
-                //HIDDEN2
-                case "Existing":
-                    return new Handle(167);
-                //PNEUMATIC
-                case "Demolition":
-                    return new Handle(4554);
-                //CONTINUOUS
-                case "New":
-                    return new Handle(22);
-
-                //Defalt
-                default:
-                    return new Handle(0);
+            public IEnumerator GetEnumerator()
+            {
+                throw new NotImplementedException();
             }
         }
     }
 }
+
