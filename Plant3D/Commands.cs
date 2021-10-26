@@ -176,16 +176,16 @@ namespace Plant3D
                             StringCollection eVals = dlm.GetProperties(dlm.FindAcPpRowId(ent.ObjectId), eKeys, true);
                             if (!String.IsNullOrEmpty(eVals[0]))
                             {
-                                ent.UpgradeOpen();
-                                var ltd = new LinetypeDialog();
-                                if (ent.LinetypeId != ltd.Linetype)
+                                if(eVals[0] != "Future Flow Line" & eVals[0] != "Alternative / Intermittent Flow Line")
+                                {
+                                    ent.UpgradeOpen();
                                     ent.LinetypeId = RetornaLinetypeId(eVals[0], tr, doc.Database);
-                                ent.DowngradeOpen();
+                                    ent.DowngradeOpen();
+                                }
                             }
                             //Object LinetypeId = tr.GetObject(RetornaLinetype(eVals[0]).);
                             //ent.LinetypeId = RetornaLinetype(eVals[0]);
                             //ed.WriteMessage("\nTipo:{0} + + Status{1}", ent.ToString(), eVals[0]);
-
                         }
                     }
                     tr.Commit();
