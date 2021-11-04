@@ -15,9 +15,10 @@ using System.Windows.Media.Imaging;
 using Orientation = System.Windows.Controls.Orientation;
 using Application = Autodesk.AutoCAD.ApplicationServices.Application;
 using Autodesk.ProcessPower.DataLinks;
+using Autodesk.ProcessPower.P3dProjectParts;
 using System.Collections.Specialized;
-using Autodesk.AutoCAD.Windows;
 using System.Collections;
+using System.Windows.Forms;
 
 [assembly: CommandClass(typeof(Plant3D.Commands))]
 [assembly: CommandClass(typeof(Plant3D.VALERibbon))]
@@ -81,7 +82,7 @@ namespace Plant3D
             RibbonButton button1 = new RibbonButton
             {
                 Text = "Related To",
-                LargeImage = new BitmapImage(new Uri(@"C:\Program Files\Autodesk\AutoCAD 2022\Support\en-us\img\navigate_plus.png")),
+                LargeImage = new BitmapImage(new Uri(@"C:\Program Files\Autodesk\AutoCAD 2022\Support\en-us\img\relatedto.png")),
                 Orientation = Orientation.Vertical,
                 Size = RibbonItemSize.Large,
                 ShowText = true,
@@ -93,8 +94,8 @@ namespace Plant3D
             };
             RibbonButton button2 = new RibbonButton
             {
-                Text = "Substitute",
-                LargeImage = new BitmapImage(new Uri(@"C:\Program Files\Autodesk\AutoCAD 2022\Support\en-us\img\satellite32.png")),
+                Text = "Update \nLinetype by Status",
+                LargeImage = new BitmapImage(new Uri(@"C:\Program Files\Autodesk\AutoCAD 2022\Support\en-us\img\substitute.png")),
                 Orientation = Orientation.Vertical,
                 Size = RibbonItemSize.Large,
                 ShowText = true,
@@ -102,7 +103,7 @@ namespace Plant3D
                 Id = "2",
                 CommandHandler = new VALERibbonButtonCommandeHandler(),
                 //actual AutoCAD command passed to ICommand.Execute().
-                CommandParameter = "._SBTTT "
+                CommandParameter = "._ULTBS "
             };
 
             List<RibbonButton> ribbonButtons = new List<RibbonButton> { button1, button2 };
@@ -150,8 +151,8 @@ namespace Plant3D
             catch (Autodesk.AutoCAD.Runtime.Exception e)
             { }
         }
-        [CommandMethod("_SBTTT")]
-        public void Substitute()
+        [CommandMethod("_ULTBS")]
+        public void UpdateLinetypeByStatus()
         {
             Document doc = Application.DocumentManager.MdiActiveDocument;
             Editor ed = doc.Editor;
@@ -161,6 +162,8 @@ namespace Plant3D
             DataLinksManager dlm = pnidProj.DataLinksManager;
             LoadLineTypes(doc.Database);
             PromptSelectionResult selection = ed.SelectAll();
+            bool success = false;
+            int countAlteredLines = 0;
 
             if (selection.Status == PromptStatus.OK)
             {
@@ -173,27 +176,41 @@ namespace Plant3D
                         if (!layer.IsFrozen & ent.Id.ObjectClass.DxfName == "SLINE")
                         {
                             StringCollection eKeys = new StringCollection { "Status" };
-                            StringCollection eVals = dlm.GetProperties(dlm.FindAcPpRowId(ent.ObjectId), eKeys, true);
-                            if (!String.IsNullOrEmpty(eVals[0]))
+                            //existe um objeto onde eu n posso pegar o rowId para fazer um get 
+                            //no database dos valores respectivos as chaves
+                            try
                             {
-                                if(eVals[0] != "Future Flow Line" & eVals[0] != "Alternative / Intermittent Flow Line")
+                                StringCollection eVals = dlm.GetProperties(dlm.FindAcPpRowId(ent.ObjectId), eKeys, true);
+                                if (!String.IsNullOrEmpty(eVals[0]))
                                 {
-                                    ent.UpgradeOpen();
-                                    ent.LinetypeId = RetornaLinetypeId(eVals[0], tr, doc.Database);
-                                    ent.DowngradeOpen();
+                                    if (eVals[0] != "Future Flow Line" & eVals[0] != "Alternative / Intermittent Flow Line")
+                                    {
+                                        ObjectId lti = RetornaLinetypeId(eVals[0], tr, doc.Database);
+                                        if(ent.LinetypeId != lti)
+                                        {
+                                            ent.UpgradeOpen();
+                                            ent.LinetypeId = lti;
+                                            ent.DowngradeOpen();
+                                            countAlteredLines++;
+                                        }
+                                    }
                                 }
                             }
-                            //Object LinetypeId = tr.GetObject(RetornaLinetype(eVals[0]).);
-                            //ent.LinetypeId = RetornaLinetype(eVals[0]);
-                            //ed.WriteMessage("\nTipo:{0} + + Status{1}", ent.ToString(), eVals[0]);
+                            catch (DLException e)
+                            {
+                                _ = e;// runtime dando erro por nao haver link com a entidade 
+                            }                            
                         }
                     }
                     tr.Commit();
+                    if(countAlteredLines > 0)
+                        MessageBox.Show(countAlteredLines + " linhas alteradas com sucesso!!", "Update Linetype By Status", MessageBoxButtons.OK, MessageBoxIcon.Question);
+                    else
+                        MessageBox.Show("Não houve nenhuma alteração!!", "Update Linetype By Status", MessageBoxButtons.OK, MessageBoxIcon.Question);
                 } // using
             } // if
 
         }
-
         private ObjectId RetornaLinetypeId(string descricao, Transaction tr, Database db)
         {
             LinetypeTable tbl = (LinetypeTable)tr.GetObject(db.LinetypeTableId, OpenMode.ForWrite);
@@ -242,7 +259,6 @@ namespace Plant3D
             }
             return linetype;
         }
-
         static public void LoadLineTypes(Database db)
         {
             using (Transaction tr = db.TransactionManager.StartTransaction())
@@ -258,7 +274,6 @@ namespace Plant3D
                 tr.Commit();
             }
         }
-
         public class Linetype : IEnumerable
         {
             public Linetype() { }
