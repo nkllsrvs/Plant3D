@@ -82,7 +82,7 @@ namespace Plant3D
             RibbonButton button1 = new RibbonButton
             {
                 Text = "Related To",
-                LargeImage = new BitmapImage(new Uri(@"C:\Program Files\Autodesk\AutoCAD 2022\Support\en-us\img\relatedto.png")),
+                LargeImage = new BitmapImage(new Uri(@"C:\Program Files\Autodesk\AutoCAD 2022\Plant3DValeAddin\img\relatedto.png")),
                 Orientation = Orientation.Vertical,
                 Size = RibbonItemSize.Large,
                 ShowText = true,
@@ -95,7 +95,7 @@ namespace Plant3D
             RibbonButton button2 = new RibbonButton
             {
                 Text = "Update \nLinetype by Status",
-                LargeImage = new BitmapImage(new Uri(@"C:\Program Files\Autodesk\AutoCAD 2022\Support\en-us\img\substitute.png")),
+                LargeImage = new BitmapImage(new Uri(@"C:\Program Files\Autodesk\AutoCAD 2022\Plant3DValeAddin\img\substitute.png")),
                 Orientation = Orientation.Vertical,
                 Size = RibbonItemSize.Large,
                 ShowText = true,
@@ -104,6 +104,19 @@ namespace Plant3D
                 CommandHandler = new VALERibbonButtonCommandeHandler(),
                 //actual AutoCAD command passed to ICommand.Execute().
                 CommandParameter = "._ULTBS "
+            };
+            RibbonButton button3 = new RibbonButton
+            {
+                Text = "Update \nLinetype by Status",
+                LargeImage = new BitmapImage(new Uri(@"C:\Program Files\Autodesk\AutoCAD 2022\Plant3DValeAddin\img\relatedto.png")),
+                Orientation = Orientation.Vertical,
+                Size = RibbonItemSize.Large,
+                ShowText = true,
+                ShowImage = true,
+                Id = "2",
+                CommandHandler = new VALERibbonButtonCommandeHandler(),
+                //actual AutoCAD command passed to ICommand.Execute().
+                CommandParameter = "._RLTT "
             };
 
             List<RibbonButton> ribbonButtons = new List<RibbonButton> { button1, button2 };
@@ -130,7 +143,8 @@ namespace Plant3D
     }
     public class Commands
     {
-        FormVALE formVALE = new FormVALE();
+        FormVALE relatedToVALE = new FormVALE();
+        FormVALE fromToVALE = new FormVALE();
         static StringCollection linetypesSubstitute = new StringCollection
         {
             "Continuous",
@@ -144,9 +158,9 @@ namespace Plant3D
         {
             try
             {
-                if (formVALE == null || formVALE.IsDisposed)
-                    formVALE = new FormVALE();
-                formVALE.Show();
+                if (relatedToVALE == null || relatedToVALE.IsDisposed)
+                    relatedToVALE = new FormVALE();
+                relatedToVALE.Show();
             }
             catch (Autodesk.AutoCAD.Runtime.Exception e)
             { }
@@ -289,6 +303,19 @@ namespace Plant3D
             {
                 throw new NotImplementedException();
             }
+        }
+
+        [CommandMethod("_FRMT")]
+        public void FromTo()
+        {
+            try
+            {
+                if (relatedToVALE == null || relatedToVALE.IsDisposed)
+                    relatedToVALE = new FormVALE();
+                relatedToVALE.Show();
+            }
+            catch (Autodesk.AutoCAD.Runtime.Exception e)
+            { }
         }
     }
 }

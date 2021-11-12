@@ -200,6 +200,12 @@
   <ItemGroup>
     <Compile Include="Commands - Copy.cs" />
     <Compile Include="Commands.cs" />
+    <Compile Include="FromTo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FromTo.Designer.cs">
+      <DependentUpon>FromTo.cs</DependentUpon>
+    </Compile>
     <Compile Include="FormVALE.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -209,6 +215,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="FromTo.resx">
+      <DependentUpon>FromTo.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FormVALE.resx">
       <DependentUpon>FormVALE.cs</DependentUpon>
     </EmbeddedResource>
