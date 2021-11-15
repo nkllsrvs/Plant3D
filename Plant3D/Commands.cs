@@ -19,6 +19,7 @@ using Autodesk.ProcessPower.P3dProjectParts;
 using System.Collections.Specialized;
 using System.Collections;
 using System.Windows.Forms;
+using static Plant3D.Commands;
 
 [assembly: CommandClass(typeof(Plant3D.Commands))]
 [assembly: CommandClass(typeof(Plant3D.VALERibbon))]
@@ -26,10 +27,11 @@ namespace Plant3D
 {
     public class VALERibbon
     {
-
+        public List<DocId> DocIdList { get; set; }
         [CommandMethod("vale", CommandFlags.Transparent)]
         public void TestRibbonTab()
         {
+            Commands.AddDocEvent();
             RibbonControl ribbonControl = ComponentManager.Ribbon;
             if (ribbonControl != null)
             {
@@ -124,6 +126,8 @@ namespace Plant3D
             {
                 panelSource.Items.Add(rb);
             }
+
+            Commands.AddDocEvent();
             return panel;
         }
         public class VALERibbonButtonCommandeHandler : System.Windows.Input.ICommand
@@ -165,6 +169,7 @@ namespace Plant3D
             catch (Autodesk.AutoCAD.Runtime.Exception e)
             { }
         }
+
         [CommandMethod("_ULTBS")]
         public void UpdateLinetypeByStatus()
         {
@@ -200,7 +205,7 @@ namespace Plant3D
                                     if (eVals[0] != "Future Flow Line" & eVals[0] != "Alternative / Intermittent Flow Line")
                                     {
                                         ObjectId lti = RetornaLinetypeId(eVals[0], tr, doc.Database);
-                                        if(ent.LinetypeId != lti)
+                                        if (ent.LinetypeId != lti)
                                         {
                                             ent.UpgradeOpen();
                                             ent.LinetypeId = lti;
@@ -213,11 +218,11 @@ namespace Plant3D
                             catch (DLException e)
                             {
                                 _ = e;// runtime dando erro por nao haver link com a entidade 
-                            }                            
+                            }
                         }
                     }
                     tr.Commit();
-                    if(countAlteredLines > 0)
+                    if (countAlteredLines > 0)
                         MessageBox.Show(countAlteredLines + " linhas alteradas com sucesso!!", "Update Linetype By Status", MessageBoxButtons.OK, MessageBoxIcon.Question);
                     else
                         MessageBox.Show("Não houve nenhuma alteração!!", "Update Linetype By Status", MessageBoxButtons.OK, MessageBoxIcon.Question);
@@ -317,6 +322,92 @@ namespace Plant3D
             catch (Autodesk.AutoCAD.Runtime.Exception e)
             { }
         }
+
+        [CommandMethod("AddDocEvent")]
+        static public void AddDocEvent()
+        {
+            // Get the current document
+            Document acDoc = Application.DocumentManager.MdiActiveDocument;
+
+            acDoc.BeginDocumentClose += new DocumentBeginCloseEventHandler(docBeginDocClose);
+        }
+
+        [CommandMethod("RemoveDocEvent")]
+        public void RemoveDocEvent()
+        {
+            // Get the current document
+            Document acDoc = Application.DocumentManager.MdiActiveDocument;
+
+            acDoc.BeginDocumentClose -= new DocumentBeginCloseEventHandler(docBeginDocClose);
+            PreencheListaDocId(acDoc, docIdList);
+        }
+
+        static public void docBeginDocClose(object senderObj, DocumentBeginCloseEventArgs docBegClsEvtArgs)
+        {
+            // Display a message box prompting to continue closing the document
+            if (System.Windows.Forms.MessageBox.Show(
+                                 "The document is about to be closed." +
+                                 "\nDo you want to continue?",
+                                 "Close Document",
+                                 System.Windows.Forms.MessageBoxButtons.YesNo) ==
+                                 System.Windows.Forms.DialogResult.No)
+            {
+                docBegClsEvtArgs.Veto();
+            }
+        }
+
+        public class DocId : IEnumerable
+        {
+            public ObjectId Id { get; set; }
+            public string Tag { get; set; }
+
+            public string Document { get; set; }
+
+            public IEnumerator GetEnumerator()
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public void PreencheListaDocId(Document acDoc, List<DocId> docIdList)
+        {
+            PlantProject proj = PlantApplication.CurrentProject;
+            ProjectPartCollection projParts = proj.ProjectParts;
+            PnIdProject pnidProj = (PnIdProject)projParts["PnId"];
+            DataLinksManager dlm = pnidProj.DataLinksManager;
+            DocId docid = new DocId();
+            PromptSelectionResult selection = acDoc.Editor.SelectAll();
+            docid.Document = acDoc.Name;
+            using (Transaction tr = acDoc.Database.TransactionManager.StartOpenCloseTransaction())
+            {
+                foreach (ObjectId id in selection.Value.GetObjectIds())
+                {
+                    Entity ent = (Entity)tr.GetObject(id, OpenMode.ForRead);
+                    LayerTableRecord layer = (LayerTableRecord)tr.GetObject(ent.LayerId, OpenMode.ForRead);
+                    if (!layer.IsFrozen)
+                    {
+                        StringCollection entKeys = new StringCollection { "Tag" };
+                        //existe um objeto onde eu n posso pegar o rowId para fazer um get 
+                        //no database dos valores respectivos as chaves
+                        try
+                        {
+                            StringCollection entVal = dlm.GetProperties(dlm.FindAcPpRowId(ent.ObjectId), entKeys, true);
+                            docid.Id = ent.ObjectId;
+                            docid.Tag = entVal[0];
+                            docIdList.Add(docid);
+                        }
+                        catch (DLException e)
+                        {
+                            _ = e;// runtime dando erro por nao haver link com a entidade 
+                        }
+                    }
+                }
+                tr.Commit();
+            }
+            
+        }
+
     }
+
 }
 

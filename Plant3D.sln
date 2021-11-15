@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30523.141
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Plant3D", "Plant3D\Plant3D.csproj", "{F8941C8B-5C2C-41B0-8671-357CA0163AD5}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Setup", "Setup\Setup.csproj", "{7716FB04-5C2E-405B-9A31-7C29337CC34C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Plant3D", "Plant3D\Plant3D.csproj", "{F8941C8B-5C2C-41B0-8671-357CA0163AD5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,14 +13,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F8941C8B-5C2C-41B0-8671-357CA0163AD5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F8941C8B-5C2C-41B0-8671-357CA0163AD5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F8941C8B-5C2C-41B0-8671-357CA0163AD5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F8941C8B-5C2C-41B0-8671-357CA0163AD5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7716FB04-5C2E-405B-9A31-7C29337CC34C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7716FB04-5C2E-405B-9A31-7C29337CC34C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7716FB04-5C2E-405B-9A31-7C29337CC34C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7716FB04-5C2E-405B-9A31-7C29337CC34C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8941C8B-5C2C-41B0-8671-357CA0163AD5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8941C8B-5C2C-41B0-8671-357CA0163AD5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8941C8B-5C2C-41B0-8671-357CA0163AD5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8941C8B-5C2C-41B0-8671-357CA0163AD5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
