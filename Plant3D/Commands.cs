@@ -109,19 +109,19 @@ namespace Plant3D
             };
             RibbonButton button3 = new RibbonButton
             {
-                Text = "Update \nLinetype by Status",
+                Text = "FromTo",
                 LargeImage = new BitmapImage(new Uri(@"C:\Program Files\Autodesk\AutoCAD 2022\Plant3DValeAddin\img\relatedto.png")),
                 Orientation = Orientation.Vertical,
                 Size = RibbonItemSize.Large,
                 ShowText = true,
                 ShowImage = true,
-                Id = "2",
+                Id = "3",
                 CommandHandler = new VALERibbonButtonCommandeHandler(),
                 //actual AutoCAD command passed to ICommand.Execute().
-                CommandParameter = "._RLTT "
+                CommandParameter = "._FRMT "
             };
 
-            List<RibbonButton> ribbonButtons = new List<RibbonButton> { button1, button2 };
+            List<RibbonButton> ribbonButtons = new List<RibbonButton> { button1, button2, button3 };
             foreach (RibbonButton rb in ribbonButtons)
             {
                 panelSource.Items.Add(rb);
@@ -148,7 +148,7 @@ namespace Plant3D
     public class Commands
     {
         FormVALE relatedToVALE = new FormVALE();
-        FormVALE fromToVALE = new FormVALE();
+        FromTo fromToVALE = new FromTo();
         static StringCollection linetypesSubstitute = new StringCollection
         {
             "Continuous",
@@ -315,9 +315,9 @@ namespace Plant3D
         {
             try
             {
-                if (relatedToVALE == null || relatedToVALE.IsDisposed)
-                    relatedToVALE = new FormVALE();
-                relatedToVALE.Show();
+                if (fromToVALE == null || fromToVALE.IsDisposed)
+                    fromToVALE = new FromTo();
+                fromToVALE.Show();
             }
             catch (Autodesk.AutoCAD.Runtime.Exception e)
             { }
@@ -339,7 +339,6 @@ namespace Plant3D
             Document acDoc = Application.DocumentManager.MdiActiveDocument;
 
             acDoc.BeginDocumentClose -= new DocumentBeginCloseEventHandler(docBeginDocClose);
-            PreencheListaDocId(acDoc, docIdList);
         }
 
         static public void docBeginDocClose(object senderObj, DocumentBeginCloseEventArgs docBegClsEvtArgs)

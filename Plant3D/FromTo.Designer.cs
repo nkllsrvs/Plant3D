@@ -96,7 +96,7 @@ namespace Plant3D
             this.buttonLines.Name = "buttonLines";
             this.buttonLines.Size = new System.Drawing.Size(224, 45);
             this.buttonLines.TabIndex = 8;
-            this.buttonLines.Text = "Lines";
+            this.buttonLines.Text = "Line";
             this.buttonLines.UseVisualStyleBackColor = false;
             this.buttonLines.Click += new System.EventHandler(this.buttonLine_Click);
             // 
