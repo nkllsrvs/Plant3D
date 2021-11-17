@@ -35,76 +35,68 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AcCoreMgd">
-      <HintPath>..\..\..\..\..\..\Autodesk\ObjectARX_for_AutoCAD_2022_Win_64bit_dlm\inc\AcCoreMgd.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Autodesk\ObjectARX_for_AutoCAD_2022_Win_64bit_dlm\inc\AcCoreMgd.dll</HintPath>
     </Reference>
     <Reference Include="AcDbMgd">
-      <HintPath>..\..\..\..\..\..\Autodesk\ObjectARX_for_AutoCAD_2022_Win_64bit_dlm\inc\AcDbMgd.dll</HintPath>
-    </Reference>
-    <Reference Include="acdbmgdbrep">
-      <HintPath>..\..\..\..\..\..\Autodesk\ObjectARX_for_AutoCAD_2022_Win_64bit_dlm\inc\acdbmgdbrep.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Autodesk\ObjectARX_for_AutoCAD_2022_Win_64bit_dlm\inc\AcDbMgd.dll</HintPath>
     </Reference>
     <Reference Include="AcMgd">
-      <HintPath>..\..\..\..\..\..\Autodesk\ObjectARX_for_AutoCAD_2022_Win_64bit_dlm\inc\AcMgd.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Autodesk\ObjectARX_for_AutoCAD_2022_Win_64bit_dlm\inc\AcMgd.dll</HintPath>
     </Reference>
     <Reference Include="AcWindows">
-      <HintPath>..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc\AcWindows.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc\AcWindows.dll</HintPath>
+    </Reference>
+    <Reference Include="AcWindows.Fakes">
+      <HintPath>FakesAssemblies\AcWindows.Fakes.dll</HintPath>
     </Reference>
     <Reference Include="AdWindows">
-      <HintPath>..\..\..\..\..\..\Autodesk\ObjectARX_for_AutoCAD_2022_Win_64bit_dlm\inc\AdWindows.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc\AdWindows.dll</HintPath>
     </Reference>
-    <Reference Include="Autodesk.AutoCAD.Interop">
-      <HintPath>..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\Autodesk.AutoCAD.Interop.dll</HintPath>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </Reference>
-    <Reference Include="Autodesk.AutoCAD.Interop.Common">
-      <HintPath>..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\Autodesk.AutoCAD.Interop.Common.dll</HintPath>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </Reference>
-    <Reference Include="log4net">
-      <HintPath>..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\log4net.dll</HintPath>
+    <Reference Include="Microsoft.QualityTools.Testing.Fakes, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="PnIDDwgValidation">
       <HintPath>..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnIDDwgValidation.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="PnIDGUIUtilMgd">
-      <HintPath>..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnIDGUIUtilMgd.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnIDGUIUtilMgd.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="PnIDMgd">
-      <HintPath>..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnIDMgd.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnIDMgd.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="PnIdProjectPartsMgd">
-      <HintPath>..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnIdProjectPartsMgd.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnIdProjectPartsMgd.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="PnP3dACPUtils">
-      <HintPath>..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnP3dACPUtils.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnP3dACPUtils.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="PnP3dConnectionManager">
-      <HintPath>..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnP3dConnectionManager.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnP3dConnectionManager.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="PnP3dDataLinkManager">
-      <HintPath>..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnP3dDataLinkManager.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnP3dDataLinkManager.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="PnP3dMain">
-      <HintPath>..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnP3dMain.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnP3dMain.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="PnP3dObjectsMgd">
-      <HintPath>..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnP3dObjectsMgd.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnP3dObjectsMgd.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="PnP3dOrthoProjectPart">
-      <HintPath>..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnP3dOrthoProjectPart.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnP3dOrthoProjectPart.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="PnP3dPartsRepository">
-      <HintPath>..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnP3dPartsRepository.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnP3dPartsRepository.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="PnP3dPipeUI">
@@ -112,31 +104,31 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="PnP3dProjectPartsMgd">
-      <HintPath>..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnP3dProjectPartsMgd.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnP3dProjectPartsMgd.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="PnPCommonArxMgd">
-      <HintPath>..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnPCommonArxMgd.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnPCommonArxMgd.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="PnPCommonDbxMgd">
-      <HintPath>..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnPCommonDbxMgd.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnPCommonDbxMgd.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="PnPCommonMgd">
-      <HintPath>..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnPCommonMgd.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnPCommonMgd.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="PnPCommonUIMgd">
-      <HintPath>..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnPCommonUIMgd.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnPCommonUIMgd.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="PnPDataLinks">
-      <HintPath>..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnPDataLinks.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnPDataLinks.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="PnPDataObjects">
-      <HintPath>..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnPDataObjects.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnPDataObjects.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="PnPDwg2dAnno">
@@ -156,7 +148,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="PnPProjectManagerMgd">
-      <HintPath>..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnPProjectManagerMgd.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnPProjectManagerMgd.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="PnPSQLiteEngine">
@@ -164,7 +156,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="PnPValidation">
-      <HintPath>..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnPValidation.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Autodesk\AutoCAD_Plant_3D_2022_SDK_English_Win_64bit_dlm\inc-x64\PnPValidation.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="PnPVaultService">
@@ -198,6 +190,12 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Classes\DocumentInfo.cs" />
+    <Compile Include="Classes\Linetype.cs" />
+    <Compile Include="Classes\DocumentObject.cs" />
+    <Compile Include="Classes\Instruments.cs" />
+    <Compile Include="Classes\VALERibbon.cs" />
+    <Compile Include="Classes\VALERibbonButtonCommandeHandler.cs" />
     <Compile Include="Commands - Copy.cs" />
     <Compile Include="Commands.cs" />
     <Compile Include="FromTo.cs">
@@ -206,11 +204,11 @@
     <Compile Include="FromTo.Designer.cs">
       <DependentUpon>FromTo.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormVALE.cs">
+    <Compile Include="FormRelatedTo.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormVALE.Designer.cs">
-      <DependentUpon>FormVALE.cs</DependentUpon>
+    <Compile Include="FormRelatedTo.Designer.cs">
+      <DependentUpon>FormRelatedTo.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -218,8 +216,8 @@
     <EmbeddedResource Include="FromTo.resx">
       <DependentUpon>FromTo.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormVALE.resx">
-      <DependentUpon>FormVALE.cs</DependentUpon>
+    <EmbeddedResource Include="FormRelatedTo.resx">
+      <DependentUpon>FormRelatedTo.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -5,8 +5,8 @@ using Autodesk.ProcessPower.DataLinks;
 using Autodesk.ProcessPower.DataObjects;
 using Autodesk.ProcessPower.PlantInstance;
 using Autodesk.ProcessPower.ProjectManager;
+using Plant3D.Classes;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Drawing;
@@ -14,7 +14,7 @@ using System.Windows.Forms;
 
 namespace Plant3D
 {
-    public partial class FormVALE : Form
+    public partial class FormRelatedTo : Form
     {
         private readonly List<Instruments> InstrumentsOld = new List<Instruments>();
         private readonly List<ObjectId> Instruments = new List<ObjectId>();
@@ -23,7 +23,7 @@ namespace Plant3D
         PnPDatabase dbInstruments;
         int countRTE = 0;
 
-        public FormVALE()
+        public FormRelatedTo()
         {
             InitializeComponent();
 
@@ -328,23 +328,5 @@ namespace Plant3D
         }
     }
 
-    public class Instruments : IEnumerable
-    {
-        public Instruments() { }
-        public Instruments(ObjectId Id, String Layer, ObjectId LayerId)
-        {
-            this.Id = Id;
-            this.Layer = Layer;
-            this.LayerId = LayerId;
-        }
-        public Autodesk.AutoCAD.DatabaseServices.ObjectId Id { get; set; }
-        public String Layer { get; set; }
-        public Autodesk.AutoCAD.DatabaseServices.ObjectId LayerId { get; set; }
-
-        public IEnumerator GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-    }
 }
 

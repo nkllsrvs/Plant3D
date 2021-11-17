@@ -86,7 +86,7 @@ namespace Plant3D
             this.buttonEquipment.TabIndex = 6;
             this.buttonEquipment.Text = "Equipment / Line";
             this.buttonEquipment.UseVisualStyleBackColor = false;
-            this.buttonEquipment.Click += new System.EventHandler(this.buttonEquipment_Click);
+            this.buttonEquipment.Click += new System.EventHandler(this.buttonFromTo_Click);
             // 
             // buttonLines
             // 

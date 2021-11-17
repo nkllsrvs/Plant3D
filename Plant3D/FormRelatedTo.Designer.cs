@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace Plant3D
 {
-    partial class FormVALE
+    partial class FormRelatedTo
     {
         /// <summary>
         /// Required designer variable.
@@ -38,7 +38,7 @@ namespace Plant3D
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormVALE));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormRelatedTo));
             this.listView = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));

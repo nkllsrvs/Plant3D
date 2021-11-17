@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Drawing;
 using System.Windows.Forms;
+using Plant3D.Classes;
 
 namespace Plant3D
 {
@@ -45,7 +46,7 @@ namespace Plant3D
         {
 
         }
-        private void buttonEquipment_Click(object sender, EventArgs e)
+        private void buttonFromTo_Click(object sender, EventArgs e)
         {
             if (Linhas.Count > 0)
             {
@@ -167,9 +168,9 @@ namespace Plant3D
                     {
                         using (var trLine = docLines.TransactionManager.StartTransaction())
                         {
-                            Entity ent1 = (Entity)trLine.GetObject(line.ObjectId, OpenMode.ForRead);
+                            Entity entityIf = (Entity)trLine.GetObject(line.ObjectId, OpenMode.ForRead);
 
-                            if (ent1.Id.ObjectClass.DxfName == "SLINE")
+                            if (entityIf.Id.ObjectClass.DxfName == "SLINE")
                             {
                                 Entity ent = (Entity)trLine.GetObject(line.ObjectId, OpenMode.ForRead);
                                 Linhas.Add(line.ObjectId);

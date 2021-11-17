@@ -21,141 +21,25 @@ using System.Collections;
 using System.Windows.Forms;
 using static Plant3D.Commands;
 
+//Classes
+using Plant3D.Classes;
+using System.Runtime.InteropServices;
+using System.Linq;
+
 [assembly: CommandClass(typeof(Plant3D.Commands))]
-[assembly: CommandClass(typeof(Plant3D.VALERibbon))]
+[assembly: CommandClass(typeof(Plant3D.Classes.VALERibbon))]
+[assembly: CommandClass(typeof(Plant3D.Classes.DocumentObject))]
+[assembly: CommandClass(typeof(Plant3D.Classes.Instruments))]
+[assembly: CommandClass(typeof(Plant3D.Classes.Linetype))]
+[assembly: CommandClass(typeof(Plant3D.Classes.VALERibbonButtonCommandeHandler))]
 namespace Plant3D
 {
-    public class VALERibbon
-    {
-        public List<DocId> DocIdList { get; set; }
-        [CommandMethod("vale", CommandFlags.Transparent)]
-        public void TestRibbonTab()
-        {
-            Commands.AddDocEvent();
-            RibbonControl ribbonControl = ComponentManager.Ribbon;
-            if (ribbonControl != null)
-            {
-                RibbonTab ribbonTab = ribbonControl.FindTab("VALE");
-                if (ribbonTab != null)
-                {
-                    ribbonControl.Tabs.Remove(ribbonTab);
-                }
-                ribbonTab = new RibbonTab
-                {
-                    Title = "VALE",
-                    Id = "VALE"
-                };
-                RibbonPanel panel = ribbonControl.FindPanel("VALE", true);
-                if (panel != null)
-                {
-                    ribbonControl.Tabs.Remove(ribbonTab);
-                }
-                ribbonTab = new RibbonTab
-                {
-                    Title = "VALE",
-                    Id = "VALE"
-                };
-                //Add the Tab
-                ribbonControl.Tabs.Add(ribbonTab);
-                ribbonControl.ActiveTab = ribbonTab;
-                ribbonTab.Panels.Add(AddOnePanel());
-            }
-        }
-
-        static RibbonPanel AddOnePanel()
-        {
-            //Create a Command Item that the Dialog Launcher can use,
-            // for this test it is just a place holder.
-            RibbonButton commandItem = new RibbonButton
-            {
-                Name = "VALE"
-            };
-            RibbonPanelSource panelSource = new RibbonPanelSource
-            {
-                Title = "VALE",
-            };
-            RibbonPanel panel = new RibbonPanel
-            {
-                Source = panelSource
-            };
-            //assign the Command Item to the DialgLauncher which auto-enables
-            // the little button at the lower right of a Panel
-
-            RibbonButton button1 = new RibbonButton
-            {
-                Text = "Related To",
-                LargeImage = new BitmapImage(new Uri(@"C:\Program Files\Autodesk\AutoCAD 2022\Plant3DValeAddin\img\relatedto.png")),
-                Orientation = Orientation.Vertical,
-                Size = RibbonItemSize.Large,
-                ShowText = true,
-                ShowImage = true,
-                Id = "1",
-                CommandHandler = new VALERibbonButtonCommandeHandler(),
-                //actual AutoCAD command passed to ICommand.Execute().
-                CommandParameter = "._RLTT "
-            };
-            RibbonButton button2 = new RibbonButton
-            {
-                Text = "Update \nLinetype by Status",
-                LargeImage = new BitmapImage(new Uri(@"C:\Program Files\Autodesk\AutoCAD 2022\Plant3DValeAddin\img\substitute.png")),
-                Orientation = Orientation.Vertical,
-                Size = RibbonItemSize.Large,
-                ShowText = true,
-                ShowImage = true,
-                Id = "2",
-                CommandHandler = new VALERibbonButtonCommandeHandler(),
-                //actual AutoCAD command passed to ICommand.Execute().
-                CommandParameter = "._ULTBS "
-            };
-            RibbonButton button3 = new RibbonButton
-            {
-                Text = "FromTo",
-                LargeImage = new BitmapImage(new Uri(@"C:\Program Files\Autodesk\AutoCAD 2022\Plant3DValeAddin\img\relatedto.png")),
-                Orientation = Orientation.Vertical,
-                Size = RibbonItemSize.Large,
-                ShowText = true,
-                ShowImage = true,
-                Id = "3",
-                CommandHandler = new VALERibbonButtonCommandeHandler(),
-                //actual AutoCAD command passed to ICommand.Execute().
-                CommandParameter = "._FRMT "
-            };
-
-            List<RibbonButton> ribbonButtons = new List<RibbonButton> { button1, button2, button3 };
-            foreach (RibbonButton rb in ribbonButtons)
-            {
-                panelSource.Items.Add(rb);
-            }
-
-            Commands.AddDocEvent();
-            return panel;
-        }
-        public class VALERibbonButtonCommandeHandler : System.Windows.Input.ICommand
-        {
-            public bool CanExecute(object parameter)
-            {
-                return true; //return true means the button always enabled
-            }
-            public event EventHandler CanExecuteChanged;
-            public void Execute(object parameter)
-            {
-                RibbonCommandItem cmd = (RibbonCommandItem)parameter;
-                Document dwg = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
-                dwg.SendStringToExecute(cmd.CommandParameter.ToString(), true, false, true);
-            }
-        }
-    }
     public class Commands
     {
-        FormVALE relatedToVALE = new FormVALE();
+        FormRelatedTo relatedToVALE = new FormRelatedTo();
         FromTo fromToVALE = new FromTo();
-        static StringCollection linetypesSubstitute = new StringCollection
-        {
-            "Continuous",
-            "DASHDOT",
-            "HIDDEN",
-            "HIDDEN2"
-        };
+        static readonly StringCollection linetypesSubstitute = new StringCollection { "Continuous", "DASHDOT", "HIDDEN", "HIDDEN2" };
+        static List<DocumentInfo> documentInfos = new List<DocumentInfo>();
 
         [CommandMethod("_RLTT")]
         public void RelatedTo()
@@ -163,7 +47,7 @@ namespace Plant3D
             try
             {
                 if (relatedToVALE == null || relatedToVALE.IsDisposed)
-                    relatedToVALE = new FormVALE();
+                    relatedToVALE = new FormRelatedTo();
                 relatedToVALE.Show();
             }
             catch (Autodesk.AutoCAD.Runtime.Exception e)
@@ -278,7 +162,7 @@ namespace Plant3D
             }
             return linetype;
         }
-        static public void LoadLineTypes(Database db)
+        public static void LoadLineTypes(Database db)
         {
             using (Transaction tr = db.TransactionManager.StartTransaction())
             {
@@ -291,22 +175,6 @@ namespace Plant3D
                     }
                 }
                 tr.Commit();
-            }
-        }
-        public class Linetype : IEnumerable
-        {
-            public Linetype() { }
-            public Linetype(ObjectId Id, String Name)
-            {
-                this.Id = Id;
-                this.Name = Name;
-            }
-            public Autodesk.AutoCAD.DatabaseServices.ObjectId Id { get; set; }
-            public String Name { get; set; }
-
-            public IEnumerator GetEnumerator()
-            {
-                throw new NotImplementedException();
             }
         }
 
@@ -328,12 +196,15 @@ namespace Plant3D
         {
             // Get the current document
             Document acDoc = Application.DocumentManager.MdiActiveDocument;
-
-            acDoc.BeginDocumentClose += new DocumentBeginCloseEventHandler(docBeginDocClose);
+            if (acDoc.IsNamedDrawing == true)
+            {
+                acDoc.BeginDocumentClose += new DocumentBeginCloseEventHandler(docBeginDocClose);
+                documentInfos.Add(ReturnDocumentInfo(acDoc));
+            }
         }
 
         [CommandMethod("RemoveDocEvent")]
-        public void RemoveDocEvent()
+        public static void RemoveDocEvent()
         {
             // Get the current document
             Document acDoc = Application.DocumentManager.MdiActiveDocument;
@@ -341,13 +212,25 @@ namespace Plant3D
             acDoc.BeginDocumentClose -= new DocumentBeginCloseEventHandler(docBeginDocClose);
         }
 
-        static public void docBeginDocClose(object senderObj, DocumentBeginCloseEventArgs docBegClsEvtArgs)
+        public static void docBeginDocClose(object senderObj, DocumentBeginCloseEventArgs docBegClsEvtArgs)
         {
+            Document acDoc = Application.DocumentManager.MdiActiveDocument;
+            DocumentInfo docCompare = new DocumentInfo();
+            docCompare = ReturnDocumentInfo(acDoc);
+            foreach (DocumentInfo doc in documentInfos)
+            {
+                if (doc.Document == docCompare.Document)
+                {
+                    var test = doc.DocumentObjects.Except(docCompare.DocumentObjects).ToList();
+                    if (doc.DocumentObjects == docCompare.DocumentObjects) MessageBox.Show("São iguais!!!");
+                }
+            }
+
             // Display a message box prompting to continue closing the document
             if (System.Windows.Forms.MessageBox.Show(
-                                 "The document is about to be closed." +
-                                 "\nDo you want to continue?",
-                                 "Close Document",
+                                 "Houve mudanças no documento!!" +
+                                 "\nDeseja executar rotina?",
+                                 "Trigger",
                                  System.Windows.Forms.MessageBoxButtons.YesNo) ==
                                  System.Windows.Forms.DialogResult.No)
             {
@@ -355,30 +238,21 @@ namespace Plant3D
             }
         }
 
-        public class DocId : IEnumerable
-        {
-            public ObjectId Id { get; set; }
-            public string Tag { get; set; }
-
-            public string Document { get; set; }
-
-            public IEnumerator GetEnumerator()
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        public void PreencheListaDocId(Document acDoc, List<DocId> docIdList)
+        public static DocumentInfo ReturnDocumentInfo(Document acDoc)
         {
             PlantProject proj = PlantApplication.CurrentProject;
             ProjectPartCollection projParts = proj.ProjectParts;
             PnIdProject pnidProj = (PnIdProject)projParts["PnId"];
             DataLinksManager dlm = pnidProj.DataLinksManager;
-            DocId docid = new DocId();
             PromptSelectionResult selection = acDoc.Editor.SelectAll();
-            docid.Document = acDoc.Name;
+
+            DocumentInfo document = new DocumentInfo();
+            document.Document = acDoc.Name;
+            document.DocumentObjects = new List<DocumentObject>();
+
             using (Transaction tr = acDoc.Database.TransactionManager.StartOpenCloseTransaction())
             {
+                DocumentObject docObj = new DocumentObject();
                 foreach (ObjectId id in selection.Value.GetObjectIds())
                 {
                     Entity ent = (Entity)tr.GetObject(id, OpenMode.ForRead);
@@ -388,25 +262,122 @@ namespace Plant3D
                         StringCollection entKeys = new StringCollection { "Tag" };
                         //existe um objeto onde eu n posso pegar o rowId para fazer um get 
                         //no database dos valores respectivos as chaves
+
                         try
                         {
-                            StringCollection entVal = dlm.GetProperties(dlm.FindAcPpRowId(ent.ObjectId), entKeys, true);
-                            docid.Id = ent.ObjectId;
-                            docid.Tag = entVal[0];
-                            docIdList.Add(docid);
+                            if (HaveTag(dlm.GetAllProperties(id, true)))
+                            {
+                                StringCollection entVal = dlm.GetProperties(dlm.FindAcPpRowId(ent.ObjectId), entKeys, true);
+                                docObj.Id = ent.ObjectId;
+                                docObj.Tag = entVal[0];
+                                docObj.BelongingDocument = acDoc.Name;
+                                document.DocumentObjects.Add(docObj);
+                            }
                         }
                         catch (DLException e)
                         {
                             _ = e;// runtime dando erro por nao haver link com a entidade 
                         }
+
+
                     }
                 }
                 tr.Commit();
+                document.DocumentObjects.Sort();
+                return document;
             }
-            
+        }
+
+
+        //ads_queueexpr
+        [DllImport("accore.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, EntryPoint = "ads_queueexpr")]
+        extern static private int ads_queueexpr(byte[] command);
+
+        [CommandMethod("tJL", CommandFlags.Modal | CommandFlags.UsePickSet)]
+        public void TestConnectedLines()
+        {
+            Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
+            Editor ed = doc.Editor;
+            Database db = doc.Database;
+            PromptEntityOptions pso = new PromptEntityOptions("\nPick a single line to join: ");
+            pso.SetRejectMessage("\nObject must be of type Line!");
+            pso.AddAllowedClass(typeof(Line), false);
+            PromptEntityResult res = ed.GetEntity(pso);
+            if (res.Status != PromptStatus.OK) return;
+            using (DocumentLock doclock = doc.LockDocument())
+            {
+                using (Transaction tr = db.TransactionManager.StartTransaction())
+                {
+                    Autodesk.AutoCAD.ApplicationServices.Application.SetSystemVariable("PICKFIRST", 1);
+                    Autodesk.AutoCAD.ApplicationServices.Application.SetSystemVariable("PEDITACCEPT", 0);
+                    BlockTableRecord btr = (BlockTableRecord)tr.GetObject(db.CurrentSpaceId, OpenMode.ForRead) as BlockTableRecord;
+                    List<ObjectId> ids = JoinLines(btr, res.ObjectId);
+                    ObjectId[] lines = ids.ToArray();
+                    ed.SetImpliedSelection(lines);
+                    PromptSelectionResult chres = ed.SelectImplied();
+
+                    if (chres.Status != PromptStatus.OK)
+                    {
+                        ed.WriteMessage("\nNothing added in the chain!");
+                        return;
+                    }
+                    else
+                    {
+                        ed.WriteMessage(chres.Value.Count.ToString());
+                    }
+                    SelectionSet newset = SelectionSet.FromObjectIds(lines);
+                    ed.SetImpliedSelection(newset);
+                    string handles = "";
+                    foreach (SelectedObject selobj in newset)
+                    {
+                        Entity subent = tr.GetObject(selobj.ObjectId, OpenMode.ForWrite) as Entity;
+                        string hdl = string.Format("(handent \"{0}\")", subent.Handle.ToString());
+                        handles = handles + hdl + " ";
+                    }
+                    System.Text.UnicodeEncoding uEncode = new System.Text.UnicodeEncoding();
+                    // if PEDITACCEPT is set to 1 enshort the command avoiding "_Y" argument:
+                    ads_queueexpr(uEncode.GetBytes("(COMMAND \"_.PEDIT\" \"_M\"" + handles + "\"\"" + "\"_Y\" \"_J\" \"\" \"\")"));
+                    tr.Commit();
+                }
+            }
+        }
+
+        private void SelectConnectedLines(BlockTableRecord btr, List<ObjectId> ids, ObjectId id)
+        {
+            Entity en = id.GetObject(OpenMode.ForRead, false) as Entity;
+            Line ln = en as Line;
+            if (ln != null)
+                foreach (ObjectId idx in btr)
+                {
+                    Entity ex = idx.GetObject(OpenMode.ForRead, false) as Entity;
+                    Line lx = ex as Line;
+                    if (((ln.StartPoint == lx.StartPoint) || (ln.StartPoint == lx.EndPoint)) ||
+                        ((ln.EndPoint == lx.StartPoint) || (ln.EndPoint == lx.EndPoint)))
+                        if (!ids.Contains(idx))
+                        {
+                            ids.Add(idx);
+                            SelectConnectedLines(btr, ids, idx);
+                        }
+                }
+        }
+
+        public List<ObjectId> JoinLines(BlockTableRecord btr, ObjectId id)
+        {
+            List<ObjectId> ids = new List<ObjectId>();
+            SelectConnectedLines(btr, ids, id);
+            return ids;
+        }
+
+        public static bool HaveTag(List<KeyValuePair<string, string>> keyValuePairs)
+        {
+            foreach (KeyValuePair<string, string> kvp in keyValuePairs)
+            {
+                if (kvp.Key.Equals("Tag"))
+                    return true;
+            }
+            return false;
         }
 
     }
-
 }
 
