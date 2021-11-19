@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace Plant3D
 {
-    partial class FromTo
+    partial class FormFromTo : Commands
     {
         /// <summary>
         /// Required designer variable.
@@ -38,14 +38,14 @@ namespace Plant3D
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FromTo));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormFromTo));
             this.listView = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.buttonEquipment = new System.Windows.Forms.Button();
             this.buttonLines = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
-            this.checkBoxEquipmentOtherDWG = new System.Windows.Forms.CheckBox();
+            this.checkBoxOtherDWG = new System.Windows.Forms.CheckBox();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.buttonClearSelection = new System.Windows.Forms.Button();
             this.SuspendLayout();
@@ -111,14 +111,14 @@ namespace Plant3D
             // 
             // checkBoxEquipmentOtherDWG
             // 
-            this.checkBoxEquipmentOtherDWG.AutoSize = true;
-            this.checkBoxEquipmentOtherDWG.Location = new System.Drawing.Point(9, 460);
-            this.checkBoxEquipmentOtherDWG.Name = "checkBoxEquipmentOtherDWG";
-            this.checkBoxEquipmentOtherDWG.Size = new System.Drawing.Size(168, 17);
-            this.checkBoxEquipmentOtherDWG.TabIndex = 10;
-            this.checkBoxEquipmentOtherDWG.Text = "Equipamento em outro DWG?";
-            this.checkBoxEquipmentOtherDWG.UseVisualStyleBackColor = true;
-            this.checkBoxEquipmentOtherDWG.Click += new System.EventHandler(this.checkBoxEquipmentOtherDWG_CheckedChanged);
+            this.checkBoxOtherDWG.AutoSize = true;
+            this.checkBoxOtherDWG.Location = new System.Drawing.Point(9, 460);
+            this.checkBoxOtherDWG.Name = "checkBoxEquipmentOtherDWG";
+            this.checkBoxOtherDWG.Size = new System.Drawing.Size(88, 17);
+            this.checkBoxOtherDWG.TabIndex = 10;
+            this.checkBoxOtherDWG.Text = "Outro DWG?";
+            this.checkBoxOtherDWG.UseVisualStyleBackColor = true;
+            this.checkBoxOtherDWG.Click += new System.EventHandler(this.checkBoxEquipmentOtherDWG_CheckedChanged);
             // 
             // richTextBox1
             // 
@@ -138,23 +138,23 @@ namespace Plant3D
             this.buttonClearSelection.Name = "buttonClearSelection";
             this.buttonClearSelection.Size = new System.Drawing.Size(89, 23);
             this.buttonClearSelection.TabIndex = 12;
-            this.buttonClearSelection.Text = "Clear Selection";
+            this.buttonClearSelection.Text = "Clear Select";
             this.buttonClearSelection.UseVisualStyleBackColor = false;
             this.buttonClearSelection.Click += new System.EventHandler(this.buttonClearClick);
             // 
-            // FromTo
+            // FormFromTo
             // 
             this.ClientSize = new System.Drawing.Size(310, 590);
             this.Controls.Add(this.buttonClearSelection);
             this.Controls.Add(this.richTextBox1);
-            this.Controls.Add(this.checkBoxEquipmentOtherDWG);
+            this.Controls.Add(this.checkBoxOtherDWG);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.buttonLines);
             this.Controls.Add(this.buttonEquipment);
             this.Controls.Add(this.listView);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Location = new System.Drawing.Point(10, 160);
-            this.Name = "FromTo";
+            this.Name = "FormFromTo";
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "VALE -  From To";
             this.TopMost = true;
@@ -233,14 +233,14 @@ namespace Plant3D
             }
         }
         #endregion
-        private ListView listView;
+        public ListView listView;
         private ColumnHeader columnHeader1;
         private ColumnHeader columnHeader2;
-        private Button buttonEquipment;
-        private Button buttonLines;
+        public Button buttonEquipment;
+        public Button buttonLines;
         private Label label1;
-        private CheckBox checkBoxEquipmentOtherDWG;
+        public CheckBox checkBoxOtherDWG;
         private RichTextBox richTextBox1;
-        private Button buttonClearSelection;
+        public Button buttonClearSelection;
     }
 }

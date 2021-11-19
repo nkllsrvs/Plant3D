@@ -4,13 +4,14 @@ using Autodesk.ProcessPower.DataLinks;
 using Autodesk.ProcessPower.DataObjects;
 using Autodesk.ProcessPower.PlantInstance;
 using Autodesk.ProcessPower.ProjectManager;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Windows.Forms;
 
 namespace Plant3D
 {
-    partial class FormRelatedTo
+    partial class FormRelatedTo : Commands
     {
         /// <summary>
         /// Required designer variable.
@@ -98,7 +99,7 @@ namespace Plant3D
             this.buttonInstruments.TabIndex = 8;
             this.buttonInstruments.Text = "Instruments";
             this.buttonInstruments.UseVisualStyleBackColor = false;
-            this.buttonInstruments.Click += new System.EventHandler(this.buttonInstruments_Click);
+            this.buttonInstruments.Click += new System.EventHandler(this.buttonInstrumentsRT_Click);
             // 
             // label1
             // 
@@ -162,84 +163,85 @@ namespace Plant3D
             this.PerformLayout();
 
         }
-        private void RelatedTo()
-        {
-            PlantProject proj = PlantApplication.CurrentProject;
-            ProjectPartCollection projParts = proj.ProjectParts;
-            PnIdProject pnidProj = (PnIdProject)projParts["PnId"];
-            DataLinksManager dlm = pnidProj.DataLinksManager;
-            PnPDatabase db = dlm.GetPnPDatabase();
-            Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
-            Editor ed = doc.Editor;
 
-            List<PromptEntityResult> Instruments = new List<PromptEntityResult>();
-            PromptEntityResult result;
+        //private void RelatedTo()
+        //{
+        //    PlantProject proj = PlantApplication.CurrentProject;
+        //    ProjectPartCollection projParts = proj.ProjectParts;
+        //    PnIdProject pnidProj = (PnIdProject)projParts["PnId"];
+        //    DataLinksManager dlm = pnidProj.DataLinksManager;
+        //    PnPDatabase db = dlm.GetPnPDatabase();
+        //    Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
+        //    Editor ed = doc.Editor;
 
-            bool loop = true;
-            while (loop)
-            {
-                result = ed.GetEntity("\nSelecione um  Instrumento: ");
-                StringCollection eKeys = new StringCollection
-                {
+        //    List<PromptEntityResult> Instruments = new List<PromptEntityResult>();
+        //    PromptEntityResult result;
 
-                    "Description",
-                    "Tag",
-                    "RelatedTo",
-                    "ClassName",
-                    "Class"
-                };
-                StringCollection eVals = dlm.GetProperties(dlm.FindAcPpRowId(result.ObjectId), eKeys, true);
-                if (result.Status == PromptStatus.OK){
-                    Instruments.Add(result); 
-                }
-                DialogResult dr = MessageBox.Show("Deseja continuar a selecionar Instrumentos?", "RelatedTo", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
-                if (dr == DialogResult.No)
-                    break;
-            }
+        //    bool loop = true;
+        //    while (loop)
+        //    {
+        //        result = ed.GetEntity("\nSelecione um  Instrumento: ");
+        //        StringCollection eKeys = new StringCollection
+        //        {
 
-            PromptEntityResult equipment = ed.GetEntity("\nSelecione um Equipamento: ");
-            if (equipment.Status == PromptStatus.OK)
-            {
-                int equipmentRowId = dlm.FindAcPpRowId(equipment.ObjectId);
-                StringCollection eKeys = new StringCollection
-                {   
-                    
-                    "Description",
-                    "Tag",
-                    "RelatedTo",
-                    "ClassName",
-                    "Class"
-                };
-                StringCollection eVals = dlm.GetProperties(equipmentRowId, eKeys, true);
-                foreach (PromptEntityResult entityResult in Instruments)
-                {
-                    int instrumentRowId = dlm.FindAcPpRowId(entityResult.ObjectId);
-                    StringCollection iKeys = new StringCollection
-                    {
-                        "Description",
-                        "Tag",
-                        "RelatedTo",
-                        "ClassName",
-                        "Class"
-                    };
-                    StringCollection iVals = dlm.GetProperties(instrumentRowId, iKeys, true);
+        //            "Description",
+        //            "Tag",
+        //            "RelatedTo",
+        //            "ClassName",
+        //            "Class"
+        //        };
+        //        StringCollection eVals = dlm.GetProperties(dlm.FindAcPpRowId(result.ObjectId), eKeys, true);
+        //        if (result.Status == PromptStatus.OK){
+        //            Instruments.Add(result); 
+        //        }
+        //        DialogResult dr = MessageBox.Show("Deseja continuar a selecionar Instrumentos?", "RelatedTo", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+        //        if (dr == DialogResult.No)
+        //            break;
+        //    }
 
-                    iVals[2] = eVals[1];
+        //    PromptEntityResult equipment = ed.GetEntity("\nSelecione um Equipamento: ");
+        //    if (equipment.Status == PromptStatus.OK)
+        //    {
+        //        int equipmentRowId = dlm.FindAcPpRowId(equipment.ObjectId);
+        //        StringCollection eKeys = new StringCollection
+        //        {   
 
-                    db.StartTransaction();
-                    dlm.SetProperties(entityResult.ObjectId, iKeys, iVals);
-                    db.CommitTransaction();
-                }
-            }
-        }
+        //            "Description",
+        //            "Tag",
+        //            "RelatedTo",
+        //            "ClassName",
+        //            "Class"
+        //        };
+        //        StringCollection eVals = dlm.GetProperties(equipmentRowId, eKeys, true);
+        //        foreach (PromptEntityResult entityResult in Instruments)
+        //        {
+        //            int instrumentRowId = dlm.FindAcPpRowId(entityResult.ObjectId);
+        //            StringCollection iKeys = new StringCollection
+        //            {
+        //                "Description",
+        //                "Tag",
+        //                "RelatedTo",
+        //                "ClassName",
+        //                "Class"
+        //            };
+        //            StringCollection iVals = dlm.GetProperties(instrumentRowId, iKeys, true);
+
+        //            iVals[2] = eVals[1];
+
+        //            db.StartTransaction();
+        //            dlm.SetProperties(entityResult.ObjectId, iKeys, iVals);
+        //            db.CommitTransaction();
+        //        }
+        //    }
+        //}
         #endregion
-        private ListView listView;
+        public ListView listView;
         private ColumnHeader columnHeader1;
         private ColumnHeader columnHeader2;
         private Button buttonEquipment;
         private Button buttonInstruments;
         private Label label1;
-        private CheckBox checkBoxEquipmentOtherDWG;
+        public CheckBox checkBoxEquipmentOtherDWG;
         private RichTextBox richTextBox1;
         private Button buttonClearSelection;
     }

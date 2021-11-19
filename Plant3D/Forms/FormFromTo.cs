@@ -15,7 +15,7 @@ using Plant3D.Classes;
 
 namespace Plant3D
 {
-    public partial class FromTo : Form
+    public partial class FormFromTo : Commands
     {
         private readonly List<Instruments> LinhasOld = new List<Instruments>();
         private readonly List<ObjectId> Linhas = new List<ObjectId>();
@@ -24,7 +24,7 @@ namespace Plant3D
         PnPDatabase dbLines;
         int countRTE = 0;
 
-        public FromTo()
+        public FormFromTo()
         {
             InitializeComponent();
 
@@ -174,15 +174,17 @@ namespace Plant3D
                             {
                                 Entity ent = (Entity)trLine.GetObject(line.ObjectId, OpenMode.ForRead);
                                 Linhas.Add(line.ObjectId);
+                                StringCollection keyTag = new StringCollection { "Tag", "Pipe Run To", "Pipe Run From", "Layer" };
+                                StringCollection valTag = dlmLines.GetProperties(dlmLines.FindAcPpRowId(line.ObjectId), keyTag, true);
                                 Instruments iOld = new Instruments();
                                 iOld.Id = ent.ObjectId;
                                 iOld.Layer = ent.Layer;
                                 iOld.LayerId = ent.LayerId;
+                                iOld.Tag = valTag[0];
+                                iOld.FromTo = true;
                                 LinhasOld.Add(iOld);
                                 Invoke((MethodInvoker)delegate
                                 {
-                                    StringCollection keyTag = new StringCollection { "Tag", "Pipe Run To", "Pipe Run From", "Layer" };
-                                    StringCollection valTag = dlmLines.GetProperties(dlmLines.FindAcPpRowId(line.ObjectId), keyTag, true);
                                     ListViewItem item = new ListViewItem(valTag[0]);
                                     item.SubItems.Add(valTag[1]);
                                     listView.Items.Add(item);
@@ -200,10 +202,11 @@ namespace Plant3D
                     }
                 }
             }
-            if (!(checkBoxEquipmentOtherDWG.Checked) & Linhas.Count > 0)
+            if (!(checkBoxOtherDWG.Checked) & Linhas.Count > 0)
             {
-                PromptEntityResult equipment = ed.GetEntity("\nSelecione uma ou mais Linhas: ");
-                if (equipment.Status == PromptStatus.OK)
+                //mudar equipment para object
+                PromptEntityResult objectTo = ed.GetEntity("\nSelecione o objeto To: ");
+                if (objectTo.Status == PromptStatus.OK)
                 {
                     DialogResult messageReplaceRelatedToEquip = new DialogResult();
                     if (countRTE > 0)
@@ -214,11 +217,11 @@ namespace Plant3D
                         {
                             using (var trEquipment = docLines.TransactionManager.StartTransaction())
                             {
-                                Entity ent = (Entity)trEquipment.GetObject(equipment.ObjectId, OpenMode.ForRead);
-                                //Pegando o nome da classe que aparace no PLants como parametro de filtro entre linha e equipamento
-                                if (ent.Id.ObjectClass.DxfName == "SLINE")
+                                Entity ent = (Entity)trEquipment.GetObject(objectTo.ObjectId, OpenMode.ForRead);
+                                //ao invés de usar uma classe use o metodo de verificar se tem TAG ou usar classe de Equipment(Geral)
+                                if (ent.Id.ObjectClass.DxfName == "ACPPASSET")
                                 {
-                                    int equipmentRowId = dlmLines.FindAcPpRowId(equipment.ObjectId);
+                                    int equipmentRowId = dlmLines.FindAcPpRowId(objectTo.ObjectId);
                                     StringCollection eKeys = new StringCollection { "Tag" };
                                     StringCollection eVals = dlmLines.GetProperties(equipmentRowId, eKeys, true);
                                     foreach (ObjectId intrumentId in Linhas)
@@ -279,12 +282,12 @@ namespace Plant3D
         {
             try
             {
-                if (checkBoxEquipmentOtherDWG.Checked == true)
+                if (checkBoxOtherDWG.Checked == true)
                 {
                     buttonEquipment.Enabled = true;
                     buttonEquipment.BackColor = Color.LightGreen;
                 }
-                if (checkBoxEquipmentOtherDWG.Checked == false)
+                if (checkBoxOtherDWG.Checked == false)
                 {
                     buttonEquipment.Enabled = false;
                     buttonEquipment.BackColor = Color.Silver;
@@ -327,25 +330,18 @@ namespace Plant3D
             LinhasOld.Clear();
             countRTE = 0;
         }
-        public class Lines : IEnumerable
+
+        public string[] TagPipeLineGroup(string tag)
         {
-            public Lines() { }
-            public Lines(ObjectId Id, String Layer, ObjectId LayerId)
-            {
-                this.Id = Id;
-                this.Layer = Layer;
-                this.LayerId = LayerId;
-            }
-            public Autodesk.AutoCAD.DatabaseServices.ObjectId Id { get; set; }
-            public String Layer { get; set; }
-            public Autodesk.AutoCAD.DatabaseServices.ObjectId LayerId { get; set; }
-
-            public IEnumerator GetEnumerator()
-            {
-                throw new NotImplementedException();
-            }
+            return tag.Split('-');
         }
-
+        public bool SamePipeLineGroup(string[] tag1, string[] tag2)
+        {
+            if(tag1[1]+tag1[4] == tag2[1] + tag2[4])
+                return true;
+            else
+                return false;
+        }
     }
 }
 

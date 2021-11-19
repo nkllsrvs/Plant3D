@@ -194,29 +194,33 @@
     <Compile Include="Classes\Linetype.cs" />
     <Compile Include="Classes\DocumentObject.cs" />
     <Compile Include="Classes\Instruments.cs" />
-    <Compile Include="Classes\VALERibbon.cs" />
+    <Compile Include="Classes\VALERibbon.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Classes\VALERibbonButtonCommandeHandler.cs" />
-    <Compile Include="Commands - Copy.cs" />
-    <Compile Include="Commands.cs" />
-    <Compile Include="FromTo.cs">
+    <Compile Include="Classes\Commands.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FromTo.Designer.cs">
-      <DependentUpon>FromTo.cs</DependentUpon>
-    </Compile>
-    <Compile Include="FormRelatedTo.cs">
+    <Compile Include="Forms\FormFromTo.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormRelatedTo.Designer.cs">
+    <Compile Include="Forms\FormFromTo.Designer.cs">
+      <DependentUpon>FormFromTo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\FormRelatedTo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FormRelatedTo.Designer.cs">
       <DependentUpon>FormRelatedTo.cs</DependentUpon>
     </Compile>
+    <Compile Include="Interfaces\ICommands.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="FromTo.resx">
-      <DependentUpon>FromTo.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\FormFromTo.resx">
+      <DependentUpon>FormFromTo.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormRelatedTo.resx">
+    <EmbeddedResource Include="Forms\FormRelatedTo.resx">
       <DependentUpon>FormRelatedTo.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>

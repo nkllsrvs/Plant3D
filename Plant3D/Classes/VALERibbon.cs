@@ -10,13 +10,13 @@ using System.Windows.Media.Imaging;
 
 namespace Plant3D.Classes
 {
-    public class VALERibbon
+    public class VALERibbon : Commands
     {
         [CommandMethod("vale", CommandFlags.Transparent)]
         public void TestRibbonTab()
         {
-            Commands.RemoveDocEvent();
-            Commands.AddDocEvent();
+            RemoveDocEvent();
+            AddDocEvent();
             RibbonControl ribbonControl = ComponentManager.Ribbon;
             if (ribbonControl != null)
             {
@@ -46,9 +46,7 @@ namespace Plant3D.Classes
                 ribbonTab.Panels.Add(AddOnePanel());
 
             }
-
         }
-
         static RibbonPanel AddOnePanel()
         {
             //Create a Command Item that the Dialog Launcher can use,
