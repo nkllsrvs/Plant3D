@@ -9,14 +9,12 @@ namespace Plant3D.Classes
     {
         public string Document { get; set; }
         public List<DocumentObject> DocumentObjects { get; set; }
-        public List<DocumentObject> DocumentObjectsRT { get; set; }
-        public List<DocumentObject> DocumentObjectsFT { get; set; }
+        public List<DocumentObject> UsedDocumentObjects { get; set; }
 
         public DocumentInfo(string document)
         {
             this.Document = document;
-            this.DocumentObjectsRT = new List<DocumentObject>();
-            this.DocumentObjectsFT = new List<DocumentObject>();
+            this.UsedDocumentObjects = new List<DocumentObject>();
             this.DocumentObjects = new List<DocumentObject>();
         }
 

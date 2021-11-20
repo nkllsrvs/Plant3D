@@ -8,36 +8,37 @@ namespace Plant3D.Classes
     public class DocumentObject : IEnumerable
     {
         public ObjectId Id { get; set; }
+        public ObjectId RelatedId { get; set; }
         public string Tag { get; set; }
         public string BelongingDocument { get; set; }
         public String Layer { get; set; }
         public ObjectId LayerId { get; set; }
         public bool RelatedTo { get; set; }
-        public bool RelatedToOtherDWG { get; set; }
-        public string OtherDWGDocument { get; set; }
         public bool FromTo { get; set; }
+        public bool Equipment { get; set; }
+        public bool Instrument { get; set; }
+        public bool Line { get; set; }
+        public bool FromOtherDWG { get; set; }
+        public string OtherDWGDocument { get; set; }
 
-        public DocumentObject(){
-            this.RelatedTo = false;
-            this.FromTo = false;
+        public DocumentObject()
+        {
         }
-        public DocumentObject(ObjectId id, string tag, string belongingDocument) 
-        { 
+        public DocumentObject(ObjectId id, string tag, string belongingDocument)
+        {
             this.Id = id;
             this.Tag = tag;
             this.BelongingDocument = belongingDocument;
             this.RelatedTo = false;
-            this.FromTo = false;
         }
-        public DocumentObject(ObjectId id, string tag, string belongingDocument, String layer, ObjectId layerId) 
-        { 
+        public DocumentObject(ObjectId id, string tag, string belongingDocument, String layer, ObjectId layerId)
+        {
             this.Id = id;
             this.Tag = tag;
             this.BelongingDocument = belongingDocument;
             this.Layer = layer;
             this.LayerId = layerId;
             this.RelatedTo = false;
-            this.FromTo = false;
 
         }
 

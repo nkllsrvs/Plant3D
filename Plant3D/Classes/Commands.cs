@@ -35,7 +35,7 @@ using Autodesk.ProcessPower.DataObjects;
 [assembly: CommandClass(typeof(Plant3D.Classes.VALERibbonButtonCommandeHandler))]
 namespace Plant3D
 {
-    public class Commands : Form 
+    public class Commands : Form
     {
         public static FormRelatedTo formRelateTo = new FormRelatedTo();
         public static FormFromTo formFromTo = new FormFromTo();
@@ -50,7 +50,7 @@ namespace Plant3D
 
         #region RelatedTo
         [CommandMethod("_RLTT")]
-        public void RelatedTo() 
+        public void RelatedTo()
         {
             try
             {
@@ -147,11 +147,23 @@ namespace Plant3D
                             {
                                 Entity ent = (Entity)trEquipment.GetObject(equipment.ObjectId, OpenMode.ForRead);
                                 //Pegando o nome da classe que aparace no PLants como parametro de filtro entre linha e equipamento
-                                if (ent.Id.ObjectClass.DxfName == "ACPPASSET" | ent.Id.ObjectClass.DxfName == "SLINE")
+                                if (ent.Id.ObjectClass.DxfName == "ACPPASSET" | ent.Id.ObjectClass.DxfName == "SLINE") //ACPPDYNAMICASSET
                                 {
                                     int equipmentRowId = dlmInstrumentsRT.FindAcPpRowId(equipment.ObjectId);
                                     StringCollection eKeys = new StringCollection { "Tag" };
                                     StringCollection eVals = dlmInstrumentsRT.GetProperties(equipmentRowId, eKeys, true);
+
+                                    DocumentObject documentObjectE = new()
+                                    {
+                                        Id = ent.ObjectId,
+                                        Tag = eVals[0],
+                                        RelatedTo = true,
+                                        FromOtherDWG = false,
+                                        Equipment = true
+
+                                    };
+                                    documentInfos[IndexOfDocuments(documentInfos, docInstrumentsRT.Name)].UsedDocumentObjects.Add(documentObjectE);
+
                                     foreach (ObjectId intrumentId in InstrumentsRT)
                                     {
                                         int instrumentRowId = dlmInstrumentsRT.FindAcPpRowId(intrumentId);
@@ -161,22 +173,26 @@ namespace Plant3D
                                             "RelatedToEquip"
                                         };
                                         StringCollection iVals = dlmInstrumentsRT.GetProperties(instrumentRowId, iKeys, true);
+
+                                        DocumentObject documentObjectI = new()
+                                        {
+                                            Id = intrumentId,
+                                            Tag = iVals[0],
+                                            RelatedTo = true,
+                                            FromOtherDWG = false,
+                                            RelatedId = ent.ObjectId,
+                                            Instrument = true
+
+                                        };
+                                        documentInfos[IndexOfDocuments(documentInfos, docInstrumentsRT.Name)].UsedDocumentObjects.Add(documentObjectI);
                                         if (countRTE > 0 & messageReplaceRelatedToEquip == DialogResult.No)
                                         {
                                             if (String.IsNullOrEmpty(iVals[1]))
                                             {
-                                                DocumentObject documentObject = new()
-                                                {
-                                                    Id = intrumentId,
-                                                    Tag = iVals[0],
-                                                    RelatedTo = true,
-                                                    RelatedToOtherDWG = false
-                                                };
 
                                                 iVals[1] = eVals[0];
                                                 dbInstrumentsRT.StartTransaction();
                                                 dlmInstrumentsRT.SetProperties(intrumentId, iKeys, iVals);
-                                                documentInfos[IndexOfDocuments(documentInfos, docInstrumentsRT.Name)].DocumentObjectsRT.Add(documentObject);
                                                 Entity entEdited = (Entity)trEquipment.GetObject(intrumentId, OpenMode.ForWrite);
                                                 formRelateTo.ReplacePropertys(entEdited, InstrumentsRTOld);
                                                 dbInstrumentsRT.CommitTransaction();
@@ -184,6 +200,7 @@ namespace Plant3D
                                         }
                                         else
                                         {
+
                                             iVals[1] = eVals[0];
                                             dbInstrumentsRT.StartTransaction();
                                             dlmInstrumentsRT.SetProperties(intrumentId, iKeys, iVals);
@@ -237,11 +254,22 @@ namespace Plant3D
                         {
                             Entity ent = (Entity)trEquipment.GetObject(equipment.ObjectId, OpenMode.ForRead);
                             //Pegando o nome da classe que aparace no PLants como parametro de filtro entre linha e equipamento
+
                             if (ent.Id.ObjectClass.DxfName == "ACPPASSET" | ent.Id.ObjectClass.DxfName == "SLINE")
                             {
                                 int equipmentRowId = dlmInstrumentsRT.FindAcPpRowId(equipment.ObjectId);
                                 StringCollection eKeys = new StringCollection { "Tag" };
                                 StringCollection eVals = dlmInstrumentsRT.GetProperties(equipmentRowId, eKeys, true);
+                                DocumentObject documentObject = new()
+                                {
+                                    Id = ent.ObjectId,
+                                    Tag = eVals[0],
+                                    RelatedTo = true,
+                                    FromOtherDWG = true,
+                                    OtherDWGDocument = doc.Name
+                                };
+                                documentInfos[IndexOfDocuments(documentInfos, doc.Name)].UsedDocumentObjects.Add(documentObject);
+
                                 foreach (ObjectId intrumentId in InstrumentsRT)
                                 {
                                     int instrumentRowId = dlmInstrumentsRT.FindAcPpRowId(intrumentId);
@@ -305,13 +333,13 @@ namespace Plant3D
 
         public void RelatedToTrue(DocumentObject documentObject, List<DocumentInfo> documentInfos)
         {
-            foreach(DocumentInfo di in documentInfos)
+            foreach (DocumentInfo di in documentInfos)
             {
-                if(documentObject.BelongingDocument == di.Document)
+                if (documentObject.BelongingDocument == di.Document)
                 {
-                    foreach(DocumentObject docObj in di.DocumentObjects)
+                    foreach (DocumentObject docObj in di.DocumentObjects)
                     {
-                        if(documentObject.Id == docObj.Id)
+                        if (documentObject.Id == docObj.Id)
                         {
                             docObj.RelatedTo = true;
                             break;
@@ -470,8 +498,11 @@ namespace Plant3D
         {
             // Get the current document
             Document acDoc = Application.DocumentManager.MdiActiveDocument;
-            if (acDoc.IsNamedDrawing == true)
+            if (acDoc.IsNamedDrawing == true & !acDoc.Name.Contains("projSymbolStyle"))
             {
+                //só vai adicionar o trigger de fechar o documento
+                //e buscar os objetos no dwg se for um documento salvo
+                //e Name do arquivo não conter projSymbolStyle
                 acDoc.BeginDocumentClose += new DocumentBeginCloseEventHandler(DocBeginDocClose);
                 documentInfos.Add(ReturnDocumentInfo(acDoc));
             }
@@ -487,29 +518,112 @@ namespace Plant3D
         public void DocBeginDocClose(object senderObj, DocumentBeginCloseEventArgs docBegClsEvtArgs)
         {
             Document acDoc = Application.DocumentManager.MdiActiveDocument;
+            PlantProject proj = PlantApplication.CurrentProject;
+            ProjectPartCollection projParts = proj.ProjectParts;
+            PnIdProject pnidProj = (PnIdProject)projParts["PnId"];
+            DataLinksManager dlm = pnidProj.DataLinksManager;
+            PnPDatabase db = dlm.GetPnPDatabase();
             DocumentInfo docCompare = new DocumentInfo();
             docCompare = ReturnDocumentInfo(acDoc);
             foreach (DocumentInfo doc in documentInfos)
             {
                 if (doc.Document == docCompare.Document)
                 {
-                    var excpt1 = doc.DocumentObjects.Except(docCompare.DocumentObjects).ToList();
-                    var excpt2 = docCompare.DocumentObjects.Except(doc.DocumentObjects).ToList();
-                    var test2 = doc.DocumentObjects.Distinct().ToList();
-                    var test3 = docCompare.DocumentObjects.Distinct().ToList();
-                    var a = doc.DocumentObjects.All(docCompare.DocumentObjects.Contains) && doc.DocumentObjects.Count == docCompare.DocumentObjects.Count;
-
-                    if (!doc.DocumentObjects.All(docCompare.DocumentObjects.Contains) && doc.DocumentObjects.Count == docCompare.DocumentObjects.Count)
+                    //var excpt1 = doc.DocumentObjects.Except(docCompare.DocumentObjects).ToList();
+                    //var excpt2 = docCompare.DocumentObjects.Except(doc.DocumentObjects).ToList();
+                    //var test2 = doc.DocumentObjects.Distinct().ToList();
+                    //var test3 = docCompare.DocumentObjects.Distinct().ToList();
+                    //var a = doc.DocumentObjects.All(docCompare.DocumentObjects.Contains) && doc.DocumentObjects.Count == docCompare.DocumentObjects.Count;
+                    bool contemTodos = doc.DocumentObjects.All(docCompare.DocumentObjects.Contains);
+                    bool itensRemovidos = doc.DocumentObjects.Count != docCompare.DocumentObjects.Count;
+                    List<DocumentObject> itensAlterados = ReturnTagChanges(doc.UsedDocumentObjects, acDoc);
+                    if (!contemTodos | itensRemovidos)
                     {
-                        if (System.Windows.Forms.MessageBox.Show("Houve mudanças no documento!!" + "\nExecutar mudanças?", "Trigger", System.Windows.Forms.MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
+                        foreach (DocumentObject obj in doc.UsedDocumentObjects.Where(w => w.Instrument == true))
                         {
-                            //colar aqui a rotina
-                            //se clicar em "Yes" executa a rotina e fecha o documento
+                            DocumentObject itemAlterado = itensAlterados.FirstOrDefault(a => a.Id.Equals(obj.RelatedId));
+                            if (itemAlterado != null)
+                            {
+                                using (DocumentLock doclock = acDoc.LockDocument())
+                                {
+                                    using (var tr = acDoc.TransactionManager.StartTransaction())
+                                    {
+                                        int rowId = dlm.FindAcPpRowId(obj.Id);
+                                        if (obj.RelatedTo == true)
+                                        {
+                                            StringCollection oKeys = new StringCollection { "Tag", "RelatedToEquip" };
+                                            StringCollection oVals = dlm.GetProperties(rowId, oKeys, true);
+                                            oVals[1] = itemAlterado.Tag;
+                                            db.StartTransaction();
+                                            dlm.SetProperties(rowId, oKeys, oVals);
+                                            db.CommitTransaction();
+                                        }
+                                        if (obj.FromTo == true)
+                                        {
+                                            StringCollection oKeys = new StringCollection { "Tag", "Pipe Run To", "Pipe Run From" };
+                                            StringCollection oVals = dlm.GetProperties(rowId, oKeys, true);
+                                            oVals[1] = itemAlterado.Tag;
+                                            db.StartTransaction();
+                                            dlm.SetProperties(rowId, oKeys, oVals);
+                                            db.CommitTransaction();
+                                        }
+                                        tr.Commit();
+                                    }
+                                }
+                            }
                         }
                     }
+                    List<DocumentObject> itensAdd = docCompare.DocumentObjects.Except(doc.DocumentObjects).ToList();
+                    List<DocumentObject> itensRemoved = doc.DocumentObjects.Except(docCompare.DocumentObjects).ToList();
+                    string modfies =  string.Join("\n", itensRemoved.Select(s => s.Tag));
+                    modfies += " => " + string.Join("\n", itensAdd.Select(s => s.Tag));
+                    string message = $"Houve mudanças no documento!!\n{modfies}\nDeseja refatorar as referências?";
+                    if (System.Windows.Forms.MessageBox.Show(message, "Trigger", System.Windows.Forms.MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
+                        acDoc.Database.SaveAs(acDoc.Name, true, DwgVersion.Current, acDoc.Database.SecurityParameters);
+
+                    documentInfos.Remove(docCompare);
                 }
             }
-            documentInfos.Remove(docCompare);
+        }
+        private List<DocumentObject> ReturnTagChanges(List<DocumentObject> usedDocumentObjects, Document acDoc)
+        {
+            PlantProject proj = PlantApplication.CurrentProject;
+            ProjectPartCollection projParts = proj.ProjectParts;
+            PnIdProject pnidProj = (PnIdProject)projParts["PnId"];
+            DataLinksManager dlm = pnidProj.DataLinksManager;
+
+            List<DocumentObject> tagChanges = new List<DocumentObject>();
+            using (Transaction tr = acDoc.Database.TransactionManager.StartOpenCloseTransaction())
+            {
+                foreach (DocumentObject dO in usedDocumentObjects)
+                {
+                    try
+                    {
+                        StringCollection tagKey = new StringCollection { "Tag" };
+                        StringCollection tagVal = dlm.GetProperties(dlm.FindAcPpRowId(dO.Id), tagKey, true);
+
+                        if (tagVal[0] != dO.Tag)
+                        {
+                            dO.Tag = tagVal[0];
+                            tagChanges.Add(dO);
+                        }
+
+                    }
+                    catch (DLException)
+                    {
+                        DocumentObject exception = new()
+                        {
+                            Id = dO.Id,
+                            Tag = dO.Tag + "deletado"
+
+                        };
+                        tagChanges.Add(exception);
+                    }
+                }
+                tr.Commit();
+            }
+
+            return tagChanges;
         }
         public static DocumentInfo ReturnDocumentInfo(Document acDoc)
         {
@@ -522,6 +636,7 @@ namespace Plant3D
             DocumentInfo document = new DocumentInfo();
             document.Document = acDoc.Name;
             document.DocumentObjects = new List<DocumentObject>();
+            document.UsedDocumentObjects = new List<DocumentObject>();
 
             using (Transaction tr = acDoc.Database.TransactionManager.StartOpenCloseTransaction())
             {
@@ -648,29 +763,105 @@ namespace Plant3D
         [CommandMethod("TS")]
         public void Group()
         {
-            Document doc = Application.DocumentManager.MdiActiveDocument;
-            Editor ed = doc.Editor;
-
-            PlantProject currProj = PlantApplication.CurrentProject;
-            PipingProject pipeProj = (PipingProject)currProj.ProjectParts["Piping"];
-            DataLinksManager dlm = pipeProj.DataLinksManager;
+            PlantProject proj = PlantApplication.CurrentProject;
+            ProjectPartCollection projParts = proj.ProjectParts;
+            PnIdProject pnidProj = (PnIdProject)projParts["PnId"];
+            DataLinksManager dlm = pnidProj.DataLinksManager;
             PnPDatabase db = dlm.GetPnPDatabase();
+            Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
+            Editor ed = doc.Editor;
+            PromptEntityResult line;
+            doc.LockDocument();
 
-            // get linegroups related to current drawing
-            int dwgRowId = dlm.GetDrawingId( Application.DocumentManager.MdiActiveDocument.Database);
-            PnPRowIdArray groupIds = dlm.GetRelatedRowIds( "P3dDrawingLineGroupRelationship", "Drawing", dwgRowId, "LineGroup");
+            while (true)
+            {
+                line = ed.GetEntity("\nSelecione uma linha: ");
+                StringCollection iKeys = new StringCollection
+                {
+                    "Description",
+                    "Tag",
+                    "Pipe Run To",
+                    "Pipe Run From",
+                    "ClassName"
+                };
+                StringCollection iVals = dlm.GetProperties(dlm.FindAcPpRowId(line.ObjectId), iKeys, true);
+                if (line.Status == PromptStatus.OK)
+                {
+                    using (DocumentLock doclock = doc.LockDocument())
+                    {
+                        using (var trLine = doc.TransactionManager.StartTransaction())
+                        {
+                            Entity entityIf = (Entity)trLine.GetObject(line.ObjectId, OpenMode.ForRead);
 
-            //int dwgId = dlm.GetDrawingId(db);
-            //if (dwgId != -1)
-            //{
-            //    PnPRowIdArray relatedLgIds = dlm.GetRelatedRowIds("P3dDrawingLineGroupRelationship", "Drawing", dwgId, "LineGroup");
+                            if (entityIf.Id.ObjectClass.DxfName == "SLINE")
+                            {
+                                Entity ent = (Entity)trLine.GetObject(line.ObjectId, OpenMode.ForRead);
+                                StringCollection keyTag = new StringCollection { "Tag", "Pipe Run To", "Pipe Run From", "Layer" };
+                                StringCollection valTag = dlm.GetProperties(dlm.FindAcPpRowId(line.ObjectId), keyTag, true);
+                                DocumentObject selectedLine = new()
+                                {
+                                    Layer = ent.Layer,
+                                    LayerId = ent.LayerId,
+                                    Tag = valTag[0],
+                                    Id = ent.ObjectId,
+                                    BelongingDocument = doc.Name
+                                };
+                                PromptSelectionResult selection = doc.Editor.SelectAll();
 
-            //    foreach (var relatedLgId in relatedLgIds)
-            //    {
-            //        PnPRow lgRow = dlm.GetPnPDatabase().GetRow(relatedLgId);
-            //        ed.WriteMessage($"\nrelated lineGroup: {lgRow["Tag"].ToString()}");
-            //    }
-            //}
+                                List<DocumentObject> pipeLineGroup = new List<DocumentObject>();
+
+                                using (Transaction tr = doc.Database.TransactionManager.StartOpenCloseTransaction())
+                                {
+                                    foreach (ObjectId id in selection.Value.GetObjectIds())
+                                    {
+                                        Entity entity = (Entity)tr.GetObject(id, OpenMode.ForRead);
+                                        LayerTableRecord layer = (LayerTableRecord)tr.GetObject(entity.LayerId, OpenMode.ForRead);
+                                        if (!layer.IsFrozen)
+                                        {
+                                            StringCollection entKeys = new StringCollection { "Tag" };
+                                            //existe um objeto onde eu n posso pegar o rowId para fazer um get 
+                                            //no database dos valores respectivos as chaves
+                                            try
+                                            {
+                                                if (HaveTag(dlm.GetAllProperties(id, true)))
+                                                {
+                                                    StringCollection entVal = dlm.GetProperties(dlm.FindAcPpRowId(entity.ObjectId), entKeys, true);
+                                                    DocumentObject docObj = new()
+                                                    {
+                                                        Layer = entity.Layer,
+                                                        LayerId = entity.LayerId,
+                                                        Tag = entVal[0],
+                                                        Id = entity.ObjectId,
+                                                        BelongingDocument = doc.Name
+                                                    };
+                                                    if (SamePipeLineGroup(TagPipeLineGroup(selectedLine.Tag), TagPipeLineGroup(docObj.Tag)))
+                                                        pipeLineGroup.Add(docObj);
+                                                }
+                                            }
+                                            catch (DLException e)
+                                            {
+                                                _ = e;// runtime dando erro por nao haver link com a entidade 
+                                            }
+                                        }
+                                    }
+
+
+                                    tr.Commit();
+                                    trLine.Commit();
+                                }
+                                break;
+                            }
+                            else
+                            {
+                                MessageBox.Show(dlm.GetProperties(dlm.FindAcPpRowId(line.ObjectId), iKeys, true)[1] + " não é uma linha!!");
+                            }
+                            trLine.Commit();
+                        }
+
+                    }
+                }
+            }
+
         }
         public void ListarBloques()
         {
@@ -716,6 +907,22 @@ namespace Plant3D
             }
             return -1;
         }
+        public string[] TagPipeLineGroup(string tag)
+        {
+            return tag.Split('-');
+        }
+        public bool SamePipeLineGroup(string[] tag1, string[] tag2)
+        {
+            if (tag1.Length > 4 & tag2.Length > 4)
+            {
+                if ((tag1[1] != "?" & tag1[4] != "?") & (tag2[1] != "?" & tag2[4] != "?") & (tag1[1] + tag1[4] == tag2[1] + tag2[4]))
+                    return true;
+                else
+                    return false;
+            }
+            else
+                return false;
+        }
+
     }
 }
-

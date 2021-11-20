@@ -22,7 +22,7 @@ namespace Plant3D
         private Document docLines;
         DataLinksManager dlmLines;
         PnPDatabase dbLines;
-        int countRTE = 0;
+        int countFT = 0;
 
         public FormFromTo()
         {
@@ -61,7 +61,7 @@ namespace Plant3D
                 if (equipment.Status == PromptStatus.OK)
                 {
                     DialogResult messageReplaceRelatedToEquip = new DialogResult();
-                    if (countRTE > 0)
+                    if (countFT > 0)
                         messageReplaceRelatedToEquip = MessageBox.Show("Existe um ou mais instrumentos com RelatedToEquip já preenchido, deseja substituir a propriedade?", "From To", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                     while (true)
                     {
@@ -84,7 +84,7 @@ namespace Plant3D
                                         "Pipe Run From"
                                     };
                                     StringCollection iVals = dlmLines.GetProperties(instrumentRowId, iKeys, true);
-                                    if (countRTE > 0 & messageReplaceRelatedToEquip == DialogResult.No)
+                                    if (countFT > 0 & messageReplaceRelatedToEquip == DialogResult.No)
                                     {
                                         if (String.IsNullOrEmpty(iVals[1]))
                                         {
@@ -118,7 +118,7 @@ namespace Plant3D
                                 Linhas.Clear();
                                 LinhasOld.Clear();
                                 trEquipment.Commit();
-                                countRTE = 0;
+                                countFT = 0;
                                 break;
                             }
                             else
@@ -149,6 +149,7 @@ namespace Plant3D
             Editor ed = docLines.Editor;
             PromptEntityResult line;
             docLines.LockDocument();
+            List<DocumentObject> pipeLineGroup = new List<DocumentObject>();
 
             while (true)
             {
@@ -173,44 +174,84 @@ namespace Plant3D
                             if (entityIf.Id.ObjectClass.DxfName == "SLINE")
                             {
                                 Entity ent = (Entity)trLine.GetObject(line.ObjectId, OpenMode.ForRead);
-                                Linhas.Add(line.ObjectId);
                                 StringCollection keyTag = new StringCollection { "Tag", "Pipe Run To", "Pipe Run From", "Layer" };
                                 StringCollection valTag = dlmLines.GetProperties(dlmLines.FindAcPpRowId(line.ObjectId), keyTag, true);
-                                Instruments iOld = new Instruments();
-                                iOld.Id = ent.ObjectId;
-                                iOld.Layer = ent.Layer;
-                                iOld.LayerId = ent.LayerId;
-                                iOld.Tag = valTag[0];
-                                iOld.FromTo = true;
-                                LinhasOld.Add(iOld);
-                                Invoke((MethodInvoker)delegate
+                                DocumentObject selectedLine = new()
                                 {
-                                    ListViewItem item = new ListViewItem(valTag[0]);
-                                    item.SubItems.Add(valTag[1]);
-                                    listView.Items.Add(item);
-                                });
-                                trLine.Commit();
-                                break;
+                                    Layer = ent.Layer,
+                                    LayerId = ent.LayerId,
+                                    Tag = valTag[0],
+                                    Id = ent.ObjectId,
+                                    BelongingDocument = docLines.Name
+                                };
+                                PromptSelectionResult selection = docLines.Editor.SelectAll();
+
+
+                                using (Transaction tr = docLines.Database.TransactionManager.StartOpenCloseTransaction())
+                                {
+                                    foreach (ObjectId id in selection.Value.GetObjectIds())
+                                    {
+                                        Entity entity = (Entity)tr.GetObject(id, OpenMode.ForRead);
+                                        LayerTableRecord layer = (LayerTableRecord)tr.GetObject(entity.LayerId, OpenMode.ForRead);
+                                        if (!layer.IsFrozen)
+                                        {
+                                            StringCollection entKeys = new StringCollection { "Tag", "Pipe Run To", "Pipe Run From", "Layer" };
+                                            //existe um objeto onde eu n posso pegar o rowId para fazer um get 
+                                            //no database dos valores respectivos as chaves
+                                            try
+                                            {
+                                                if (HaveTag(dlmLines.GetAllProperties(id, true)))
+                                                {
+                                                    StringCollection entVal = dlmLines.GetProperties(dlmLines.FindAcPpRowId(entity.ObjectId), entKeys, true);
+                                                    DocumentObject docObj = new()
+                                                    {
+                                                        Layer = entity.Layer,
+                                                        LayerId = entity.LayerId,
+                                                        Tag = entVal[0],
+                                                        Id = entity.ObjectId,
+                                                        BelongingDocument = docLines.Name
+                                                    };
+                                                    if (SamePipeLineGroup(TagPipeLineGroup(selectedLine.Tag), TagPipeLineGroup(docObj.Tag)))
+                                                    {
+                                                        pipeLineGroup.Add(docObj);
+                                                        Invoke((MethodInvoker)delegate
+                                                        {
+                                                            ListViewItem item = new ListViewItem(entVal[0]);
+                                                            item.SubItems.Add(entVal[1]);
+                                                            formFromTo.listView.Items.Add(item);
+                                                        });
+                                                    }
+
+                                                }
+                                            }
+                                            catch (DLException)
+                                            {
+
+                                            }
+                                        }
+                                    }
+                                    tr.Commit();
+                                    trLine.Commit();
+                                    break;
+                                }
                             }
                             else
                             {
                                 MessageBox.Show(dlmLines.GetProperties(dlmLines.FindAcPpRowId(line.ObjectId), iKeys, true)[1] + " não é uma linha!!");
                             }
-                            trLine.Commit();
                         }
-
                     }
                 }
             }
-            if (!(checkBoxOtherDWG.Checked) & Linhas.Count > 0)
+            if (!(checkBoxOtherDWG.Checked) & pipeLineGroup.Count > 0)
             {
                 //mudar equipment para object
                 PromptEntityResult objectTo = ed.GetEntity("\nSelecione o objeto To: ");
                 if (objectTo.Status == PromptStatus.OK)
                 {
                     DialogResult messageReplaceRelatedToEquip = new DialogResult();
-                    if (countRTE > 0)
-                        messageReplaceRelatedToEquip = MessageBox.Show("Existe uma ou mais linhas com From já preenchido, deseja substituir a propriedade?", "From To", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    if (countFT > 0)
+                        messageReplaceRelatedToEquip = MessageBox.Show("Existe uma ou mais linhas com Pipe Run To já preenchido, deseja substituir a propriedade?", "From To", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                     while (true)
                     {
                         using (DocumentLock doclock = docLines.LockDocument())
@@ -224,34 +265,34 @@ namespace Plant3D
                                     int equipmentRowId = dlmLines.FindAcPpRowId(objectTo.ObjectId);
                                     StringCollection eKeys = new StringCollection { "Tag" };
                                     StringCollection eVals = dlmLines.GetProperties(equipmentRowId, eKeys, true);
-                                    foreach (ObjectId intrumentId in Linhas)
+                                    foreach (DocumentObject lineObj in pipeLineGroup)
                                     {
-                                        int instrumentRowId = dlmLines.FindAcPpRowId(intrumentId);
-                                        StringCollection iKeys = new StringCollection
-                                    {
-                                        "Tag",
-                                        "Pipe Run To",
-                                        "Pipe Run From"
-                                    };
-                                        StringCollection iVals = dlmLines.GetProperties(instrumentRowId, iKeys, true);
-                                        if (countRTE > 0 & messageReplaceRelatedToEquip == DialogResult.No)
-                                        {
-                                            if (String.IsNullOrEmpty(iVals[1]))
+                                        int lineRowId = dlmLines.FindAcPpRowId(lineObj.Id);
+                                        StringCollection lKeys = new StringCollection
                                             {
-                                                iVals[1] = eVals[0];
+                                                "Tag",
+                                                "Pipe Run To",
+                                                "Pipe Run From"
+                                            };
+                                        StringCollection lVals = dlmLines.GetProperties(lineRowId, lKeys, true);
+                                        if (countFT > 0 & messageReplaceRelatedToEquip == DialogResult.No)
+                                        {
+                                            if (String.IsNullOrEmpty(lVals[1]))
+                                            {
+                                                lVals[1] = eVals[0];
                                                 dbLines.StartTransaction();
-                                                dlmLines.SetProperties(intrumentId, iKeys, iVals);
-                                                Entity entEdited = (Entity)trEquipment.GetObject(intrumentId, OpenMode.ForWrite);
+                                                dlmLines.SetProperties(lineObj.Id, lKeys, lVals);
+                                                Entity entEdited = (Entity)trEquipment.GetObject(lineObj.Id, OpenMode.ForWrite);
                                                 ReplacePropertys(entEdited, LinhasOld);
                                                 dbLines.CommitTransaction();
                                             }
                                         }
                                         else
                                         {
-                                            iVals[1] = eVals[0];
+                                            lVals[1] = eVals[0];
                                             dbLines.StartTransaction();
-                                            dlmLines.SetProperties(intrumentId, iKeys, iVals);
-                                            Entity entEdited = (Entity)trEquipment.GetObject(intrumentId, OpenMode.ForWrite);
+                                            dlmLines.SetProperties(lineObj.Id, lKeys, lVals);
+                                            Entity entEdited = (Entity)trEquipment.GetObject(lineObj.Id, OpenMode.ForWrite);
                                             ReplacePropertys(entEdited, LinhasOld);
                                             dbLines.CommitTransaction();
                                         }
@@ -263,7 +304,7 @@ namespace Plant3D
                                     Linhas.Clear();
                                     LinhasOld.Clear();
                                     trEquipment.Commit();
-                                    countRTE = 0;
+                                    countFT = 0;
                                     break;
                                 }
                                 else
@@ -328,20 +369,9 @@ namespace Plant3D
             this.listView.Items.Clear();
             Linhas.Clear();
             LinhasOld.Clear();
-            countRTE = 0;
+            countFT = 0;
         }
 
-        public string[] TagPipeLineGroup(string tag)
-        {
-            return tag.Split('-');
-        }
-        public bool SamePipeLineGroup(string[] tag1, string[] tag2)
-        {
-            if(tag1[1]+tag1[4] == tag2[1] + tag2[4])
-                return true;
-            else
-                return false;
-        }
     }
 }
 
