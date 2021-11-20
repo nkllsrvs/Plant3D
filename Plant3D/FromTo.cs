@@ -206,7 +206,7 @@ namespace Plant3D
                 {
                     DialogResult messageReplaceRelatedToEquip = new DialogResult();
                     if (countRTE > 0)
-                        messageReplaceRelatedToEquip = MessageBox.Show("Existe uma ou mais linhas com From já preenchido, deseja substituir a propriedade?", "From To", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                        messageReplaceRelatedToEquip = MessageBox.Show("Existe uma ou mais linhas com From/to já preenchido, deseja substituir a propriedade?", "From To", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                     while (true)
                     {
                         using (DocumentLock doclock = docLines.LockDocument())
