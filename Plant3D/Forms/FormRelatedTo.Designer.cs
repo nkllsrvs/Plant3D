@@ -4,13 +4,14 @@ using Autodesk.ProcessPower.DataLinks;
 using Autodesk.ProcessPower.DataObjects;
 using Autodesk.ProcessPower.PlantInstance;
 using Autodesk.ProcessPower.ProjectManager;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Windows.Forms;
 
 namespace Plant3D
 {
-    partial class FromTo
+    partial class FormRelatedTo : Commands
     {
         /// <summary>
         /// Required designer variable.
@@ -38,12 +39,12 @@ namespace Plant3D
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FromTo));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormRelatedTo));
             this.listView = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.buttonEquipment = new System.Windows.Forms.Button();
-            this.buttonLines = new System.Windows.Forms.Button();
+            this.buttonInstruments = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.checkBoxEquipmentOtherDWG = new System.Windows.Forms.CheckBox();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
@@ -66,7 +67,7 @@ namespace Plant3D
             // 
             // columnHeader1
             // 
-            this.columnHeader1.Text = "Lines";
+            this.columnHeader1.Text = "Instruments";
             this.columnHeader1.Width = 77;
             // 
             // columnHeader2
@@ -88,17 +89,17 @@ namespace Plant3D
             this.buttonEquipment.UseVisualStyleBackColor = false;
             this.buttonEquipment.Click += new System.EventHandler(this.buttonEquipment_Click);
             // 
-            // buttonLines
+            // buttonInstruments
             // 
-            this.buttonLines.BackColor = System.Drawing.SystemColors.ActiveCaption;
-            this.buttonLines.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.buttonLines.Location = new System.Drawing.Point(43, 483);
-            this.buttonLines.Name = "buttonLines";
-            this.buttonLines.Size = new System.Drawing.Size(224, 45);
-            this.buttonLines.TabIndex = 8;
-            this.buttonLines.Text = "Line";
-            this.buttonLines.UseVisualStyleBackColor = false;
-            this.buttonLines.Click += new System.EventHandler(this.buttonLine_Click);
+            this.buttonInstruments.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            this.buttonInstruments.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.buttonInstruments.Location = new System.Drawing.Point(43, 483);
+            this.buttonInstruments.Name = "buttonInstruments";
+            this.buttonInstruments.Size = new System.Drawing.Size(224, 45);
+            this.buttonInstruments.TabIndex = 8;
+            this.buttonInstruments.Text = "Instruments";
+            this.buttonInstruments.UseVisualStyleBackColor = false;
+            this.buttonInstruments.Click += new System.EventHandler(this.buttonInstrumentsRT_Click);
             // 
             // label1
             // 
@@ -142,104 +143,105 @@ namespace Plant3D
             this.buttonClearSelection.UseVisualStyleBackColor = false;
             this.buttonClearSelection.Click += new System.EventHandler(this.buttonClearClick);
             // 
-            // FromTo
+            // FormVALE
             // 
             this.ClientSize = new System.Drawing.Size(310, 590);
             this.Controls.Add(this.buttonClearSelection);
             this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.checkBoxEquipmentOtherDWG);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.buttonLines);
+            this.Controls.Add(this.buttonInstruments);
             this.Controls.Add(this.buttonEquipment);
             this.Controls.Add(this.listView);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Location = new System.Drawing.Point(10, 160);
-            this.Name = "FromTo";
+            this.Name = "FormVALE";
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
-            this.Text = "VALE -  From To";
+            this.Text = "VALE - Related To";
             this.TopMost = true;
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
-        private void RelatedTo()
-        {
-            PlantProject proj = PlantApplication.CurrentProject;
-            ProjectPartCollection projParts = proj.ProjectParts;
-            PnIdProject pnidProj = (PnIdProject)projParts["PnId"];
-            DataLinksManager dlm = pnidProj.DataLinksManager;
-            PnPDatabase db = dlm.GetPnPDatabase();
-            Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
-            Editor ed = doc.Editor;
 
-            List<PromptEntityResult> Instruments = new List<PromptEntityResult>();
-            PromptEntityResult result;
+        //private void RelatedTo()
+        //{
+        //    PlantProject proj = PlantApplication.CurrentProject;
+        //    ProjectPartCollection projParts = proj.ProjectParts;
+        //    PnIdProject pnidProj = (PnIdProject)projParts["PnId"];
+        //    DataLinksManager dlm = pnidProj.DataLinksManager;
+        //    PnPDatabase db = dlm.GetPnPDatabase();
+        //    Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
+        //    Editor ed = doc.Editor;
 
-            bool loop = true;
-            while (loop)
-            {
-                result = ed.GetEntity("\nSelecione um  Instrumento: ");
-                StringCollection eKeys = new StringCollection
-                {
+        //    List<PromptEntityResult> Instruments = new List<PromptEntityResult>();
+        //    PromptEntityResult result;
 
-                    "Description",
-                    "Tag",
-                    "RelatedTo",
-                    "ClassName",
-                    "Class"
-                };
-                StringCollection eVals = dlm.GetProperties(dlm.FindAcPpRowId(result.ObjectId), eKeys, true);
-                if (result.Status == PromptStatus.OK){
-                    Instruments.Add(result); 
-                }
-                DialogResult dr = MessageBox.Show("Deseja continuar a selecionar Instrumentos?", "RelatedTo", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
-                if (dr == DialogResult.No)
-                    break;
-            }
+        //    bool loop = true;
+        //    while (loop)
+        //    {
+        //        result = ed.GetEntity("\nSelecione um  Instrumento: ");
+        //        StringCollection eKeys = new StringCollection
+        //        {
 
-            PromptEntityResult equipment = ed.GetEntity("\nSelecione um Equipamento: ");
-            if (equipment.Status == PromptStatus.OK)
-            {
-                int equipmentRowId = dlm.FindAcPpRowId(equipment.ObjectId);
-                StringCollection eKeys = new StringCollection
-                {   
-                    
-                    "Description",
-                    "Tag",
-                    "RelatedTo",
-                    "ClassName",
-                    "Class"
-                };
-                StringCollection eVals = dlm.GetProperties(equipmentRowId, eKeys, true);
-                foreach (PromptEntityResult entityResult in Instruments)
-                {
-                    int instrumentRowId = dlm.FindAcPpRowId(entityResult.ObjectId);
-                    StringCollection iKeys = new StringCollection
-                    {
-                        "Description",
-                        "Tag",
-                        "RelatedTo",
-                        "ClassName",
-                        "Class"
-                    };
-                    StringCollection iVals = dlm.GetProperties(instrumentRowId, iKeys, true);
+        //            "Description",
+        //            "Tag",
+        //            "RelatedTo",
+        //            "ClassName",
+        //            "Class"
+        //        };
+        //        StringCollection eVals = dlm.GetProperties(dlm.FindAcPpRowId(result.ObjectId), eKeys, true);
+        //        if (result.Status == PromptStatus.OK){
+        //            Instruments.Add(result); 
+        //        }
+        //        DialogResult dr = MessageBox.Show("Deseja continuar a selecionar Instrumentos?", "RelatedTo", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+        //        if (dr == DialogResult.No)
+        //            break;
+        //    }
 
-                    iVals[2] = eVals[1];
+        //    PromptEntityResult equipment = ed.GetEntity("\nSelecione um Equipamento: ");
+        //    if (equipment.Status == PromptStatus.OK)
+        //    {
+        //        int equipmentRowId = dlm.FindAcPpRowId(equipment.ObjectId);
+        //        StringCollection eKeys = new StringCollection
+        //        {   
 
-                    db.StartTransaction();
-                    dlm.SetProperties(entityResult.ObjectId, iKeys, iVals);
-                    db.CommitTransaction();
-                }
-            }
-        }
+        //            "Description",
+        //            "Tag",
+        //            "RelatedTo",
+        //            "ClassName",
+        //            "Class"
+        //        };
+        //        StringCollection eVals = dlm.GetProperties(equipmentRowId, eKeys, true);
+        //        foreach (PromptEntityResult entityResult in Instruments)
+        //        {
+        //            int instrumentRowId = dlm.FindAcPpRowId(entityResult.ObjectId);
+        //            StringCollection iKeys = new StringCollection
+        //            {
+        //                "Description",
+        //                "Tag",
+        //                "RelatedTo",
+        //                "ClassName",
+        //                "Class"
+        //            };
+        //            StringCollection iVals = dlm.GetProperties(instrumentRowId, iKeys, true);
+
+        //            iVals[2] = eVals[1];
+
+        //            db.StartTransaction();
+        //            dlm.SetProperties(entityResult.ObjectId, iKeys, iVals);
+        //            db.CommitTransaction();
+        //        }
+        //    }
+        //}
         #endregion
-        private ListView listView;
+        public ListView listView;
         private ColumnHeader columnHeader1;
         private ColumnHeader columnHeader2;
         private Button buttonEquipment;
-        private Button buttonLines;
+        private Button buttonInstruments;
         private Label label1;
-        private CheckBox checkBoxEquipmentOtherDWG;
+        public CheckBox checkBoxEquipmentOtherDWG;
         private RichTextBox richTextBox1;
         private Button buttonClearSelection;
     }
