@@ -120,7 +120,9 @@
   <data name="richTextBox1.Text" xml:space="preserve">
     <value>1 - Para selecionar os instrumentos a serem relacionados, clique no botão "Instruments". Selecione um instrumento no modelo desejado. Será exibida uma mensagem perguntando se deseja selecionar outro instrumento, caso afirmativo, clique em "Sim" e repita o processo até que todos os instrumentos sejam selecionados. Caso negativo, se o equipamento a ser relacionado estiver no mesmo modelo, a aplicação solicitará automáticamente que seja selecionado o equipamento a ser relacionado;
 
-2- Para selecionar um equipamento em outro modelo, a opção "Equipamento em outro DWG?" deverá ser marcada antes que se inicie o processo de seleção dos instrumentos. Com esta opção marcada a seleção do equipamento deverá ser feita manualmente, clicando no botão "Equipment/Line".</value>
+2- Para selecionar um equipamento em outro modelo, a opção "Equipamento em outro DWG?" deverá ser marcada antes que se inicie o processo de seleção dos instrumentos. Com esta opção marcada a seleção do equipamento asd
+
+3 -adsafadsffffffffffffffffffffffffffffsssssssssssssssssssssssssssssssssssssssssssssssssssssinicie o processo de seleçãoinicie o processo de seleçãoinicie o processo de seleçãoinicie o processo de seleção</value>
   </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">

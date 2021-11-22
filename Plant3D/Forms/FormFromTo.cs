@@ -174,7 +174,7 @@ namespace Plant3D
                             if (entityIf.Id.ObjectClass.DxfName == "SLINE")
                             {
                                 Entity ent = (Entity)trLine.GetObject(line.ObjectId, OpenMode.ForRead);
-                                StringCollection keyTag = new StringCollection { "Tag", "Pipe Run To", "Pipe Run From", "Layer" };
+                                StringCollection keyTag = new StringCollection { "Tag", "PipeRunTo", "PipeRunFrom", "Layer" };
                                 StringCollection valTag = dlmLines.GetProperties(dlmLines.FindAcPpRowId(line.ObjectId), keyTag, true);
                                 DocumentObject selectedLine = new()
                                 {
@@ -260,7 +260,7 @@ namespace Plant3D
                             {
                                 Entity ent = (Entity)trEquipment.GetObject(objectTo.ObjectId, OpenMode.ForRead);
                                 //ao invés de usar uma classe use o metodo de verificar se tem TAG ou usar classe de Equipment(Geral)
-                                if (ent.Id.ObjectClass.DxfName == "ACPPASSET")
+                                if (ent.Id.ObjectClass.DxfName == "ACPPASSET" | ent.Id.ObjectClass.DxfName == "SLINE")
                                 {
                                     int equipmentRowId = dlmLines.FindAcPpRowId(objectTo.ObjectId);
                                     StringCollection eKeys = new StringCollection { "Tag" };
@@ -271,8 +271,8 @@ namespace Plant3D
                                         StringCollection lKeys = new StringCollection
                                             {
                                                 "Tag",
-                                                "Pipe Run To",
-                                                "Pipe Run From"
+                                                "PipeRunTo",
+                                                "PipeRunFrom"
                                             };
                                         StringCollection lVals = dlmLines.GetProperties(lineRowId, lKeys, true);
                                         if (countFT > 0 & messageReplaceRelatedToEquip == DialogResult.No)
