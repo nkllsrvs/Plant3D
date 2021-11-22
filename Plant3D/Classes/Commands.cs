@@ -544,6 +544,13 @@ namespace Plant3D
                             DocumentObject itemAlterado = itensAlterados.FirstOrDefault(a => a.Id.Equals(obj.RelatedId));
                             if (itemAlterado != null)
                             {
+                                List<DocumentObject> itensAdd = docCompare.DocumentObjects.Except(doc.DocumentObjects).ToList();
+                                List<DocumentObject> itensRemoved = doc.DocumentObjects.Except(docCompare.DocumentObjects).ToList();
+                                string modfies = string.Join("\n", itensRemoved.Select(s => s.Tag));
+                                modfies += " => " + string.Join("\n", itensAdd.Select(s => s.Tag));
+                                string message = $"Houve mudanças no documento!!\n{modfies}\nDeseja refatorar as referências?";
+                                if (System.Windows.Forms.MessageBox.Show(message, "Trigger", System.Windows.Forms.MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
+                                    acDoc.Database.SaveAs(acDoc.Name, true, DwgVersion.Current, acDoc.Database.SecurityParameters);
                                 using (DocumentLock doclock = acDoc.LockDocument())
                                 {
                                     using (var tr = acDoc.TransactionManager.StartTransaction())
@@ -573,14 +580,7 @@ namespace Plant3D
                             }
                         }
                     }
-                    List<DocumentObject> itensAdd = docCompare.DocumentObjects.Except(doc.DocumentObjects).ToList();
-                    List<DocumentObject> itensRemoved = doc.DocumentObjects.Except(docCompare.DocumentObjects).ToList();
-                    string modfies =  string.Join("\n", itensRemoved.Select(s => s.Tag));
-                    modfies += " => " + string.Join("\n", itensAdd.Select(s => s.Tag));
-                    string message = $"Houve mudanças no documento!!\n{modfies}\nDeseja refatorar as referências?";
-                    if (System.Windows.Forms.MessageBox.Show(message, "Trigger", System.Windows.Forms.MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
-                        acDoc.Database.SaveAs(acDoc.Name, true, DwgVersion.Current, acDoc.Database.SecurityParameters);
-
+                    
                     documentInfos.Remove(docCompare);
                 }
             }
