@@ -108,8 +108,8 @@ namespace Setup
                 {
                     if (allLines[i] == ";;;===== AutoArxLoad Arx Applications =====")
                     {
-                        //allLines[i + 1] = "(command " + '"' + "_netload" + '"' + ' ' + '"' + pluginPathDestination.Replace("\\", "/") + "/Plant3D.dll" + '"' + ")";
-                        allLines[i + 1] = "(command " + '"' + "_netload" + '"' + ' ' + '"' + "C:/Users/nikol/source/repos/nkllsrvs/Plant3D/Plant3D/bin/Debug" + "/Plant3D.dll" + '"' + ")";
+                        allLines[i + 1] = "(command " + '"' + "_netload" + '"' + ' ' + '"' + pluginPathDestination.Replace("\\", "/") + "/Plant3D.dll" + '"' + ")";
+                        //allLines[i + 1] = "(command " + '"' + "_netload" + '"' + ' ' + '"' + "C:/Users/nikol/source/repos/nkllsrvs/Plant3D/Plant3D/bin/Debug" + "/Plant3D.dll" + '"' + ")";
                         allLines[i + 2] = "(command " + '"' +"_vale" + '"' + ")";
                         break;
                     }
