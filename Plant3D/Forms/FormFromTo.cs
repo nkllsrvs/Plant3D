@@ -132,6 +132,7 @@ namespace Plant3D
                                                         Invoke((MethodInvoker)delegate
                                                         {
                                                             ListViewItem item = new ListViewItem(entVal[0]);
+                                                            item.SubItems.Add(entVal[2]);
                                                             item.SubItems.Add(entVal[1]);
                                                             formFromTo.listView.Items.Add(item);
                                                         });

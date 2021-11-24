@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace Plant3D
 {
-    partial class FormFromTo : Commands
+    partial class FormFromTo 
     {
         /// <summary>
         /// Required designer variable.
@@ -48,13 +48,15 @@ namespace Plant3D
             this.checkBoxOtherDWG = new System.Windows.Forms.CheckBox();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.buttonClearSelection = new System.Windows.Forms.Button();
+            this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SuspendLayout();
             // 
             // listView
             // 
             this.listView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,
-            this.columnHeader2});
+            this.columnHeader2,
+            this.columnHeader3});
             this.listView.HideSelection = false;
             this.listView.Location = new System.Drawing.Point(9, 237);
             this.listView.Name = "listView";
@@ -71,8 +73,8 @@ namespace Plant3D
             // 
             // columnHeader2
             // 
-            this.columnHeader2.Text = "RelatedToEquip";
-            this.columnHeader2.Width = 172;
+            this.columnHeader2.Text = "From";
+            this.columnHeader2.Width = 100;
             // 
             // buttonEquipment
             // 
@@ -109,11 +111,11 @@ namespace Plant3D
             this.label1.TabIndex = 9;
             this.label1.Text = "Instruções:";
             // 
-            // checkBoxEquipmentOtherDWG
+            // checkBoxOtherDWG
             // 
             this.checkBoxOtherDWG.AutoSize = true;
             this.checkBoxOtherDWG.Location = new System.Drawing.Point(9, 460);
-            this.checkBoxOtherDWG.Name = "checkBoxEquipmentOtherDWG";
+            this.checkBoxOtherDWG.Name = "checkBoxOtherDWG";
             this.checkBoxOtherDWG.Size = new System.Drawing.Size(88, 17);
             this.checkBoxOtherDWG.TabIndex = 10;
             this.checkBoxOtherDWG.Text = "Outro DWG?";
@@ -141,6 +143,11 @@ namespace Plant3D
             this.buttonClearSelection.Text = "Clear Select";
             this.buttonClearSelection.UseVisualStyleBackColor = false;
             this.buttonClearSelection.Click += new System.EventHandler(this.buttonClearClick);
+            // 
+            // columnHeader3
+            // 
+            this.columnHeader3.Text = "To";
+            this.columnHeader3.Width = 100;
             // 
             // FormFromTo
             // 
@@ -242,5 +249,6 @@ namespace Plant3D
         public CheckBox checkBoxOtherDWG;
         private RichTextBox richTextBox1;
         public Button buttonClearSelection;
+        private ColumnHeader columnHeader3;
     }
 }
