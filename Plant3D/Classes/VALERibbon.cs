@@ -15,8 +15,6 @@ namespace Plant3D.Classes
         [CommandMethod("vale", CommandFlags.Transparent)]
         public void TestRibbonTab()
         {
-            RemoveDocEvent();
-            AddDocEvent();
             RibbonControl ribbonControl = ComponentManager.Ribbon;
             if (ribbonControl != null)
             {
