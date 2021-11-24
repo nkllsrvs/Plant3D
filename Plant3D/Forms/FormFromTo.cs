@@ -295,6 +295,7 @@ namespace Plant3D
                 DataLinksManager dlm = pnidProj.DataLinksManager;
                 Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
                 Editor ed = doc.Editor;
+                PnPDatabase db = dlm.GetPnPDatabase();
                 tmLinesSecondDWG = doc.Database.TransactionManager;
                 doc.LockDocument();
                 PromptSelectionResult selection = doc.Editor.SelectAll();
@@ -397,22 +398,27 @@ namespace Plant3D
                                             if (String.IsNullOrEmpty(iVals[1]))
                                             {
                                                 iVals[1] = selectedTo.Tag;
-                                                dlm.GetPnPDatabase().StartTransaction();
-                                                doc.TransactionManager.StartTransaction();
+                                                db.StartTransaction();
+                                                var val = doc.TransactionManager.StartTransaction();
                                                 dlm.SetProperties(lineID, iKeys, iVals);
-                                                Entity entEdited = (Entity)tmLinesSecondDWG.GetObject(lineID, OpenMode.ForWrite);
-                                                ReplacePropertys(entEdited, LinhasOld);
-                                                dlm.GetPnPDatabase().CommitTransaction();
+                                                //Entity entEdited = (Entity)tmLinesSecondDWG.GetObject(lineID, OpenMode.ForWrite);
+                                                //ReplacePropertys(entEdited, LinhasOld);
+                                                val.Commit();
+                                                db.CommitTransaction();
                                             }
                                         }
                                         else
                                         {
                                             iVals[1] = selectedTo.Tag;
-                                            dlm.GetPnPDatabase().StartTransaction();
+                                            db.StartTransaction();
+                                            var val = doc.TransactionManager.StartTransaction();
                                             dlm.SetProperties(lineID, iKeys, iVals);
-                                            Entity entEdited = (Entity)tmLinesSecondDWG.GetObject(lineID, OpenMode.ForWrite);
-                                            ReplacePropertys(entEdited, LinhasOld);
-                                            dlm.GetPnPDatabase().CommitTransaction();
+                                            //Entity entEdited = (Entity)tmLinesSecondDWG.GetObject(lineID, OpenMode.ForWrite);
+                                            //ReplacePropertys(entEdited, LinhasOld);
+                                            val.Commit();
+                                            db.CommitTransaction();
+                                            StringCollection test = dlmLines.GetProperties(lineRowID, iKeys, true);
+
                                         }
                                     }
                                     else
@@ -430,11 +436,11 @@ namespace Plant3D
                                             {
                                                 iVals[1] = selectedTo.Tag;
                                                 dbLines.StartTransaction();
-                                                docLines.TransactionManager.StartTransaction();
+                                                var val = docLines.TransactionManager.StartTransaction();
                                                 dlmLines.SetProperties(lineID, iKeys, iVals);
-                                                Entity entEdited = (Entity)tmLinesFirstDWG.GetObject(lineID, OpenMode.ForWrite);
-                                                ReplacePropertys(entEdited, LinhasOld);
-                                                docLines.TransactionManager.StartTransaction().Commit();
+                                                //Entity entEdited = (Entity)tmLinesFirstDWG.GetObject(lineID, OpenMode.ForWrite);
+                                                //ReplacePropertys(entEdited, LinhasOld);
+                                                val.Commit();
                                                 dbLines.CommitTransaction();
                                             }
                                         }
@@ -442,12 +448,14 @@ namespace Plant3D
                                         {
                                             iVals[1] = selectedTo.Tag;
                                             dbLines.StartTransaction();
-                                            docLines.TransactionManager.StartTransaction();
+                                            var val = docLines.TransactionManager.StartTransaction();
                                             dlmLines.SetProperties(lineID, iKeys, iVals);
                                             //Entity entEdited = (Entity)tmLinesFirstDWG.GetObject(lineID, OpenMode.ForWrite);
                                             //ReplacePropertys(entEdited, LinhasOld);
-                                            docLines.TransactionManager.StartTransaction().Commit();
+                                            val.Commit();
                                             dbLines.CommitTransaction();
+                                            StringCollection test = dlmLines.GetProperties(lineRowID, iKeys, true);
+
                                         }
                                     }
 
@@ -461,12 +469,14 @@ namespace Plant3D
                                 LinhasOld.Clear();
                                 countFT = 0;
                                 doc.TransactionManager.StartTransaction().Commit();
+                                tr2.Commit();
                                 break;
                             }
                             else
                             {
                                 MessageBox.Show("Selecione um equipamento ou linha!!");
                             }
+
                         }
                     }
                 }
