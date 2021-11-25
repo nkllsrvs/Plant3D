@@ -13,6 +13,8 @@ using System.Drawing;
 using System.Windows.Forms;
 using Plant3D.Classes;
 using TransactionManager = Autodesk.AutoCAD.DatabaseServices.TransactionManager;
+using System.IO;
+using System.Reflection;
 
 namespace Plant3D
 {
@@ -332,6 +334,7 @@ namespace Plant3D
                                         Invoke((MethodInvoker)delegate
                                         {
                                             ListViewItem item = new ListViewItem(entVal[0]);
+                                            item.SubItems.Add(entVal[2]);
                                             item.SubItems.Add(entVal[1]);
                                             formFromTo.listView.Items.Add(item);
                                         });
@@ -367,7 +370,7 @@ namespace Plant3D
                     {
                         using (var tr2 = doc.TransactionManager.StartOpenCloseTransaction())
                         {
-                            Entity ent = (Entity)doc.TransactionManager.StartTransaction().GetObject(equipment.ObjectId, OpenMode.ForRead);
+                            Entity ent = (Entity)tr2.GetObject(equipment.ObjectId, OpenMode.ForRead);
                             //Pegando o nome da classe que aparace no PLants como parametro de filtro entre linha e equipamento
                             if (ent.Id.ObjectClass.DxfName == "ACPPASSET" | ent.Id.ObjectClass.DxfName == "SLINE")
                             {
@@ -392,6 +395,7 @@ namespace Plant3D
                                         {
                                             "Tag",
                                             "PipeRunTo",
+                                            "PipeRunFrom"
                                         };
                                         StringCollection iVals = dlm.GetProperties(lineRowID, iKeys, true);
                                         if (countFT > 0 & messageReplaceRelatedToEquip == DialogResult.No)
@@ -400,11 +404,9 @@ namespace Plant3D
                                             {
                                                 iVals[1] = selectedTo.Tag;
                                                 db.StartTransaction();
-                                                var val = doc.TransactionManager.StartTransaction();
                                                 dlm.SetProperties(lineID, iKeys, iVals);
                                                 //Entity entEdited = (Entity)tmLinesSecondDWG.GetObject(lineID, OpenMode.ForWrite);
                                                 //ReplacePropertys(entEdited, LinhasOld);
-                                                val.Commit();
                                                 db.CommitTransaction();
                                             }
                                         }
@@ -412,14 +414,12 @@ namespace Plant3D
                                         {
                                             iVals[1] = selectedTo.Tag;
                                             db.StartTransaction();
-                                            var val = doc.TransactionManager.StartTransaction();
                                             dlm.SetProperties(lineID, iKeys, iVals);
                                             //Entity entEdited = (Entity)tmLinesSecondDWG.GetObject(lineID, OpenMode.ForWrite);
                                             //ReplacePropertys(entEdited, LinhasOld);
-                                            val.Commit();
                                             db.CommitTransaction();
                                             StringCollection test = dlmLines.GetProperties(lineRowID, iKeys, true);
-
+                                            Log($"Tag = {test[0]} PipeRunFrom = {test[2]} PipeRunTo = {test[1]}", "PlantsLog");
                                         }
                                     }
                                     else
@@ -429,8 +429,10 @@ namespace Plant3D
                                         {
                                             "Tag",
                                             "PipeRunTo",
+                                            "PipeRunFrom"
                                         };
                                         StringCollection iVals = dlmLines.GetProperties(lineRowID, iKeys, true);
+                                        Log($"countFT = {countFT} messageReplaceRelatedToEquip = {messageReplaceRelatedToEquip.ToString()} DialogResult = {DialogResult.No.ToString()}", "PlantsLog");
                                         if (countFT > 0 & messageReplaceRelatedToEquip == DialogResult.No)
                                         {
                                             if (String.IsNullOrEmpty(iVals[1]))
@@ -456,7 +458,7 @@ namespace Plant3D
                                             val.Commit();
                                             dbLines.CommitTransaction();
                                             StringCollection test = dlmLines.GetProperties(lineRowID, iKeys, true);
-
+                                            Log($"Tag = {test[0]} PipeRunFrom = {test[2]} PipeRunTo = {test[1]}", "PlantsLog");
                                         }
                                     }
 
@@ -544,6 +546,44 @@ namespace Plant3D
             countFT = 0;
         }
 
+        public static bool Log(string strMensagem, string strNomeArquivo = "ArquivoLog")
+        {
+            try
+            {
+                var caminhoExe = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                string caminhoArquivo = Path.Combine(caminhoExe, strNomeArquivo);
+                if (!File.Exists(caminhoArquivo))
+                {
+                    FileStream arquivo = File.Create(caminhoArquivo);
+                    arquivo.Close();
+                }
+                using (StreamWriter w = File.AppendText(caminhoArquivo))
+                {
+                    AppendLog(strMensagem, w);
+                }
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+        private static void AppendLog(string logMensagem, TextWriter txtWriter)
+        {
+            try
+            {
+                txtWriter.Write("\r\nLog Entrada : ");
+                txtWriter.WriteLine($"{DateTime.Now.ToLongTimeString()} {DateTime.Now.ToLongDateString()}");
+                txtWriter.WriteLine("  :");
+                txtWriter.WriteLine($"  :{logMensagem}");
+                txtWriter.WriteLine("------------------------------------");
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }
+
 
