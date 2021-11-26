@@ -247,7 +247,7 @@ namespace Plant3D
                 {
                     DialogResult messageReplaceRelatedToEquip = new DialogResult();
                     if (countRTE > 0)
-                        messageReplaceRelatedToEquip = MessageBox.Show("Existe um ou mais instrumentos com RelatedToEquip já preenchido, deseja substituir a propriedade?", "Related To", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                        messageReplaceRelatedToEquip = MessageBox.Show("Existe um ou mais elementos com RelatedToEquip já preenchidos, deseja substituir o valor atual do atributo?", "Related To", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                     while (true)
                     {
                         using (var trEquipment = doc.TransactionManager.StartTransaction())
