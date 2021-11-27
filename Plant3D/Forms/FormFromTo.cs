@@ -117,6 +117,8 @@ namespace Plant3D
                                             {
                                                 if (HaveTag(dlmLines.GetAllProperties(id, true)))
                                                 {
+                                                    if (!String.IsNullOrEmpty(iVals[1]) | !String.IsNullOrEmpty(iVals[2]))
+                                                        countFT++;
                                                     StringCollection entVal = dlmLines.GetProperties(dlmLines.FindAcPpRowId(entity.ObjectId), entKeys, true);
                                                     DocumentObject docObj = new()
                                                     {
@@ -139,7 +141,6 @@ namespace Plant3D
                                                             formFromTo.listView.Items.Add(item);
                                                         });
                                                     }
-
                                                 }
                                             }
                                             catch (DLException)
@@ -222,7 +223,7 @@ namespace Plant3D
                     {
                         DialogResult messageReplaceRelatedToEquip = new DialogResult();
                         if (countFT > 0)
-                            messageReplaceRelatedToEquip = MessageBox.Show("Existe uma ou mais linhas com Pipe Run To já preenchido, deseja substituir a propriedade?", "From To", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                            messageReplaceRelatedToEquip = MessageBox.Show("Existe um ou mais elementos com PireRunFrom/PipeRunTo já preenchidos, deseja substituir o valor atual do atributo?", "From To", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                         using (DocumentLock doclock = docLines.LockDocument())
                         {
                             using (var trTo = docLines.TransactionManager.StartTransaction())
@@ -281,9 +282,7 @@ namespace Plant3D
                                     MessageBox.Show("Selecione uma linha!!");
                                 }
                             }
-
                         }
-
                     }
                 }
             }

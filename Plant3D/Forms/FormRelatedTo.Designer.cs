@@ -117,7 +117,7 @@ namespace Plant3D
             this.checkBoxEquipmentOtherDWG.Name = "checkBoxEquipmentOtherDWG";
             this.checkBoxEquipmentOtherDWG.Size = new System.Drawing.Size(168, 17);
             this.checkBoxEquipmentOtherDWG.TabIndex = 10;
-            this.checkBoxEquipmentOtherDWG.Text = "Equipamento em outro DWG?";
+            this.checkBoxEquipmentOtherDWG.Text = "Related ToTarget in another DWG?";
             this.checkBoxEquipmentOtherDWG.UseVisualStyleBackColor = true;
             this.checkBoxEquipmentOtherDWG.Click += new System.EventHandler(this.checkBoxEquipmentOtherDWG_CheckedChanged);
             // 

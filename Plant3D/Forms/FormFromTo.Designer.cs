@@ -118,7 +118,7 @@ namespace Plant3D
             this.checkBoxOtherDWG.Name = "checkBoxOtherDWG";
             this.checkBoxOtherDWG.Size = new System.Drawing.Size(88, 17);
             this.checkBoxOtherDWG.TabIndex = 10;
-            this.checkBoxOtherDWG.Text = "Outro DWG?";
+            this.checkBoxOtherDWG.Text = "From ToElement " + "To" + " in another DWG?";
             this.checkBoxOtherDWG.UseVisualStyleBackColor = true;
             this.checkBoxOtherDWG.Click += new System.EventHandler(this.checkBoxEquipmentOtherDWG_CheckedChanged);
             // 
@@ -169,76 +169,7 @@ namespace Plant3D
             this.PerformLayout();
 
         }
-        private void RelatedTo()
-        {
-            PlantProject proj = PlantApplication.CurrentProject;
-            ProjectPartCollection projParts = proj.ProjectParts;
-            PnIdProject pnidProj = (PnIdProject)projParts["PnId"];
-            DataLinksManager dlm = pnidProj.DataLinksManager;
-            PnPDatabase db = dlm.GetPnPDatabase();
-            Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
-            Editor ed = doc.Editor;
 
-            List<PromptEntityResult> Instruments = new List<PromptEntityResult>();
-            PromptEntityResult result;
-
-            bool loop = true;
-            while (loop)
-            {
-                result = ed.GetEntity("\nSelecione um  Instrumento: ");
-                StringCollection eKeys = new StringCollection
-                {
-
-                    "Description",
-                    "Tag",
-                    "RelatedTo",
-                    "ClassName",
-                    "Class"
-                };
-                StringCollection eVals = dlm.GetProperties(dlm.FindAcPpRowId(result.ObjectId), eKeys, true);
-                if (result.Status == PromptStatus.OK){
-                    Instruments.Add(result); 
-                }
-                DialogResult dr = MessageBox.Show("Deseja continuar a selecionar Instrumentos?", "RelatedTo", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
-                if (dr == DialogResult.No)
-                    break;
-            }
-
-            PromptEntityResult equipment = ed.GetEntity("\nSelecione um Equipamento: ");
-            if (equipment.Status == PromptStatus.OK)
-            {
-                int equipmentRowId = dlm.FindAcPpRowId(equipment.ObjectId);
-                StringCollection eKeys = new StringCollection
-                {   
-                    
-                    "Description",
-                    "Tag",
-                    "RelatedTo",
-                    "ClassName",
-                    "Class"
-                };
-                StringCollection eVals = dlm.GetProperties(equipmentRowId, eKeys, true);
-                foreach (PromptEntityResult entityResult in Instruments)
-                {
-                    int instrumentRowId = dlm.FindAcPpRowId(entityResult.ObjectId);
-                    StringCollection iKeys = new StringCollection
-                    {
-                        "Description",
-                        "Tag",
-                        "RelatedTo",
-                        "ClassName",
-                        "Class"
-                    };
-                    StringCollection iVals = dlm.GetProperties(instrumentRowId, iKeys, true);
-
-                    iVals[2] = eVals[1];
-
-                    db.StartTransaction();
-                    dlm.SetProperties(entityResult.ObjectId, iKeys, iVals);
-                    db.CommitTransaction();
-                }
-            }
-        }
         #endregion
         public ListView listView;
         private ColumnHeader columnHeader1;
