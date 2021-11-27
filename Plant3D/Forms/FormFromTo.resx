@@ -118,11 +118,23 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="richTextBox1.Text" xml:space="preserve">
-    <value>1 - Para selecionar os instrumentos a serem relacionados, clique no botão "Instruments". Selecione um instrumento no modelo desejado. Será exibida uma mensagem perguntando se deseja selecionar outro instrumento, caso afirmativo, clique em "Sim" e repita o processo até que todos os instrumentos sejam selecionados. Caso negativo, se o equipamento a ser relacionado estiver no mesmo modelo, a aplicação solicitará automáticamente que seja selecionado o equipamento a ser relacionado;
+    <value>1 - Para selecionar uma linha, clique no botão "Line".
+ Selecione a linha no modelo desejado. Após selecionar 
+a linha, selecione o objeto From como indicado no 
+cursor do mouse. Por fim, selecione o objeto To para 
+finalizar a operação.
 
-2- Para selecionar um equipamento em outro modelo, a opção "Equipamento em outro DWG?" deverá ser marcada antes que se inicie o processo de seleção dos instrumentos. Com esta opção marcada a seleção do equipamento asd
+2 - Caso o seu objetivo seja relacionar objetos em 
+DWGs diferentes, marque a caixa de seleção 
+"Outro DWG?" antes de iniciar a operação. Após isso 
+realize os passos da primeira instrução novamente até
+chegar na seleção do objeto To. Para selecionar o 
+objeto To vá para o DWG desejado e clique no botão 
+"Object To". Selecione o objeto desejado!
 
-3 -adsafadsffffffffffffffffffffffffffffsssssssssssssssssssssssssssssssssssssssssssssssssssssinicie o processo de seleçãoinicie o processo de seleçãoinicie o processo de seleçãoinicie o processo de seleção</value>
+3 - Caso tenha selecionado objetos indesejados, clique 
+no botão "Clear Select" para limpar a seleção e refaça a 
+operação.</value>
   </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">

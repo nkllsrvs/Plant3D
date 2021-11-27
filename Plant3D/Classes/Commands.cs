@@ -138,7 +138,7 @@ namespace Plant3D
                 {
                     DialogResult messageReplaceRelatedToEquip = new DialogResult();
                     if (countRTE > 0)
-                        messageReplaceRelatedToEquip = MessageBox.Show("Existe um ou mais instrumentos com RelatedToEquip já preenchido, deseja substituir a propriedade?", "Related To", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                        messageReplaceRelatedToEquip = MessageBox.Show("Existe um ou mais elementos com RelatedToEquip já preenchidos, deseja substituir o valor atual do atributo?", "Related To", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                     while (true)
                     {
                         using (DocumentLock doclock = docInstrumentsRT.LockDocument())
@@ -162,7 +162,14 @@ namespace Plant3D
                                         Equipment = true
 
                                     };
-                                    documentInfos[IndexOfDocuments(documentInfos, docInstrumentsRT.Name)].UsedDocumentObjects.Add(documentObjectE);
+                                    try
+                                    {
+                                        documentInfos[IndexOfDocuments(documentInfos, docInstrumentsRT.Name)].UsedDocumentObjects.Add(documentObjectE);
+                                    }
+                                    catch (System.Exception ex)
+                                    {
+                                        ex.ToString();
+                                    }
 
                                     foreach (ObjectId intrumentId in InstrumentsRT)
                                     {
@@ -184,7 +191,14 @@ namespace Plant3D
                                             Instrument = true
 
                                         };
-                                        documentInfos[IndexOfDocuments(documentInfos, docInstrumentsRT.Name)].UsedDocumentObjects.Add(documentObjectI);
+                                        try
+                                        {
+                                            documentInfos[IndexOfDocuments(documentInfos, docInstrumentsRT.Name)].UsedDocumentObjects.Add(documentObjectI);
+                                        }
+                                        catch (System.Exception ex)
+                                        {
+                                            ex.ToString();
+                                        }
                                         if (countRTE > 0 & messageReplaceRelatedToEquip == DialogResult.No)
                                         {
                                             if (String.IsNullOrEmpty(iVals[1]))
@@ -268,7 +282,14 @@ namespace Plant3D
                                     FromOtherDWG = true,
                                     OtherDWGDocument = doc.Name
                                 };
-                                documentInfos[IndexOfDocuments(documentInfos, doc.Name)].UsedDocumentObjects.Add(documentObject);
+                                try
+                                {
+                                    documentInfos[IndexOfDocuments(documentInfos, doc.Name)].UsedDocumentObjects.Add(documentObject);
+                                }
+                                catch (System.Exception ex)
+                                {
+                                    ex.ToString();
+                                }
 
                                 foreach (ObjectId intrumentId in InstrumentsRT)
                                 {

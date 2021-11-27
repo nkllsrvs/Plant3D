@@ -42,13 +42,13 @@ namespace Plant3D
             this.listView = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.buttonEquipment = new System.Windows.Forms.Button();
             this.buttonLines = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.checkBoxOtherDWG = new System.Windows.Forms.CheckBox();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.buttonClearSelection = new System.Windows.Forms.Button();
-            this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SuspendLayout();
             // 
             // listView
@@ -76,6 +76,11 @@ namespace Plant3D
             this.columnHeader2.Text = "From";
             this.columnHeader2.Width = 100;
             // 
+            // columnHeader3
+            // 
+            this.columnHeader3.Text = "To";
+            this.columnHeader3.Width = 100;
+            // 
             // buttonEquipment
             // 
             this.buttonEquipment.BackColor = System.Drawing.Color.Silver;
@@ -86,7 +91,7 @@ namespace Plant3D
             this.buttonEquipment.Name = "buttonEquipment";
             this.buttonEquipment.Size = new System.Drawing.Size(224, 42);
             this.buttonEquipment.TabIndex = 6;
-            this.buttonEquipment.Text = "Equipment / Line";
+            this.buttonEquipment.Text = "Object To";
             this.buttonEquipment.UseVisualStyleBackColor = false;
             this.buttonEquipment.Click += new System.EventHandler(this.buttonFromTo_Click);
             // 
@@ -118,7 +123,7 @@ namespace Plant3D
             this.checkBoxOtherDWG.Name = "checkBoxOtherDWG";
             this.checkBoxOtherDWG.Size = new System.Drawing.Size(88, 17);
             this.checkBoxOtherDWG.TabIndex = 10;
-            this.checkBoxOtherDWG.Text = "From ToElement " + "To" + " in another DWG?";
+            this.checkBoxOtherDWG.Text = "Element \"To\" in another DWG?";
             this.checkBoxOtherDWG.UseVisualStyleBackColor = true;
             this.checkBoxOtherDWG.Click += new System.EventHandler(this.checkBoxEquipmentOtherDWG_CheckedChanged);
             // 
@@ -143,11 +148,6 @@ namespace Plant3D
             this.buttonClearSelection.Text = "Clear Select";
             this.buttonClearSelection.UseVisualStyleBackColor = false;
             this.buttonClearSelection.Click += new System.EventHandler(this.buttonClearClick);
-            // 
-            // columnHeader3
-            // 
-            this.columnHeader3.Text = "To";
-            this.columnHeader3.Width = 100;
             // 
             // FormFromTo
             // 

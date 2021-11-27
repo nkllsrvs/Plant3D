@@ -223,7 +223,7 @@ namespace Plant3D
                     {
                         DialogResult messageReplaceRelatedToEquip = new DialogResult();
                         if (countFT > 0)
-                            messageReplaceRelatedToEquip = MessageBox.Show("Existe um ou mais elementos com PireRunFrom/PipeRunTo já preenchidos, deseja substituir o valor atual do atributo?", "From To", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                            messageReplaceRelatedToEquip = MessageBox.Show("Existe um ou mais elementos com PipeRunFrom/PipeRunTo já preenchidos, deseja substituir o valor atual do atributo?", "From To", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                         using (DocumentLock doclock = docLines.LockDocument())
                         {
                             using (var trTo = docLines.TransactionManager.StartTransaction())
@@ -279,7 +279,7 @@ namespace Plant3D
                                 }
                                 else
                                 {
-                                    MessageBox.Show("Selecione uma linha!!");
+                                    MessageBox.Show("Categoria de elemento inválida!");
                                 }
                             }
                         }
@@ -359,7 +359,7 @@ namespace Plant3D
                     }
                     tr1.Commit();
                 }
-                PromptEntityResult equipment = ed.GetEntity("\nSelecione um Equipamento ou  Linha: ");
+                PromptEntityResult equipment = ed.GetEntity("\nSelecione o objeto To: ");
                 if (equipment.Status == PromptStatus.OK)
                 {
                     DialogResult messageReplaceRelatedToEquip = new DialogResult();
@@ -476,7 +476,7 @@ namespace Plant3D
                             }
                             else
                             {
-                                MessageBox.Show("Selecione um equipamento ou linha!!");
+                                MessageBox.Show("Selecione o objeto To!!");
                             }
 
                         }
@@ -484,12 +484,12 @@ namespace Plant3D
                 }
                 else
                 {
-                    MessageBox.Show("Equipamento selecionado inválido!");
+                    MessageBox.Show("Objeto selecionado inválido!");
                 }
             }
             else
             {
-                MessageBox.Show("Lista de Instrumentos está vazia, selecione instrumentos!!");
+                MessageBox.Show("Lista de linhas está vazia, selecione uma ou mais linhas!!");
             }
         }
         private void checkBoxEquipmentOtherDWG_CheckedChanged(object sender, EventArgs e)
