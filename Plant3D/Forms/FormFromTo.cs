@@ -282,14 +282,21 @@ namespace Plant3D
                                     else
                                     {
                                         MessageBox.Show("Categoria de elemento inválida!");
+
                                     }
                                 }
                             }
-
                         }
                         else
                         {
                             MessageBox.Show("From/To não foi executado.", "From To", MessageBoxButtons.OK, MessageBoxIcon.Question);
+                            foreach (ListViewItem item in listView.Items)
+                                this.listView.Items.Remove(item);
+                            this.listView.Items.Clear();
+                            Linhas.Clear();
+                            LinhasOld.Clear();
+                            countFT = 0;
+                            break;
                         }
                     }
                 }
