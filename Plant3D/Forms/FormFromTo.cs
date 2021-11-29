@@ -289,7 +289,7 @@ namespace Plant3D
                         }
                         else
                         {
-                            MessageBox.Show("From/To não foi executado.", "From To", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                            MessageBox.Show("From/To não foi executado.", "From To", MessageBoxButtons.OK, MessageBoxIcon.Question);
                         }
                     }
                 }
