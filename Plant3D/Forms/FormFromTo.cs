@@ -117,7 +117,7 @@ namespace Plant3D
                                             {
                                                 if (HaveTag(dlmLines.GetAllProperties(id, true)))
                                                 {
-                                                    if (!String.IsNullOrEmpty(iVals[1]) | !String.IsNullOrEmpty(iVals[2]))
+                                                    if (!String.IsNullOrEmpty(entKeys[1]) | !String.IsNullOrEmpty(entKeys[2]))
                                                         countFT++;
                                                     StringCollection entVal = dlmLines.GetProperties(dlmLines.FindAcPpRowId(entity.ObjectId), entKeys, true);
                                                     DocumentObject docObj = new()
