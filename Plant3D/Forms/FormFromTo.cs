@@ -117,8 +117,6 @@ namespace Plant3D
                                             {
                                                 if (HaveTag(dlmLines.GetAllProperties(id, true)))
                                                 {
-                                                    if (!String.IsNullOrEmpty(entKeys[1]) | !String.IsNullOrEmpty(entKeys[2]))
-                                                        countFT++;
                                                     StringCollection entVal = dlmLines.GetProperties(dlmLines.FindAcPpRowId(entity.ObjectId), entKeys, true);
                                                     DocumentObject docObj = new()
                                                     {
@@ -131,6 +129,8 @@ namespace Plant3D
                                                     };
                                                     if (SamePipeLineGroup(TagPipeLineGroup(selectedLine.Tag), TagPipeLineGroup(docObj.Tag)))
                                                     {
+                                                        if (!String.IsNullOrEmpty(entVal[1]) | !String.IsNullOrEmpty(entVal[2]))
+                                                            countFT++;
                                                         pipeLineGroup.Add(docObj);
                                                         Linhas.Add(id);
                                                         Invoke((MethodInvoker)delegate
