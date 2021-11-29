@@ -228,8 +228,6 @@ namespace Plant3D
                     PromptEntityResult objectTo = ed.GetEntity("\nSelecione o objeto To: ");
                     if (objectTo.Status == PromptStatus.OK)
                     {
-                        if(countFT > 0)
-                            MessageBox.Show("Existe um ou mais elementos com PipeRunFrom/PipeRunTo já preenchidos e o valor atual do atributo será substituido.", "From To", MessageBoxButtons.OK, MessageBoxIcon.Question);
                         using (DocumentLock doclock = docLines.LockDocument())
                         {
                             using (var trTo = docLines.TransactionManager.StartTransaction())
