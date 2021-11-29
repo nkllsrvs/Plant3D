@@ -221,7 +221,7 @@ namespace Plant3D
                     PromptEntityResult objectTo = ed.GetEntity("\nSelecione o objeto To: ");
                     if (objectTo.Status == PromptStatus.OK)
                     {
-                        DialogResult messageReplaceFromTo = new DialogResult();
+                        DialogResult messageReplaceFromTo = DialogResult.OK;
                         if (countFT > 0)
                             messageReplaceFromTo = MessageBox.Show("Existe um ou mais elementos com PipeRunFrom/PipeRunTo já preenchidos, deseja substituir o valor atual do atributo?", "From To", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                         if (messageReplaceFromTo == DialogResult.OK)
