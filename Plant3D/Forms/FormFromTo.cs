@@ -223,7 +223,6 @@ namespace Plant3D
             {
                 while (true)
                 {
-
                     //mudar equipment para object
                     PromptEntityResult objectTo = ed.GetEntity("\nSelecione o objeto To: ");
                     if (objectTo.Status == PromptStatus.OK)
@@ -249,19 +248,6 @@ namespace Plant3D
                                             "PipeRunFrom"
                                         };
                                         StringCollection lVals = dlmLines.GetProperties(lineRowId, lKeys, true);
-                                        if (countFT > 0 )
-                                        {
-                                            if (String.IsNullOrEmpty(lVals[1]))
-                                            {
-                                                lVals[1] = toVals[0];
-                                                dbLines.StartTransaction();
-                                                dlmLines.SetProperties(lineObj.Id, lKeys, lVals);
-                                                Entity entEdited = (Entity)trTo.GetObject(lineObj.Id, OpenMode.ForWrite);
-                                                ReplacePropertys(entEdited, LinhasOld);
-                                                dbLines.CommitTransaction();
-                                            }
-                                        }
-                                        else
                                         {
                                             lVals[1] = toVals[0];
                                             dbLines.StartTransaction();
