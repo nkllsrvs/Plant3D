@@ -221,33 +221,45 @@ namespace Plant3D
                     PromptEntityResult objectTo = ed.GetEntity("\nSelecione o objeto To: ");
                     if (objectTo.Status == PromptStatus.OK)
                     {
-                        DialogResult messageReplaceRelatedToEquip = new DialogResult();
+                        DialogResult messageReplaceFromTo = new DialogResult();
                         if (countFT > 0)
-                            messageReplaceRelatedToEquip = MessageBox.Show("Existe um ou mais elementos com PipeRunFrom/PipeRunTo já preenchidos, deseja substituir o valor atual do atributo?", "From To", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                        using (DocumentLock doclock = docLines.LockDocument())
+                            messageReplaceFromTo = MessageBox.Show("Existe um ou mais elementos com PipeRunFrom/PipeRunTo já preenchidos, deseja substituir o valor atual do atributo?", "From To", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                        if (messageReplaceFromTo == DialogResult.OK)
                         {
-                            using (var trTo = docLines.TransactionManager.StartTransaction())
+                            using (DocumentLock doclock = docLines.LockDocument())
                             {
-                                Entity ent = (Entity)trTo.GetObject(objectTo.ObjectId, OpenMode.ForRead);
-                                //ao invés de usar uma classe use o metodo de verificar se tem TAG ou usar classe de Equipment(Geral)
-                                if (ent.Id.ObjectClass.DxfName == "ACPPASSET" | ent.Id.ObjectClass.DxfName == "SLINE")
+                                using (var trTo = docLines.TransactionManager.StartTransaction())
                                 {
-                                    int toRowId = dlmLines.FindAcPpRowId(objectTo.ObjectId);
-                                    StringCollection toKeys = new StringCollection { "Tag" };
-                                    StringCollection toVals = dlmLines.GetProperties(toRowId, toKeys, true);
-                                    foreach (DocumentObject lineObj in pipeLineGroup)
+                                    Entity ent = (Entity)trTo.GetObject(objectTo.ObjectId, OpenMode.ForRead);
+                                    //ao invés de usar uma classe use o metodo de verificar se tem TAG ou usar classe de Equipment(Geral)
+                                    if (ent.Id.ObjectClass.DxfName == "ACPPASSET" | ent.Id.ObjectClass.DxfName == "SLINE")
                                     {
-                                        int lineRowId = dlmLines.FindAcPpRowId(lineObj.Id);
-                                        StringCollection lKeys = new StringCollection
+                                        int toRowId = dlmLines.FindAcPpRowId(objectTo.ObjectId);
+                                        StringCollection toKeys = new StringCollection { "Tag" };
+                                        StringCollection toVals = dlmLines.GetProperties(toRowId, toKeys, true);
+                                        foreach (DocumentObject lineObj in pipeLineGroup)
+                                        {
+                                            int lineRowId = dlmLines.FindAcPpRowId(lineObj.Id);
+                                            StringCollection lKeys = new StringCollection
                                         {
                                             "Tag",
                                             "PipeRunTo",
                                             "PipeRunFrom"
                                         };
-                                        StringCollection lVals = dlmLines.GetProperties(lineRowId, lKeys, true);
-                                        if (countFT > 0 & messageReplaceRelatedToEquip == DialogResult.No)
-                                        {
-                                            if (String.IsNullOrEmpty(lVals[1]))
+                                            StringCollection lVals = dlmLines.GetProperties(lineRowId, lKeys, true);
+                                            if (countFT > 0 & messageReplaceFromTo == DialogResult.No)
+                                            {
+                                                if (String.IsNullOrEmpty(lVals[1]))
+                                                {
+                                                    lVals[1] = toVals[0];
+                                                    dbLines.StartTransaction();
+                                                    dlmLines.SetProperties(lineObj.Id, lKeys, lVals);
+                                                    Entity entEdited = (Entity)trTo.GetObject(lineObj.Id, OpenMode.ForWrite);
+                                                    ReplacePropertys(entEdited, LinhasOld);
+                                                    dbLines.CommitTransaction();
+                                                }
+                                            }
+                                            else
                                             {
                                                 lVals[1] = toVals[0];
                                                 dbLines.StartTransaction();
@@ -257,31 +269,27 @@ namespace Plant3D
                                                 dbLines.CommitTransaction();
                                             }
                                         }
-                                        else
-                                        {
-                                            lVals[1] = toVals[0];
-                                            dbLines.StartTransaction();
-                                            dlmLines.SetProperties(lineObj.Id, lKeys, lVals);
-                                            Entity entEdited = (Entity)trTo.GetObject(lineObj.Id, OpenMode.ForWrite);
-                                            ReplacePropertys(entEdited, LinhasOld);
-                                            dbLines.CommitTransaction();
-                                        }
+                                        MessageBox.Show("From To executado com sucesso!!");
+                                        foreach (ListViewItem item in listView.Items)
+                                            this.listView.Items.Remove(item);
+                                        this.listView.Items.Clear();
+                                        Linhas.Clear();
+                                        LinhasOld.Clear();
+                                        trTo.Commit();
+                                        countFT = 0;
+                                        break;
                                     }
-                                    MessageBox.Show("From To executado com sucesso!!");
-                                    foreach (ListViewItem item in listView.Items)
-                                        this.listView.Items.Remove(item);
-                                    this.listView.Items.Clear();
-                                    Linhas.Clear();
-                                    LinhasOld.Clear();
-                                    trTo.Commit();
-                                    countFT = 0;
-                                    break;
-                                }
-                                else
-                                {
-                                    MessageBox.Show("Categoria de elemento inválida!");
+                                    else
+                                    {
+                                        MessageBox.Show("Categoria de elemento inválida!");
+                                    }
                                 }
                             }
+
+                        }
+                        else
+                        {
+                            MessageBox.Show("From/To não foi executado.", "From To", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                         }
                     }
                 }
