@@ -107,7 +107,7 @@ namespace Plant3D
                                     iOld.Layer = ent.Layer;
                                     iOld.LayerId = ent.LayerId;
                                     iOld.Tag = valTag[0];
-                                    iOld.RelatedTo = true;
+                                    iOld.UsedRelatedTo = true;
                                     InstrumentsRTOld.Add(iOld);
 
                                     Invoke((MethodInvoker)delegate
@@ -149,6 +149,7 @@ namespace Plant3D
                                 //Pegando o nome da classe que aparace no PLants como parametro de filtro entre linha e equipamento
                                 if (ent.Id.ObjectClass.DxfName == "ACPPASSET" | ent.Id.ObjectClass.DxfName == "SLINE") //ACPPDYNAMICASSET
                                 {
+
                                     int equipmentRowId = dlmInstrumentsRT.FindAcPpRowId(equipment.ObjectId);
                                     StringCollection eKeys = new StringCollection { "Tag" };
                                     StringCollection eVals = dlmInstrumentsRT.GetProperties(equipmentRowId, eKeys, true);
@@ -157,8 +158,8 @@ namespace Plant3D
                                     {
                                         Id = ent.ObjectId,
                                         Tag = eVals[0],
-                                        RelatedTo = true,
-                                        FromOtherDWG = false,
+                                        UsedRelatedTo = true,
+                                        OtherDWG = false,
                                         Equipment = true
 
                                     };
@@ -174,19 +175,15 @@ namespace Plant3D
                                     foreach (ObjectId intrumentId in InstrumentsRT)
                                     {
                                         int instrumentRowId = dlmInstrumentsRT.FindAcPpRowId(intrumentId);
-                                        StringCollection iKeys = new StringCollection
-                                        {
-                                            "Tag",
-                                            "RelatedToEquip"
-                                        };
+                                        StringCollection iKeys = new StringCollection { "Tag", "RelatedToEquip", "OtherDWG", "OtherDWGName", "UsedFromTo", "UsedRelatedTo" };
                                         StringCollection iVals = dlmInstrumentsRT.GetProperties(instrumentRowId, iKeys, true);
 
                                         DocumentObject documentObjectI = new()
                                         {
                                             Id = intrumentId,
                                             Tag = iVals[0],
-                                            RelatedTo = true,
-                                            FromOtherDWG = false,
+                                            UsedRelatedTo = true,
+                                            OtherDWG = false,
                                             RelatedId = ent.ObjectId,
                                             Instrument = true
 
@@ -203,8 +200,9 @@ namespace Plant3D
                                         {
                                             if (String.IsNullOrEmpty(iVals[1]))
                                             {
-
                                                 iVals[1] = eVals[0];
+                                                iVals[2] = "false";
+                                                iVals[5] = "true";
                                                 dbInstrumentsRT.StartTransaction();
                                                 dlmInstrumentsRT.SetProperties(intrumentId, iKeys, iVals);
                                                 Entity entEdited = (Entity)trEquipment.GetObject(intrumentId, OpenMode.ForWrite);
@@ -214,8 +212,9 @@ namespace Plant3D
                                         }
                                         else
                                         {
-
                                             iVals[1] = eVals[0];
+                                            iVals[2] = "false";
+                                            iVals[5] = "true";
                                             dbInstrumentsRT.StartTransaction();
                                             dlmInstrumentsRT.SetProperties(intrumentId, iKeys, iVals);
                                             Entity entEdited = (Entity)trEquipment.GetObject(intrumentId, OpenMode.ForWrite);
@@ -278,9 +277,9 @@ namespace Plant3D
                                 {
                                     Id = ent.ObjectId,
                                     Tag = eVals[0],
-                                    RelatedTo = true,
-                                    FromOtherDWG = true,
-                                    OtherDWGDocument = doc.Name
+                                    UsedRelatedTo = true,
+                                    OtherDWG = true,
+                                    OtherDWGName = doc.Name
                                 };
                                 try
                                 {
@@ -294,17 +293,16 @@ namespace Plant3D
                                 foreach (ObjectId intrumentId in InstrumentsRT)
                                 {
                                     int instrumentRowId = dlmInstrumentsRT.FindAcPpRowId(intrumentId);
-                                    StringCollection iKeys = new StringCollection
-                                    {
-                                        "Tag",
-                                        "RelatedToEquip"
-                                    };
+                                    StringCollection iKeys = new StringCollection { "Tag", "RelatedToEquip", "OtherDWG", "OtherDWGName", "UsedFromTo", "UsedRelatedTo" };
                                     StringCollection iVals = dlmInstrumentsRT.GetProperties(instrumentRowId, iKeys, true);
                                     if (countRTE > 0 & messageReplaceRelatedToEquip == DialogResult.No)
                                     {
                                         if (String.IsNullOrEmpty(iVals[1]))
                                         {
                                             iVals[1] = eVals[0];
+                                            iVals[2] = "true";
+                                            iVals[3] = doc.Name;
+                                            iVals[5] = "true";
                                             dbInstrumentsRT.StartTransaction();
                                             dlmInstrumentsRT.SetProperties(intrumentId, iKeys, iVals);
                                             Transaction trInstrumenst = docInstrumentsRT.TransactionManager.StartTransaction();
@@ -317,6 +315,9 @@ namespace Plant3D
                                     else
                                     {
                                         iVals[1] = eVals[0];
+                                        iVals[2] = "true";
+                                        iVals[3] = doc.Name;
+                                        iVals[5] = "true";
                                         dbInstrumentsRT.StartTransaction();
                                         dlmInstrumentsRT.SetProperties(intrumentId, iKeys, iVals);
                                         Transaction trInstrumenst = docInstrumentsRT.TransactionManager.StartTransaction();
@@ -362,7 +363,7 @@ namespace Plant3D
                     {
                         if (documentObject.Id == docObj.Id)
                         {
-                            docObj.RelatedTo = true;
+                            docObj.UsedRelatedTo = true;
                             break;
                         }
                     }
@@ -577,7 +578,7 @@ namespace Plant3D
                                     using (var tr = acDoc.TransactionManager.StartTransaction())
                                     {
                                         int rowId = dlm.FindAcPpRowId(obj.Id);
-                                        if (obj.RelatedTo == true)
+                                        if (obj.UsedRelatedTo == true)
                                         {
                                             StringCollection oKeys = new StringCollection { "Tag", "RelatedToEquip" };
                                             StringCollection oVals = dlm.GetProperties(rowId, oKeys, true);
@@ -586,7 +587,7 @@ namespace Plant3D
                                             dlm.SetProperties(rowId, oKeys, oVals);
                                             db.CommitTransaction();
                                         }
-                                        if (obj.FromTo == true)
+                                        if (obj.UsedFromTo == true)
                                         {
                                             StringCollection oKeys = new StringCollection { "Tag", "Pipe Run To", "Pipe Run From" };
                                             StringCollection oVals = dlm.GetProperties(rowId, oKeys, true);
@@ -601,7 +602,7 @@ namespace Plant3D
                             }
                         }
                     }
-                    
+
                     documentInfos.Remove(docCompare);
                 }
             }
@@ -708,215 +709,68 @@ namespace Plant3D
         #endregion
 
         #region Testes
-        //ads_queueexpr
-        [DllImport("accore.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, EntryPoint = "ads_queueexpr")]
-        extern static private int ads_queueexpr(byte[] command);
-        [CommandMethod("tJL", CommandFlags.Modal | CommandFlags.UsePickSet)]
-        public void TestConnectedLines()
+        [CommandMethod("tt")]
+        public void test()
         {
-            Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
-            Editor ed = doc.Editor;
-            Database db = doc.Database;
-            PromptEntityOptions pso = new PromptEntityOptions("\nPick a single line to join: ");
-            PromptEntityResult res = ed.GetEntity(pso);
-            if (res.Status != PromptStatus.OK) return;
-            using (DocumentLock doclock = doc.LockDocument())
-            {
-                using (Transaction tr = db.TransactionManager.StartTransaction())
-                {
-                    Autodesk.AutoCAD.ApplicationServices.Application.SetSystemVariable("PICKFIRST", 1);
-                    Autodesk.AutoCAD.ApplicationServices.Application.SetSystemVariable("PEDITACCEPT", 0);
-                    BlockTableRecord btr = (BlockTableRecord)tr.GetObject(db.CurrentSpaceId, OpenMode.ForRead) as BlockTableRecord;
-                    List<ObjectId> ids = JoinLines(btr, res.ObjectId);
-                    ObjectId[] lines = ids.ToArray();
-                    ed.SetImpliedSelection(lines);
-                    PromptSelectionResult chres = ed.SelectImplied();
-
-                    if (chres.Status != PromptStatus.OK)
-                    {
-                        ed.WriteMessage("\nNothing added in the chain!");
-                        return;
-                    }
-                    else
-                    {
-                        ed.WriteMessage(chres.Value.Count.ToString());
-                    }
-                    SelectionSet newset = SelectionSet.FromObjectIds(lines);
-                    ed.SetImpliedSelection(newset);
-                    string handles = "";
-                    foreach (SelectedObject selobj in newset)
-                    {
-                        Entity subent = tr.GetObject(selobj.ObjectId, OpenMode.ForWrite) as Entity;
-                        string hdl = string.Format("(handent \"{0}\")", subent.Handle.ToString());
-                        handles = handles + hdl + " ";
-                    }
-                    System.Text.UnicodeEncoding uEncode = new System.Text.UnicodeEncoding();
-                    // if PEDITACCEPT is set to 1 enshort the command avoiding "_Y" argument:
-                    ads_queueexpr(uEncode.GetBytes("(COMMAND \"_.PEDIT\" \"_M\"" + handles + "\"\"" + "\"_Y\" \"_J\" \"\" \"\")"));
-                    tr.Commit();
-                }
-            }
-        }
-        private void SelectConnectedLines(BlockTableRecord btr, List<ObjectId> ids, ObjectId id)
-        {
-            Entity en = id.GetObject(OpenMode.ForRead, false) as Entity;
-            Line ln = en as Line;
-            if (ln != null)
-                foreach (ObjectId idx in btr)
-                {
-                    Entity ex = idx.GetObject(OpenMode.ForRead, false) as Entity;
-                    Line lx = ex as Line;
-                    if (((ln.StartPoint == lx.StartPoint) || (ln.StartPoint == lx.EndPoint)) ||
-                        ((ln.EndPoint == lx.StartPoint) || (ln.EndPoint == lx.EndPoint)))
-                        if (!ids.Contains(idx))
-                        {
-                            ids.Add(idx);
-                            SelectConnectedLines(btr, ids, idx);
-                        }
-                }
-        }
-        public List<ObjectId> JoinLines(BlockTableRecord btr, ObjectId id)
-        {
-            List<ObjectId> ids = new List<ObjectId>();
-            SelectConnectedLines(btr, ids, id);
-            return ids;
-        }
-        [CommandMethod("TS")]
-        public void Group()
-        {
+            Document doc = Application.DocumentManager.MdiActiveDocument;
             PlantProject proj = PlantApplication.CurrentProject;
             ProjectPartCollection projParts = proj.ProjectParts;
             PnIdProject pnidProj = (PnIdProject)projParts["PnId"];
             DataLinksManager dlm = pnidProj.DataLinksManager;
             PnPDatabase db = dlm.GetPnPDatabase();
-            Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
-            Editor ed = doc.Editor;
-            PromptEntityResult line;
-            doc.LockDocument();
+            PromptSelectionResult selection = doc.Editor.SelectAll();
+            List<DocumentObject> objects = new List<DocumentObject>();
+            int countAlteredLines = 0;
 
-            while (true)
+            if (selection.Status == PromptStatus.OK)
             {
-                line = ed.GetEntity("\nSelecione uma linha: ");
-                StringCollection iKeys = new StringCollection
+                using (Transaction tr = doc.Database.TransactionManager.StartOpenCloseTransaction())
                 {
-                    "Description",
-                    "Tag",
-                    "Pipe Run To",
-                    "Pipe Run From",
-                    "ClassName"
-                };
-                StringCollection iVals = dlm.GetProperties(dlm.FindAcPpRowId(line.ObjectId), iKeys, true);
-                if (line.Status == PromptStatus.OK)
-                {
-                    using (DocumentLock doclock = doc.LockDocument())
+                    foreach (ObjectId id in selection.Value.GetObjectIds())
                     {
-                        using (var trLine = doc.TransactionManager.StartTransaction())
+                        Entity ent = (Entity)tr.GetObject(id, OpenMode.ForRead);
+                        LayerTableRecord layer = (LayerTableRecord)tr.GetObject(ent.LayerId, OpenMode.ForRead);
+                        StringCollection objectKeys = new StringCollection { "Tag", "OtherDWG", "OtherDWGName", "UsedFromTo", "UsedRelatedTo" };
+                        try
                         {
-                            Entity entityIf = (Entity)trLine.GetObject(line.ObjectId, OpenMode.ForRead);
-
-                            if (entityIf.Id.ObjectClass.DxfName == "SLINE")
+                            if (!layer.IsFrozen)
                             {
-                                Entity ent = (Entity)trLine.GetObject(line.ObjectId, OpenMode.ForRead);
-                                StringCollection keyTag = new StringCollection { "Tag", "Pipe Run To", "Pipe Run From", "Layer" };
-                                StringCollection valTag = dlm.GetProperties(dlm.FindAcPpRowId(line.ObjectId), keyTag, true);
-                                DocumentObject selectedLine = new()
+                                StringCollection objectValues = dlm.GetProperties(dlm.FindAcPpRowId(ent.ObjectId), objectKeys, true);
+                                if (!String.IsNullOrEmpty(objectValues[0]))
                                 {
-                                    Layer = ent.Layer,
-                                    LayerId = ent.LayerId,
-                                    Tag = valTag[0],
-                                    Id = ent.ObjectId,
-                                    BelongingDocument = doc.Name
-                                };
-                                PromptSelectionResult selection = doc.Editor.SelectAll();
-
-                                List<DocumentObject> pipeLineGroup = new List<DocumentObject>();
-
-                                using (Transaction tr = doc.Database.TransactionManager.StartOpenCloseTransaction())
-                                {
-                                    foreach (ObjectId id in selection.Value.GetObjectIds())
+                                    if (!String.IsNullOrEmpty(objectValues[3]) || !String.IsNullOrEmpty(objectValues[4]))
                                     {
-                                        Entity entity = (Entity)tr.GetObject(id, OpenMode.ForRead);
-                                        LayerTableRecord layer = (LayerTableRecord)tr.GetObject(entity.LayerId, OpenMode.ForRead);
-                                        if (!layer.IsFrozen)
-                                        {
-                                            StringCollection entKeys = new StringCollection { "Tag" };
-                                            //existe um objeto onde eu n posso pegar o rowId para fazer um get 
-                                            //no database dos valores respectivos as chaves
-                                            try
-                                            {
-                                                if (HaveTag(dlm.GetAllProperties(id, true)))
-                                                {
-                                                    StringCollection entVal = dlm.GetProperties(dlm.FindAcPpRowId(entity.ObjectId), entKeys, true);
-                                                    DocumentObject docObj = new()
-                                                    {
-                                                        Layer = entity.Layer,
-                                                        LayerId = entity.LayerId,
-                                                        Tag = entVal[0],
-                                                        Id = entity.ObjectId,
-                                                        BelongingDocument = doc.Name
-                                                    };
-                                                    if (SamePipeLineGroup(TagPipeLineGroup(selectedLine.Tag), TagPipeLineGroup(docObj.Tag)))
-                                                        pipeLineGroup.Add(docObj);
-                                                }
-                                            }
-                                            catch (DLException e)
-                                            {
-                                                _ = e;// runtime dando erro por nao haver link com a entidade 
-                                            }
-                                        }
+                                        countAlteredLines++;
+                                        DocumentObject obj = new DocumentObject();
+
+                                        obj.Id = ent.ObjectId;
+                                        obj.Tag = objectValues[0];
+                                        obj.OtherDWG = !String.IsNullOrEmpty(objectValues[1]) ? Convert.ToBoolean(objectValues[1]) : false;
+                                        obj.OtherDWGName = objectValues[2];
+                                        obj.UsedFromTo = !String.IsNullOrEmpty(objectValues[3]) ? Convert.ToBoolean(objectValues[3]) : false;
+                                        obj.UsedRelatedTo = !String.IsNullOrEmpty(objectValues[4]) ? Convert.ToBoolean(objectValues[4]) : false;
+
+                                        objects.Add(obj);
                                     }
-
-
-                                    tr.Commit();
-                                    trLine.Commit();
                                 }
-                                break;
+
                             }
-                            else
-                            {
-                                MessageBox.Show(dlm.GetProperties(dlm.FindAcPpRowId(line.ObjectId), iKeys, true)[1] + " não é uma linha!!");
-                            }
-                            trLine.Commit();
+                        }
+                        catch (DLException e)
+                        {
+                            _ = e;// runtime dando erro por nao haver link com a entidade 
                         }
 
                     }
-                }
-            }
+                    tr.Commit();
+                    if (countAlteredLines > 0)
+                        MessageBox.Show(countAlteredLines + " objetos usadoas!!", "teste", MessageBoxButtons.OK, MessageBoxIcon.Question);
+                    else
+                        MessageBox.Show("Não houve nenhuma alteração!!", "teste", MessageBoxButtons.OK, MessageBoxIcon.Question);
+                } // using
+            } // if
 
         }
-        public void ListarBloques()
-        {
-            Document doc = Application.DocumentManager.MdiActiveDocument;
-            Database objs = doc.Database;
-            PlantProject proj = PlantApplication.CurrentProject;
-            ProjectPartCollection projParts = proj.ProjectParts;
-            PnIdProject pnidProj = (PnIdProject)projParts["PnId"];
-            DataLinksManager dlm = pnidProj.DataLinksManager;
-
-            using (Transaction tr = objs.TransactionManager.StartTransaction())
-            {
-                BlockTable blckTbl;
-                blckTbl = tr.GetObject(objs.BlockTableId, OpenMode.ForRead) as BlockTable;
-
-                BlockTableRecord blckTblRcrd;
-                blckTblRcrd = tr.GetObject(blckTbl[BlockTableRecord.ModelSpace], OpenMode.ForRead) as BlockTableRecord;
-                var blockBeginId = dlm.GetAllProperties(blckTblRcrd.BlockBeginId, true);
-                var blockEndId = dlm.GetAllProperties(blckTblRcrd.BlockEndId, true);
-                foreach (ObjectId id in blckTblRcrd)
-                {
-
-                    var dbObj = tr.GetObject(id, OpenMode.ForRead);
-                    if (dbObj is BlockReference)
-                    {
-                        var blckRef = (BlockReference)dbObj;
-                        doc.Editor.WriteMessage("" + blckRef.Name);
-                    }
-                }
-
-                tr.Commit();
-            }
-        }
-
         #endregion
 
         public int IndexOfDocuments(List<DocumentInfo> documentInfos, string doc)

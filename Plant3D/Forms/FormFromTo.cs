@@ -100,7 +100,7 @@ namespace Plant3D
                                     Tag = valTag[0],
                                     Id = ent.ObjectId,
                                     BelongingDocument = docLines.Name,
-                                    FromOtherDWG = false
+                                    OtherDWG = false
                                 };
                                 if (!String.IsNullOrEmpty(valTag[1]) | !String.IsNullOrEmpty(valTag[2]))
                                 {
@@ -132,7 +132,7 @@ namespace Plant3D
                                                         Tag = entVal[0],
                                                         Id = entity.ObjectId,
                                                         BelongingDocument = docLines.Name,
-                                                        FromOtherDWG = false
+                                                        OtherDWG = false
                                                     };
                                                     if (SamePipeLineGroup(TagPipeLineGroup(selectedLine.Tag), TagPipeLineGroup(docObj.Tag)))
                                                     {
@@ -192,18 +192,15 @@ namespace Plant3D
                                     Tag = fromVals[0],
                                     Id = ent.ObjectId,
                                     BelongingDocument = docLines.Name,
-                                    FromOtherDWG = false
+                                    OtherDWG = false
                                 };
                                 foreach (DocumentObject lineObj in pipeLineGroup)
                                 {
                                     int lineRowId = dlmLines.FindAcPpRowId(lineObj.Id);
-                                    StringCollection lKeys = new StringCollection
-                                    {
-                                        "Tag",
-                                        "PipeRunFrom"
-                                    };
+                                    StringCollection lKeys = new StringCollection { "Tag", "PipeRunFrom", "OtherDWG", "OtherDWGName", "UsedFromTo", "UsedRelatedTo" };
                                     StringCollection lVals = dlmLines.GetProperties(lineRowId, lKeys, true);
                                     lVals[1] = fromVals[0];
+                                    lVals[4] = "true";
                                     dbLines.StartTransaction();
                                     dlmLines.SetProperties(lineObj.Id, lKeys, lVals);
                                     dbLines.CommitTransaction();
@@ -241,15 +238,12 @@ namespace Plant3D
                                     foreach (DocumentObject lineObj in pipeLineGroup)
                                     {
                                         int lineRowId = dlmLines.FindAcPpRowId(lineObj.Id);
-                                        StringCollection lKeys = new StringCollection
-                                        {
-                                            "Tag",
-                                            "PipeRunTo",
-                                            "PipeRunFrom"
-                                        };
+                                        StringCollection lKeys = new StringCollection { "Tag", "PipeRunTo", "OtherDWG", "OtherDWGName", "UsedFromTo", "UsedRelatedTo" };
                                         StringCollection lVals = dlmLines.GetProperties(lineRowId, lKeys, true);
                                         {
                                             lVals[1] = toVals[0];
+                                            lVals[2] = "false";
+                                            lVals[4] = "true";
                                             dbLines.StartTransaction();
                                             dlmLines.SetProperties(lineObj.Id, lKeys, lVals);
                                             Entity entEdited = (Entity)trTo.GetObject(lineObj.Id, OpenMode.ForWrite);
@@ -315,7 +309,7 @@ namespace Plant3D
                                         Tag = entVal[0],
                                         Id = entity.ObjectId,
                                         BelongingDocument = doc.Name,
-                                        FromOtherDWG = true,
+                                        OtherDWG = true,
                                     };
                                     if (SamePipeLineGroup(TagPipeLineGroup(docObj.Tag), TagPipeLineGroup(selectedLine.Tag)))
                                     {
@@ -329,13 +323,12 @@ namespace Plant3D
                                             formFromTo.listView.Items.Add(item);
                                         });
                                         int lineRowId = dlm.FindAcPpRowId(docObj.Id);
-                                        StringCollection lKeys = new StringCollection
-                                        {
-                                            "Tag",
-                                            "PipeRunFrom"
-                                        };
+                                        StringCollection lKeys = new StringCollection { "Tag", "PipeRunFrom", "OtherDWG", "OtherDWGName", "UsedFromTo", "UsedRelatedTo" };
                                         StringCollection lVals = dlmLines.GetProperties(lineRowId, lKeys, true);
                                         lVals[1] = selectedFrom.Tag;
+                                        lVals[2] = "true";
+                                        lVals[3] = doc.Name;
+                                        lVals[4] = "true";
                                         dlm.GetPnPDatabase().StartTransaction();
                                         dlm.SetProperties(docObj.Id, lKeys, lVals);
                                         dlm.GetPnPDatabase().CommitTransaction();
@@ -374,11 +367,11 @@ namespace Plant3D
                                     Tag = eVals[0],
                                     Id = ent.ObjectId,
                                     BelongingDocument = doc.Name,
-                                    FromOtherDWG = true,
+                                    OtherDWG = true,
                                 };
                                 foreach (ObjectId lineID in Linhas)
                                 {
-                                    if (pipeLineGroup.Find(f => f.Id == lineID).FromOtherDWG == true)
+                                    if (pipeLineGroup.Find(f => f.Id == lineID).OtherDWG == true)
                                     {
                                         int lineRowID = dlm.FindAcPpRowId(lineID);
                                         StringCollection iKeys = new StringCollection

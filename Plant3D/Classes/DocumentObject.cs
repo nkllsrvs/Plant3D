@@ -13,13 +13,13 @@ namespace Plant3D.Classes
         public string BelongingDocument { get; set; }
         public String Layer { get; set; }
         public ObjectId LayerId { get; set; }
-        public bool RelatedTo { get; set; }
-        public bool FromTo { get; set; }
+        public bool UsedRelatedTo { get; set; }
+        public bool UsedFromTo { get; set; }
         public bool Equipment { get; set; }
         public bool Instrument { get; set; }
         public bool Line { get; set; }
-        public bool FromOtherDWG { get; set; }
-        public string OtherDWGDocument { get; set; }
+        public bool OtherDWG { get; set; }
+        public string OtherDWGName { get; set; }
 
         public DocumentObject()
         {
@@ -29,7 +29,7 @@ namespace Plant3D.Classes
             this.Id = id;
             this.Tag = tag;
             this.BelongingDocument = belongingDocument;
-            this.RelatedTo = false;
+            this.UsedRelatedTo = false;
         }
         public DocumentObject(ObjectId id, string tag, string belongingDocument, String layer, ObjectId layerId)
         {
@@ -38,7 +38,7 @@ namespace Plant3D.Classes
             this.BelongingDocument = belongingDocument;
             this.Layer = layer;
             this.LayerId = layerId;
-            this.RelatedTo = false;
+            this.UsedRelatedTo = false;
 
         }
 
