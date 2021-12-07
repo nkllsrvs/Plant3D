@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
+using static Plant3D.Commands;
 
 namespace Plant3D.Classes
 {
@@ -15,6 +16,7 @@ namespace Plant3D.Classes
         [CommandMethod("vale", CommandFlags.Transparent)]
         public void TestRibbonTab()
         {
+            this.AddDocEvent();
             RibbonControl ribbonControl = ComponentManager.Ribbon;
             if (ribbonControl != null)
             {

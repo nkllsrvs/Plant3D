@@ -26,6 +26,7 @@ using Plant3D.Classes;
 using System.Runtime.InteropServices;
 using System.Linq;
 using Autodesk.ProcessPower.DataObjects;
+using Plant3D.Forms;
 
 [assembly: CommandClass(typeof(Plant3D.Commands))]
 [assembly: CommandClass(typeof(Plant3D.Classes.VALERibbon))]
@@ -39,6 +40,7 @@ namespace Plant3D
     {
         public static FormRelatedTo formRelateTo = new FormRelatedTo();
         public static FormFromTo formFromTo = new FormFromTo();
+        public static FormInconsistence formInconsistence;
         static readonly StringCollection linetypesSubstitute = new StringCollection { "Continuous", "DASHDOT", "HIDDEN", "HIDDEN2" };
         public static List<DocumentInfo> documentInfos = new List<DocumentInfo>();
         public readonly List<Instruments> InstrumentsRTOld = new List<Instruments>();
@@ -540,6 +542,295 @@ namespace Plant3D
         public void DocBeginDocClose(object senderObj, DocumentBeginCloseEventArgs docBegClsEvtArgs)
         {
             Document acDoc = Application.DocumentManager.MdiActiveDocument;
+            string caminhoDocumentoAtual = acDoc.Name;
+            PlantProject proj = PlantApplication.CurrentProject;
+            ProjectPartCollection projParts = proj.ProjectParts;
+            PnIdProject pnidProj = (PnIdProject)projParts["PnId"];
+            DataLinksManager dlm = pnidProj.DataLinksManager;
+            PnPDatabase db = dlm.GetPnPDatabase();
+            PromptSelectionResult prompt = acDoc.Editor.SelectAll();
+            StringCollection objectKeys = new StringCollection { "Tag", "OtherDWG", "OtherDWGName", "UsedFromTo", "UsedRelatedTo", "PipeRunFrom", "PipeRunTo", "RelatedToEquip" };
+            acDoc.LockDocument();
+            List<Inconsistence> Erros = new List<Inconsistence>();
+            List<Element> elements = new List<Element>();
+            using (Transaction tr = acDoc.Database.TransactionManager.StartOpenCloseTransaction())
+            {
+                foreach (ObjectId obj in prompt.Value.GetObjectIds())
+                {
+                    Entity ent = (Entity)tr.GetObject(obj, OpenMode.ForRead);
+                    LayerTableRecord layer = (LayerTableRecord)tr.GetObject(ent.LayerId, OpenMode.ForRead);
+                    try
+                    {
+                        if (!layer.IsFrozen)
+                        {
+                            StringCollection objectValues = dlm.GetProperties(dlm.FindAcPpRowId(ent.ObjectId), objectKeys, true);
+                            if (!String.IsNullOrEmpty(objectValues[0]))
+                            {
+                                //if (!String.IsNullOrEmpty(objectValues[3]) || !String.IsNullOrEmpty(objectValues[4]))
+                                //{
+                                // countAlteredLines++;
+                                Element element = new Element();
+                                element.id = ent.ObjectId;
+                                element.TAG = objectValues[0];
+                                var teste = ent.GetType().FullName;
+                                try
+                                {
+                                    element.ClassName = ((Autodesk.ProcessPower.PnIDObjects.Asset)ent).ClassName;
+                                }
+                                catch
+                                {
+
+                                }
+
+                                switch (ent.Id.ObjectClass.DxfName)
+                                {
+                                    case "ACPPASSET":
+                                        if (HaveRelatedToEquip(dlm.GetAllProperties(ent.ObjectId, true)))
+                                        {
+                                            element.Type = "Instrumento";
+                                            element.RelatedTo = objectValues[7] == "EQUIPAMENTO NÃO ENCONTRADO" ? "" : objectValues[7];
+                                            element.OtherDWG = !String.IsNullOrEmpty(objectValues[1]) ?
+                                                                    (objectValues[2] != caminhoDocumentoAtual ? Convert.ToBoolean(objectValues[1]) : false) :
+                                                                    false;
+                                            element.OtherDWGName = objectValues[2];
+                                            element.HaveInOtherDocRT = false;
+                                            if (element.OtherDWG)
+                                            {
+                                                //Document otherDoc = Application.DocumentManager.Open(element.OtherDWGName, false);
+                                                //PlantProject projOD = PlantApplication.CurrentProject;
+                                                //ProjectPartCollection projPartsOD = proj.ProjectParts;
+                                                //PnIdProject pnidProjOD = (PnIdProject)projParts["PnId"];
+                                                //DataLinksManager dlmOD = pnidProj.DataLinksManager;
+                                                //PnPDatabase dbOD = dlm.GetPnPDatabase();
+                                                //PromptSelectionResult promptOD = otherDoc.Editor.SelectAll();
+
+                                                //
+
+                                                //foreach (ObjectId objOD in prompt.Value.GetObjectIds())
+                                                //{
+                                                //    Entity entOD = (Entity)tr.GetObject(obj, OpenMode.ForRead);
+                                                //    LayerTableRecord layerOD = (LayerTableRecord)tr.GetObject(ent.LayerId, OpenMode.ForRead);
+                                                //    StringCollection objectKeysOD = new StringCollection { "Tag", "OtherDWG", "OtherDWGName", "UsedFromTo", "UsedRelatedTo", "PipeRunFrom", "PipeRunTo", "RelatedToEquip" };
+                                                //    try
+                                                //    {
+                                                //        if (!layerOD.IsFrozen)
+                                                //        {
+                                                //            StringCollection objectValuesOD = dlm.GetProperties(dlm.FindAcPpRowId(ent.ObjectId), objectKeys, true);
+                                                //            if (!String.IsNullOrEmpty(objectValuesOD[0]))
+                                                //            {
+                                                //                if ((objectValuesOD[0]) == element.RelatedTo)
+                                                //                {
+                                                //                    element.HaveInOtherDocRT = true;
+                                                //                    break;
+                                                //                }
+                                                //            }
+                                                //        }
+                                                //    }
+                                                //    catch (DLException e)
+                                                //    {
+                                                //        _ = e;// runtime dando erro por nao haver link com a entidade 
+                                                //    }
+                                                //}
+
+                                                //otherDoc.CloseAndSave(element.OtherDWGName);
+                                            }
+
+                                        }
+                                        else
+                                        {
+                                            element.Type = "Equipamento";
+                                        }
+                                        elements.Add(element);
+
+
+                                        break;
+                                    case "SLINE":
+
+                                        element.Type = "Linha";
+
+                                        element.PipeRunFrom = objectValues[5] == "EQUIPAMENTO NÃO ENCONTRADO" ? "" : objectValues[5];
+                                        element.PipeRunTo = objectValues[6] == "EQUIPAMENTO NÃO ENCONTRADO" ? "" : objectValues[6];
+                                        element.OtherDWG = !String.IsNullOrEmpty(objectValues[1]) ?
+                                                                    (objectValues[2] != caminhoDocumentoAtual ? Convert.ToBoolean(objectValues[1]) : false) :
+                                                                    false;
+
+                                        element.OtherDWGName = objectValues[2];
+                                        element.HaveInOtherDocFT = false;
+
+                                        if (element.OtherDWG)
+                                        {
+                                            //Document otherDoc = Application.DocumentManager.Open(element.OtherDWGName, false);
+                                            //PlantProject projOD = PlantApplication.CurrentProject;
+                                            //ProjectPartCollection projPartsOD = proj.ProjectParts;
+                                            //PnIdProject pnidProjOD = (PnIdProject)projParts["PnId"];
+                                            //DataLinksManager dlmOD = pnidProj.DataLinksManager;
+                                            //PnPDatabase dbOD = dlm.GetPnPDatabase();
+                                            //PromptSelectionResult promptOD = otherDoc.Editor.SelectAll();
+
+                                            //
+
+                                            //foreach (ObjectId objOD in prompt.Value.GetObjectIds())
+                                            //{
+                                            //    Entity entOD = (Entity)tr.GetObject(obj, OpenMode.ForRead);
+                                            //    LayerTableRecord layerOD = (LayerTableRecord)tr.GetObject(ent.LayerId, OpenMode.ForRead);
+                                            //    StringCollection objectKeysOD = new StringCollection { "Tag", "OtherDWG", "OtherDWGName", "UsedFromTo", "UsedRelatedTo", "PipeRunFrom", "PipeRunTo", "RelatedToEquip" };
+                                            //    try
+                                            //    {
+                                            //        if (!layerOD.IsFrozen)
+                                            //        {
+                                            //            StringCollection objectValuesOD = dlm.GetProperties(dlm.FindAcPpRowId(ent.ObjectId), objectKeys, true);
+                                            //            if (!String.IsNullOrEmpty(objectValuesOD[0]))
+                                            //            {
+                                            //                if ((objectValuesOD[0]) == element.PipeRunTo)
+                                            //                {
+                                            //                    element.HaveInOtherDocFT = true;
+                                            //                    break;
+                                            //                }
+                                            //            }
+                                            //        }
+                                            //    }
+                                            //    catch (DLException e)
+                                            //    {
+                                            //        _ = e;// runtime dando erro por nao haver link com a entidade 
+                                            //    }
+                                            //}
+
+                                            //otherDoc.CloseAndSave(element.OtherDWGName);
+                                        }
+                                        elements.Add(element);
+
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                    catch (DLException e)
+                    {
+                        _ = e;// runtime dando erro por nao haver link com a entidade 
+                    }
+                }
+            }
+
+            using (Transaction tr = acDoc.Database.TransactionManager.StartTransaction())
+            {
+
+                foreach (Element element in elements.Where(w => w.Type == "Linha" &
+                                                            (!String.IsNullOrEmpty(w.PipeRunFrom) |
+                                                             !String.IsNullOrEmpty(w.PipeRunTo))))
+                {
+                    //Linha editada com o PipeRunFrom em branco
+                    if (String.IsNullOrEmpty(element.PipeRunFrom))
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O campo From está vazio!"));
+                    //Linha editada com o PipeRunTo em branco
+                    if (String.IsNullOrEmpty(element.PipeRunTo))
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O campo To está vazio!"));
+
+                    //Linha com PipeRunFrom relacionado a um equipamento inexistente
+                    if (!String.IsNullOrEmpty(element.PipeRunFrom) && !element.OtherDWG && !elements.Any(w => w.Type == "Equipamento" & w.TAG == element.PipeRunFrom))
+                    {
+                        int rowId = dlm.FindAcPpRowId(element.id);
+                        StringCollection objectValues = dlm.GetProperties(dlm.FindAcPpRowId(element.id), objectKeys, true);
+                        objectValues[5] = "EQUIPAMENTO NÃO ENCONTRADO";
+                        db.StartTransaction();
+                        dlm.SetProperties(element.id, objectKeys, objectValues);
+                        db.CommitTransaction();
+
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O Equipamento {element.PipeRunFrom} não foi encontrado para a relação From!"));
+                    }
+
+                    //Linha com PipeRunTo relacionado a um equipamento inexistente
+                    if (!String.IsNullOrEmpty(element.PipeRunTo) && !element.OtherDWG && !elements.Any(w => w.Type == "Equipamento" & w.TAG == element.PipeRunTo))
+                    {
+                        //int rowId = dlm.FindAcPpRowId(element.id);
+                        //StringCollection objectValues = dlm.GetProperties(dlm.FindAcPpRowId(element.id), objectKeys, true);
+                        //objectValues[6] = "EQUIPAMENTO NÃO ENCONTRADO";
+                        //db.StartTransaction();
+                        //dlm.SetProperties(rowId, objectKeys, objectValues);
+                        //db.CommitTransaction();
+
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O Equipamento {element.PipeRunTo} não foi encontrado para a relação To!"));
+                    }
+
+                    //Linha com PipeRunTo relacionado a um equipamento de outro documento, porém inexistente                                
+                    if (!String.IsNullOrEmpty(element.PipeRunTo) && element.OtherDWG && !element.HaveInOtherDocFT)
+                    {
+                        //int rowId = dlm.FindAcPpRowId(element.id);
+                        //StringCollection objectValues = dlm.GetProperties(dlm.FindAcPpRowId(element.id), objectKeys, true);
+                        //objectValues[7] = "EQUIPAMENTO NÃO ENCONTRADO";
+                        //db.StartTransaction();
+                        //dlm.SetProperties(rowId, objectKeys, objectValues);
+                        //db.CommitTransaction();
+
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O Equipamento {element.PipeRunTo} se encontra no documento {element.OtherDWGName}"));
+                    }
+                }
+                tr.Commit();
+                string strDWGName = acDoc.Name;
+                acDoc.Database.SaveAs(strDWGName, true, DwgVersion.Current, acDoc.Database.SecurityParameters);
+            }
+
+            foreach (Element element in elements.Where(w => w.Type == "Instrumento" & !String.IsNullOrEmpty(w.RelatedTo)))
+            {
+                //Instrumento vinculado a um equipamento que não foi encontrado  
+                if (!element.OtherDWG && !elements.Any(w => w.Type == "Equipamento" & w.TAG == element.RelatedTo))
+                {
+                    //int rowId = dlm.FindAcPpRowId(element.id);
+                    //StringCollection objectValues = dlm.GetProperties(dlm.FindAcPpRowId(element.id), objectKeys, true);
+                    //objectValues[5] = "EQUIPAMENTO NÃO ENCONTRADO";
+                    //db.StartTransaction();
+                    //dlm.SetProperties(rowId, objectKeys, objectValues);
+                    //db.CommitTransaction();
+
+                    Erros.Add(new Inconsistence(element.TAG, element.Type, $"O Equipamento {element.RelatedTo} não foi encontrado!"));
+                }
+
+                //Instrumento vinculado a um equipamento de outro documento que não foi encontrado          
+                if (element.OtherDWG && !element.HaveInOtherDocRT)
+                {
+
+                    //int rowId = dlm.FindAcPpRowId(element.id);
+                    //StringCollection objectValues = dlm.GetProperties(dlm.FindAcPpRowId(element.id), objectKeys, true);
+                    //objectValues[6] = "EQUIPAMENTO NÃO ENCONTRADO";
+                    //db.StartTransaction();
+                    //dlm.SetProperties(rowId, objectKeys, objectValues);
+                    //db.CommitTransaction();
+
+                    Erros.Add(new Inconsistence(element.TAG, element.Type, $"O Equipamento {element.RelatedTo} se encontra no documento {element.OtherDWGName}"));
+
+                }
+
+            }
+
+            if (Erros.Any())
+            {
+                try
+                {
+                    if (formInconsistence == null || formInconsistence.IsDisposed)
+                        formInconsistence = new FormInconsistence();
+                    formInconsistence.Equipments = elements.Where(w => w.Type == "Equipamento").ToList();
+                    formInconsistence.InconsistenceList = Erros;
+
+                    formInconsistence.Show();
+                    formInconsistence.Focus();
+                }
+                catch (Autodesk.AutoCAD.Runtime.Exception e)
+                { }
+            }
+        }
+
+        public bool HaveRelatedToEquip(List<KeyValuePair<string, string>> keyValuePairs)
+        {
+            foreach (KeyValuePair<string, string> kvp in keyValuePairs)
+            {
+                if (kvp.Key.Equals("RelatedToEquip"))
+                    return true;
+            }
+            return false;
+        }
+
+        public void DocBeginDocClose2(object senderObj, DocumentBeginCloseEventArgs docBegClsEvtArgs)
+        {
+            Document acDoc = Application.DocumentManager.MdiActiveDocument;
             PlantProject proj = PlantApplication.CurrentProject;
             ProjectPartCollection projParts = proj.ProjectParts;
             PnIdProject pnidProj = (PnIdProject)projParts["PnId"];
@@ -561,7 +852,7 @@ namespace Plant3D
                     List<DocumentObject> itensAlterados = ReturnTagChanges(doc.UsedDocumentObjects, acDoc);
                     if (!contemTodos | itensRemovidos)
                     {
-                        foreach (DocumentObject obj in doc.UsedDocumentObjects.Where(w => w.Instrument == true))
+                        foreach (DocumentObject obj in doc.DocumentObjects.Where(w => w.Instrument == true))
                         {
                             DocumentObject itemAlterado = itensAlterados.FirstOrDefault(a => a.Id.Equals(obj.RelatedId));
                             if (itemAlterado != null)
