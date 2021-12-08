@@ -52,7 +52,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(713, 15);
+            this.button1.Location = new System.Drawing.Point(1025, 15);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 0;
@@ -80,7 +80,7 @@
             this.lvwInconsistence.FullRowSelect = true;
             this.lvwInconsistence.GridLines = true;
             this.lvwInconsistence.HideSelection = false;
-            this.lvwInconsistence.Location = new System.Drawing.Point(208, 0);
+            this.lvwInconsistence.Location = new System.Drawing.Point(0, 0);
             this.lvwInconsistence.Name = "lvwInconsistence";
             this.lvwInconsistence.Size = new System.Drawing.Size(904, 606);
             this.lvwInconsistence.TabIndex = 1;
@@ -100,21 +100,22 @@
             // Message
             // 
             this.Message.Text = "Message";
-            this.Message.Width = 800;
+            this.Message.Width = 3000;
             // 
             // lvwEquipements
             // 
             this.lvwEquipements.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1});
-            this.lvwEquipements.Dock = System.Windows.Forms.DockStyle.Left;
+            this.lvwEquipements.Dock = System.Windows.Forms.DockStyle.Right;
             this.lvwEquipements.GridLines = true;
             this.lvwEquipements.HideSelection = false;
-            this.lvwEquipements.Location = new System.Drawing.Point(0, 0);
+            this.lvwEquipements.Location = new System.Drawing.Point(904, 0);
             this.lvwEquipements.Name = "lvwEquipements";
             this.lvwEquipements.Size = new System.Drawing.Size(208, 606);
             this.lvwEquipements.TabIndex = 2;
             this.lvwEquipements.UseCompatibleStateImageBehavior = false;
             this.lvwEquipements.View = System.Windows.Forms.View.Details;
+            this.lvwEquipements.Visible = false;
             // 
             // columnHeader1
             // 

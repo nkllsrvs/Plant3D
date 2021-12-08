@@ -378,14 +378,22 @@ namespace Plant3D
                                         {
                                             "Tag",
                                             "PipeRunTo",
-                                            "PipeRunFrom"
+                                            "PipeRunFrom",
+                                            "OtherDWG", 
+                                            "OtherDWGName",
+                                            "UsedFromTo", 
+                                            "UsedRelatedTo"
                                         };
+
                                         StringCollection iVals = dlm.GetProperties(lineRowID, iKeys, true);
                                         if (countFT > 0 & messageReplaceRelatedToEquip == DialogResult.No)
                                         {
                                             if (String.IsNullOrEmpty(iVals[1]))
                                             {
                                                 iVals[1] = selectedTo.Tag;
+                                                iVals[3] = "true";
+                                                iVals[4] = doc.Name;
+                                                iVals[5] = "true";
                                                 db.StartTransaction();
                                                 dlm.SetProperties(lineID, iKeys, iVals);
                                                 //Entity entEdited = (Entity)tmLinesSecondDWG.GetObject(lineID, OpenMode.ForWrite);
@@ -396,6 +404,9 @@ namespace Plant3D
                                         else
                                         {
                                             iVals[1] = selectedTo.Tag;
+                                            iVals[3] = "true";
+                                            iVals[4] = doc.Name;
+                                            iVals[5] = "true";
                                             db.StartTransaction();
                                             dlm.SetProperties(lineID, iKeys, iVals);
                                             //Entity entEdited = (Entity)tmLinesSecondDWG.GetObject(lineID, OpenMode.ForWrite);
@@ -410,9 +421,13 @@ namespace Plant3D
                                         int lineRowID = dlmLines.FindAcPpRowId(lineID);
                                         StringCollection iKeys = new StringCollection
                                         {
-                                            "Tag",
+                                           "Tag",
                                             "PipeRunTo",
-                                            "PipeRunFrom"
+                                            "PipeRunFrom",
+                                            "OtherDWG",
+                                            "OtherDWGName",
+                                            "UsedFromTo",
+                                            "UsedRelatedTo"
                                         };
                                         StringCollection iVals = dlmLines.GetProperties(lineRowID, iKeys, true);
                                         Log($"countFT = {countFT} messageReplaceRelatedToEquip = {messageReplaceRelatedToEquip.ToString()} DialogResult = {DialogResult.No.ToString()}", "PlantsLog");
@@ -421,6 +436,9 @@ namespace Plant3D
                                             if (String.IsNullOrEmpty(iVals[1]))
                                             {
                                                 iVals[1] = selectedTo.Tag;
+                                                iVals[3] = "true";
+                                                iVals[4] = doc.Name;
+                                                iVals[5] = "true";
                                                 dbLines.StartTransaction();
                                                 var val = docLines.TransactionManager.StartTransaction();
                                                 dlmLines.SetProperties(lineID, iKeys, iVals);
@@ -433,6 +451,9 @@ namespace Plant3D
                                         else
                                         {
                                             iVals[1] = selectedTo.Tag;
+                                            iVals[3] = "true";
+                                            iVals[4] = doc.Name;
+                                            iVals[5] = "true";
                                             dbLines.StartTransaction();
                                             var val = docLines.TransactionManager.StartTransaction();
                                             dlmLines.SetProperties(lineID, iKeys, iVals);
