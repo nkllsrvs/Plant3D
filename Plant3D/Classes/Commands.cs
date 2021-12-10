@@ -102,7 +102,7 @@ namespace Plant3D
                                     MessageBox.Show("O instrumento já foi selecionado!!");
                                 else
                                 {
-                                    StringCollection keyTag = new StringCollection { "Tag", "RelatedToEquip", "Layer" };
+                                    StringCollection keyTag = new StringCollection { "Tag", "RelatedToEquip", "Layer", "RowIdRelatedTo", "DWGNameRelatedTo" };
                                     StringCollection valTag = dlmInstrumentsRT.GetProperties(dlmInstrumentsRT.FindAcPpRowId(instrument.ObjectId), keyTag, true);
 
                                     Entity ent = (Entity)trInstruments.GetObject(instrument.ObjectId, OpenMode.ForRead);
@@ -180,7 +180,9 @@ namespace Plant3D
                                     foreach (ObjectId intrumentId in InstrumentsRT)
                                     {
                                         int instrumentRowId = dlmInstrumentsRT.FindAcPpRowId(intrumentId);
-                                        StringCollection iKeys = new StringCollection { "Tag", "RelatedToEquip", "OtherDWG", "OtherDWGName", "UsedFromTo", "UsedRelatedTo" };
+
+                                        StringCollection iKeys = new StringCollection { "Tag", "RelatedToEquip", "OtherDWG", "OtherDWGName", "UsedFromTo", "UsedRelatedTo",
+                                            "RowIdRelatedTo", "DWGNameRelatedTo" };
                                         StringCollection iVals = dlmInstrumentsRT.GetProperties(instrumentRowId, iKeys, true);
 
                                         DocumentObject documentObjectI = new()
@@ -207,7 +209,10 @@ namespace Plant3D
                                             {
                                                 iVals[1] = eVals[0];
                                                 iVals[2] = "false";
+                                                iVals[3] = docInstrumentsRT.Name;
                                                 iVals[5] = "true";
+                                                iVals[6] = equipmentRowId.ToString();
+                                                iVals[7] = docInstrumentsRT.Name;
                                                 dbInstrumentsRT.StartTransaction();
                                                 dlmInstrumentsRT.SetProperties(intrumentId, iKeys, iVals);
                                                 Entity entEdited = (Entity)trEquipment.GetObject(intrumentId, OpenMode.ForWrite);
@@ -219,7 +224,10 @@ namespace Plant3D
                                         {
                                             iVals[1] = eVals[0];
                                             iVals[2] = "false";
+                                            iVals[3] = docInstrumentsRT.Name;
                                             iVals[5] = "true";
+                                            iVals[6] = equipmentRowId.ToString();
+                                            iVals[7] = docInstrumentsRT.Name;
                                             dbInstrumentsRT.StartTransaction();
                                             dlmInstrumentsRT.SetProperties(intrumentId, iKeys, iVals);
                                             Entity entEdited = (Entity)trEquipment.GetObject(intrumentId, OpenMode.ForWrite);
@@ -299,7 +307,8 @@ namespace Plant3D
                                 foreach (ObjectId intrumentId in InstrumentsRT)
                                 {
                                     int instrumentRowId = dlmInstrumentsRT.FindAcPpRowId(intrumentId);
-                                    StringCollection iKeys = new StringCollection { "Tag", "RelatedToEquip", "OtherDWG", "OtherDWGName", "UsedFromTo", "UsedRelatedTo", "RowIdRelated" };
+                                    StringCollection iKeys = new StringCollection { "Tag", "RelatedToEquip", "OtherDWG", "OtherDWGName", "UsedFromTo", "UsedRelatedTo",
+                                        "RowIdRelatedTo", "DWGNameRelatedTo",};
                                     StringCollection iVals = dlmInstrumentsRT.GetProperties(instrumentRowId, iKeys, true);
                                     if (countRTE > 0 & messageReplaceRelatedToEquip == DialogResult.No)
                                     {
@@ -310,6 +319,7 @@ namespace Plant3D
                                             iVals[3] = doc.Name;
                                             iVals[5] = "true";
                                             iVals[6] = equipmentRowId.ToString();
+                                            iVals[7] = doc.Name;
 
                                             dbInstrumentsRT.StartTransaction();
                                             dlmInstrumentsRT.SetProperties(intrumentId, iKeys, iVals);
@@ -327,6 +337,7 @@ namespace Plant3D
                                         iVals[3] = doc.Name;
                                         iVals[5] = "true";
                                         iVals[6] = equipmentRowId.ToString();
+                                        iVals[7] = doc.Name;
 
                                         dbInstrumentsRT.StartTransaction();
                                         dlmInstrumentsRT.SetProperties(intrumentId, iKeys, iVals);
@@ -558,7 +569,26 @@ namespace Plant3D
             DataLinksManager dlm = pnidProj.DataLinksManager;
             PnPDatabase db = dlm.GetPnPDatabase();
             PromptSelectionResult prompt = acDoc.Editor.SelectAll();
-            StringCollection objectKeys = new StringCollection { "Tag", "OtherDWG", "OtherDWGName", "UsedFromTo", "UsedRelatedTo", "PipeRunFrom", "PipeRunTo", "RelatedToEquip", "RowIdRelated" };
+            StringCollection objectKeys = new StringCollection
+            {
+                "Tag",
+                "OtherDWG",
+                "OtherDWGName",
+                "UsedFromTo",
+                "UsedRelatedTo",
+                "PipeRunFrom",
+                "PipeRunTo",
+                "RelatedToEquip",
+
+                "RowIdRelatedTo",//8
+                "DWGNameRelatedTo",//9
+
+                "RowIdFromToOrigin", //10
+                "DWGNameFromToOrigin",//11
+
+                "RowIdFromToDestiny",//12
+                "DWGNameFromToDestiny",//13
+            };
             acDoc.LockDocument();
             List<Inconsistence> Erros = new List<Inconsistence>();
             List<Element> elements = new List<Element>();
@@ -581,7 +611,9 @@ namespace Plant3D
                                 Element element = new Element();
                                 element.id = ent.ObjectId;
                                 element.TAG = objectValues[0];
-                                element.RowIdRelated = !String.IsNullOrEmpty(objectValues[8]) ? Convert.ToInt32(objectValues[8]) : 0;
+                                element.RowIdRelatedTo = !String.IsNullOrEmpty(objectValues[8]) ? Convert.ToInt32(objectValues[8]) : 0;
+                                element.RowIdFromToOrigin = !String.IsNullOrEmpty(objectValues[10]) ? Convert.ToInt32(objectValues[10]) : 0;
+                                element.RowIdFromToDestiny = !String.IsNullOrEmpty(objectValues[12]) ? Convert.ToInt32(objectValues[12]) : 0;
                                 var teste = ent.GetType().FullName;
                                 try
                                 {
@@ -599,15 +631,9 @@ namespace Plant3D
                                         {
                                             element.Type = "Instrumento";
                                             element.RelatedTo = objectValues[7]/* == "EQUIPAMENTO NÃO ENCONTRADO" ? "" : objectValues[7]*/;
-                                            element.OtherDWG = !String.IsNullOrEmpty(objectValues[1]) ?
-                                                                    (objectValues[2] != caminhoDocumentoAtual ? Convert.ToBoolean(objectValues[1]) : false) :
-                                                                    false;
-                                            element.OtherDWGName = objectValues[2];
-                                            element.HaveInOtherDocRT = false;
-                                            if (element.OtherDWG)
-                                            {
-                                                element.HaveInOtherDocRT = OtherDWGValidate(element.RowIdRelated, element.OtherDWGName, element);
-                                            }
+                                            element.OtherDWGRT = objectValues[9] != caminhoDocumentoAtual;
+                                            element.DWGNameRelatedTo = objectValues[9];
+                                            element.HaveRT = Validate(element.RowIdRelated, element.DWGNameRelatedTo, element.RelatedTo);
                                         }
                                         else
                                         {
@@ -621,18 +647,15 @@ namespace Plant3D
                                         element.Type = "Linha";
 
                                         element.PipeRunFrom = objectValues[5] /*== "EQUIPAMENTO NÃO ENCONTRADO" ? "" : objectValues[5]*/;
+                                        element.OtherDWGFTFrom = objectValues[11] != caminhoDocumentoAtual;
+                                        element.DWGNameFromToOrigin = objectValues[11];
+                                        element.HaveFTFrom = Validate(element.RowIdRelated, element.DWGNameFromToOrigin, element.PipeRunFrom);
+
                                         element.PipeRunTo = objectValues[6] /*== "EQUIPAMENTO NÃO ENCONTRADO" ? "" : objectValues[6]*/;
-                                        element.OtherDWG = !String.IsNullOrEmpty(objectValues[1]) ?
-                                                                    (objectValues[2] != caminhoDocumentoAtual ? Convert.ToBoolean(objectValues[1]) : false) :
-                                                                    false;
+                                        element.OtherDWGFTTo = objectValues[13] != caminhoDocumentoAtual;
+                                        element.DWGNameFromToDestiny = objectValues[13];
+                                        element.HaveFTTo = Validate(element.RowIdRelated, element.DWGNameFromToDestiny, element.PipeRunTo);
 
-                                        element.OtherDWGName = objectValues[2];
-                                        element.HaveInOtherDocFT = false;
-
-                                        if (element.OtherDWG)
-                                        {
-                                            element.HaveInOtherDocFT = OtherDWGValidate(element.RowIdRelated, element.OtherDWGName, element);
-                                        }
                                         elements.Add(element);
 
                                         break;
@@ -662,7 +685,7 @@ namespace Plant3D
                         Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Pipe Run To do elemento {element.TAG} está vazio"));
 
                     //Linha com PipeRunFrom relacionado a um equipamento inexistente
-                    if (!String.IsNullOrEmpty(element.PipeRunFrom) && element.PipeRunFrom != equipamentoNaoEncontrado && !element.OtherDWG && !elements.Any(w => w.TAG == element.PipeRunFrom))
+                    if (!String.IsNullOrEmpty(element.PipeRunFrom) && element.PipeRunFrom != equipamentoNaoEncontrado && !element.OtherDWGFTFrom && !elements.Any(w => w.TAG == element.PipeRunFrom))
                     {
                         int rowId = dlm.FindAcPpRowId(element.id);
                         StringCollection objectValues = dlm.GetProperties(dlm.FindAcPpRowId(element.id), objectKeys, true);
@@ -675,7 +698,7 @@ namespace Plant3D
                     }
 
                     //Linha com PipeRunTo relacionado a um equipamento inexistente
-                    if (!String.IsNullOrEmpty(element.PipeRunTo) && element.PipeRunTo != equipamentoNaoEncontrado && !element.OtherDWG && !elements.Any(w => w.TAG == element.PipeRunTo))
+                    if (!String.IsNullOrEmpty(element.PipeRunTo) && element.PipeRunTo != equipamentoNaoEncontrado && !element.OtherDWGFTTo && !elements.Any(w => w.TAG == element.PipeRunTo))
                     {
                         int rowId = dlm.FindAcPpRowId(element.id);
                         StringCollection objectValues = dlm.GetProperties(dlm.FindAcPpRowId(element.id), objectKeys, true);
@@ -688,7 +711,7 @@ namespace Plant3D
                     }
 
                     //Linha com PipeRunTo relacionado a um equipamento de outro documento, porém inexistente                                
-                    if (!String.IsNullOrEmpty(element.PipeRunTo) && element.PipeRunTo != equipamentoNaoEncontrado && element.OtherDWG && !element.HaveInOtherDocFT)
+                    if (!String.IsNullOrEmpty(element.PipeRunTo) && element.PipeRunTo != equipamentoNaoEncontrado && element.OtherDWGFTTo && !element.HaveFTTo)
                     {
                         int rowId = dlm.FindAcPpRowId(element.id);
                         StringCollection objectValues = dlm.GetProperties(dlm.FindAcPpRowId(element.id), objectKeys, true);
@@ -697,14 +720,26 @@ namespace Plant3D
                         dlm.SetProperties(rowId, objectKeys, objectValues);
                         db.CommitTransaction();
 
-                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Pipe Run To do elemento {element.TAG} não foi encontrado no documento {element.OtherDWGName}"));
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Pipe Run To do elemento {element.TAG} não foi encontrado no documento {element.DWGNameFromToDestiny}"));
+                    }
+                    
+                    if (!String.IsNullOrEmpty(element.PipeRunFrom) && element.PipeRunFrom != equipamentoNaoEncontrado && element.OtherDWGFTFrom && !element.HaveFTFrom)
+                    {
+                        int rowId = dlm.FindAcPpRowId(element.id);
+                        StringCollection objectValues = dlm.GetProperties(dlm.FindAcPpRowId(element.id), objectKeys, true);
+                        objectValues[6] = "ELEMENTO NÃO ENCONTRADO";
+                        db.StartTransaction();
+                        dlm.SetProperties(rowId, objectKeys, objectValues);
+                        db.CommitTransaction();
+
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Pipe Run From do elemento {element.TAG} não foi encontrado no documento {element.DWGNameFromToOrigin}"));
                     }
                 }
 
                 foreach (Element element in elements.Where(w => w.Type == "Instrumento" & !String.IsNullOrEmpty(w.RelatedTo)))
                 {
                     //Instrumento vinculado a um equipamento que não foi encontrado  
-                    if (!element.OtherDWG && element.RelatedTo != equipamentoNaoEncontrado && !elements.Any(w => w.Type == "Equipamento" & w.TAG == element.RelatedTo))
+                    if (!element.OtherDWGRT && element.RelatedTo != equipamentoNaoEncontrado && !elements.Any(w => w.Type == "Equipamento" & w.TAG == element.RelatedTo))
                     {
                         int rowId = dlm.FindAcPpRowId(element.id);
                         StringCollection objectValues = dlm.GetProperties(dlm.FindAcPpRowId(element.id), objectKeys, true);
@@ -717,7 +752,7 @@ namespace Plant3D
                     }
 
                     //Instrumento vinculado a um equipamento de outro documento que não foi encontrado          
-                    if (element.OtherDWG && element.PipeRunFrom != equipamentoNaoEncontrado && !element.HaveInOtherDocRT)
+                    if (element.OtherDWGRT && element.RelatedTo != equipamentoNaoEncontrado && !element.HaveRT)
                     {
 
                         int rowId = dlm.FindAcPpRowId(element.id);
@@ -727,10 +762,11 @@ namespace Plant3D
                         dlm.SetProperties(rowId, objectKeys, objectValues);
                         db.CommitTransaction();
 
-                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Related To Equip do elemento {element.TAG} não foi encontrado no documento {element.OtherDWGName}"));
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Related To Equip do elemento {element.TAG} não foi encontrado no documento {element.DWGNameRelatedTo}"));
 
                     }
                 }
+
                 foreach (Element element in elements.Where(w => w.PipeRunFrom == equipamentoNaoEncontrado | w.PipeRunTo == equipamentoNaoEncontrado | w.RelatedTo == equipamentoNaoEncontrado))
                 {
                     if (element.PipeRunFrom == equipamentoNaoEncontrado)
@@ -762,7 +798,7 @@ namespace Plant3D
             }
         }
 
-        public bool OtherDWGValidate(int rowId, string dwgPath, Element element)
+        public bool Validate(int rowId, string dwgPath, string tag)
         {
             PlantProject mainPrj = PlantApplication.CurrentProject;
             Project prj = mainPrj.ProjectParts["PnId"];
@@ -777,7 +813,7 @@ namespace Plant3D
                     try
                     {
                         var allProperties = dlm.GetAllProperties(rowId, false);
-                        if (allProperties != null && allProperties.Any(a => a.Value == element.PipeRunTo))
+                        if (allProperties != null && allProperties.Any(a => a.Value == tag))
                         {
                             return true;
                         }
@@ -978,119 +1014,119 @@ namespace Plant3D
         #endregion
 
         #region Testes
-        [CommandMethod("tt")]
-        public void test()
-        {
-            //Document doc = Application.DocumentManager.MdiActiveDocument;
-            //PlantProject proj = PlantApplication.CurrentProject;
-            //ProjectPartCollection projParts = proj.ProjectParts;
-            //PnIdProject pnidProj = (PnIdProject)projParts["PnId"];
-            //DataLinksManager dlm = pnidProj.DataLinksManager;
-            //PnPDatabase db = dlm.GetPnPDatabase();
-            //PromptSelectionResult selection = doc.Editor.SelectAll();
-            //List<DocumentObject> objects = new List<DocumentObject>();
-            //int countAlteredLines = 0;
+        //[CommandMethod("tt")]
+        //public void test()
+        //{
+        //    //Document doc = Application.DocumentManager.MdiActiveDocument;
+        //    //PlantProject proj = PlantApplication.CurrentProject;
+        //    //ProjectPartCollection projParts = proj.ProjectParts;
+        //    //PnIdProject pnidProj = (PnIdProject)projParts["PnId"];
+        //    //DataLinksManager dlm = pnidProj.DataLinksManager;
+        //    //PnPDatabase db = dlm.GetPnPDatabase();
+        //    //PromptSelectionResult selection = doc.Editor.SelectAll();
+        //    //List<DocumentObject> objects = new List<DocumentObject>();
+        //    //int countAlteredLines = 0;
 
-            // Prepare to the work: Let's get some entity's ObjectId
+        //    // Prepare to the work: Let's get some entity's ObjectId
 
-            Database db = Application.DocumentManager.MdiActiveDocument.Database;
-            DataLinksManager dlm = DataLinksManager.GetManager(db);
-            Editor ed = Application.DocumentManager.MdiActiveDocument.Editor;
-            ObjectId entId = ed.GetEntity("Pick a P&ID item: ").ObjectId;
-            StringCollection objectKeys = new StringCollection { "Tag", "OtherDWG", "OtherDWGName", "UsedFromTo", "UsedRelatedTo", "PipeRunFrom", "PipeRunTo", "RelatedToEquip", "RowId" };
-            StringCollection objectValuesOD = dlm.GetProperties(entId, objectKeys, true);
+        //    Database db = Application.DocumentManager.MdiActiveDocument.Database;
+        //    DataLinksManager dlm = DataLinksManager.GetManager(db);
+        //    Editor ed = Application.DocumentManager.MdiActiveDocument.Editor;
+        //    ObjectId entId = ed.GetEntity("Pick a P&ID item: ").ObjectId;
+        //    StringCollection objectKeys = new StringCollection { "Tag", "OtherDWG", "OtherDWGName", "UsedFromTo", "UsedRelatedTo", "PipeRunFrom", "PipeRunTo", "RelatedToEquip", "RowId" };
+        //    StringCollection objectValuesOD = dlm.GetProperties(entId, objectKeys, true);
 
-            // Now get the PnPID (i.e. PpObjectId)
-            //   from the selected entity's ObjectId
-            PpObjectId pnpId = dlm.MakeAcPpObjectId(entId);
-            // Now let's do an opposite action - find ObjectId(s) of the entity
-            int rowId1 = dlm.FindAcPpRowId(entId); // You can use ObjectId
-            int rowId2 = dlm.FindAcPpRowId(pnpId); //          or PpObjectId
+        //    // Now get the PnPID (i.e. PpObjectId)
+        //    //   from the selected entity's ObjectId
+        //    PpObjectId pnpId = dlm.MakeAcPpObjectId(entId);
+        //    // Now let's do an opposite action - find ObjectId(s) of the entity
+        //    int rowId1 = dlm.FindAcPpRowId(entId); // You can use ObjectId
+        //    int rowId2 = dlm.FindAcPpRowId(pnpId); //          or PpObjectId
 
-            // rowId1 and rowId2 are always equal
-            PpObjectIdArray ids = dlm.FindAcPpObjectIds(rowId1);
+        //    // rowId1 and rowId2 are always equal
+        //    PpObjectIdArray ids = dlm.FindAcPpObjectIds(rowId1);
 
-            // NOTE: It returns a COLLECTION of AcPpObjectId!
-            //     I.e., multiple AcDbObjectIds may be linked to a single RowID
+        //    // NOTE: It returns a COLLECTION of AcPpObjectId!
+        //    //     I.e., multiple AcDbObjectIds may be linked to a single RowID
 
-            // Now find the ObjectID for each PpObjectId
-            foreach (PpObjectId ppid in ids)
-            {
-                ObjectId oid = dlm.MakeAcDbObjectId(ppid);
-                try
-                {
-                    string dwgFlpath = objectValuesOD[2];
-                    using (Database dbt = new Database(false, true))
-                    {
-                        dbt.ReadDwgFile("C:\\Users\\nikol\\Documents\\FF-VALE\\MDR_Autodesk_v0_WIP_25_11_2021 11_06_26\\PID DWG\\API02.dwg", FileOpenMode.OpenForReadAndAllShare, false, null);
+        //    // Now find the ObjectID for each PpObjectId
+        //    foreach (PpObjectId ppid in ids)
+        //    {
+        //        ObjectId oid = dlm.MakeAcDbObjectId(ppid);
+        //        try
+        //        {
+        //            string dwgFlpath = objectValuesOD[2];
+        //            using (Database dbt = new Database(false, true))
+        //            {
+        //                dbt.ReadDwgFile("C:\\Users\\nikol\\Documents\\FF-VALE\\MDR_Autodesk_v0_WIP_25_11_2021 11_06_26\\PID DWG\\API02.dwg", FileOpenMode.OpenForReadAndAllShare, false, null);
 
-                        DataLinksManager dlm2 = DataLinksManager.GetManager(dbt);
+        //                DataLinksManager dlm2 = DataLinksManager.GetManager(dbt);
 
-                        try
-                        {
-                            var testRowIdDeOutroDWG = dlm2.GetAllProperties(13, false);
-                        }
-                        catch (System.Exception ex)
-                        {
+        //                try
+        //                {
+        //                    var testRowIdDeOutroDWG = dlm2.GetAllProperties(13, false);
+        //                }
+        //                catch (System.Exception ex)
+        //                {
 
-                        }
-                        try
-                        {
-                            var testRowIdDWGAtual = dlm2.GetAllProperties(rowId1, true);
-                        }
-                        catch (System.Exception ex)
-                        {
+        //                }
+        //                try
+        //                {
+        //                    var testRowIdDWGAtual = dlm2.GetAllProperties(rowId1, true);
+        //                }
+        //                catch (System.Exception ex)
+        //                {
 
-                        }
+        //                }
 
-                        dbt.SaveAs(dwgFlpath, DwgVersion.Current);
+        //                dbt.SaveAs(dwgFlpath, DwgVersion.Current);
 
-                    }
-                    Application.ShowAlertDialog("All files processed");
-                }
-                catch (System.Exception ex)
-                {
-                    Application.DocumentManager.MdiActiveDocument.Editor.WriteMessage(ex.ToString());
-                }
-                try
-                {
-                    string dwgFlpath = objectValuesOD[2];
-                    using (Database dbt = new Database(false, true))
-                    {
-                        dbt.ReadDwgFile("C:\\Users\\nikol\\Documents\\FF-VALE\\MDR_Autodesk_v0_WIP_25_11_2021 11_06_26\\PID DWG\\API01.dwg", FileOpenMode.OpenForReadAndAllShare, false, null);
+        //            }
+        //            Application.ShowAlertDialog("All files processed");
+        //        }
+        //        catch (System.Exception ex)
+        //        {
+        //            Application.DocumentManager.MdiActiveDocument.Editor.WriteMessage(ex.ToString());
+        //        }
+        //        try
+        //        {
+        //            string dwgFlpath = objectValuesOD[2];
+        //            using (Database dbt = new Database(false, true))
+        //            {
+        //                dbt.ReadDwgFile("C:\\Users\\nikol\\Documents\\FF-VALE\\MDR_Autodesk_v0_WIP_25_11_2021 11_06_26\\PID DWG\\API01.dwg", FileOpenMode.OpenForReadAndAllShare, false, null);
 
-                        DataLinksManager dlm2 = DataLinksManager.GetManager(dbt);
+        //                DataLinksManager dlm2 = DataLinksManager.GetManager(dbt);
 
-                        try
-                        {
-                            var testRowIdDeOutroDWG = dlm2.GetAllProperties(13, false);
-                        }
-                        catch (System.Exception ex)
-                        {
+        //                try
+        //                {
+        //                    var testRowIdDeOutroDWG = dlm2.GetAllProperties(13, false);
+        //                }
+        //                catch (System.Exception ex)
+        //                {
 
-                        }
-                        try
-                        {
-                            var testRowIdDWGAtual = dlm2.GetAllProperties(rowId1, true);
-                        }
-                        catch (System.Exception ex)
-                        {
+        //                }
+        //                try
+        //                {
+        //                    var testRowIdDWGAtual = dlm2.GetAllProperties(rowId1, true);
+        //                }
+        //                catch (System.Exception ex)
+        //                {
 
-                        }
+        //                }
 
-                        dbt.SaveAs(dwgFlpath, DwgVersion.Current);
+        //                dbt.SaveAs(dwgFlpath, DwgVersion.Current);
 
-                    }
-                    Application.ShowAlertDialog("All files processed");
-                }
-                catch (System.Exception ex)
-                {
-                    Application.DocumentManager.MdiActiveDocument.Editor.WriteMessage(ex.ToString());
-                }
-            }
+        //            }
+        //            Application.ShowAlertDialog("All files processed");
+        //        }
+        //        catch (System.Exception ex)
+        //        {
+        //            Application.DocumentManager.MdiActiveDocument.Editor.WriteMessage(ex.ToString());
+        //        }
+        //    }
 
 
-        }
+        //}
         #endregion
 
         public int IndexOfDocuments(List<DocumentInfo> documentInfos, string doc)

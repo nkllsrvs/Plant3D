@@ -77,7 +77,16 @@ namespace Plant3D
                     "Tag",
                     "Pipe Run To",
                     "Pipe Run From",
-                    "ClassName"
+                    "ClassName",
+
+                    "RowIdRelatedTo",
+                    "DWGNameRelatedTo",
+
+                    "RowIdFromToOrigin",
+                    "DWGNameFromToOrigin",
+
+                    "RowIdFromToDestiny",
+                    "OtherDWGNameFromToDestiny",
                 };
                 StringCollection iVals = dlmLines.GetProperties(dlmLines.FindAcPpRowId(line.ObjectId), iKeys, true);
                 if (line.Status == PromptStatus.OK)
@@ -192,15 +201,20 @@ namespace Plant3D
                                     Tag = fromVals[0],
                                     Id = ent.ObjectId,
                                     BelongingDocument = docLines.Name,
-                                    OtherDWG = false
+                                    OtherDWG = false, 
+                                    RowIdRelated = fromRowId,
                                 };
                                 foreach (DocumentObject lineObj in pipeLineGroup)
                                 {
                                     int lineRowId = dlmLines.FindAcPpRowId(lineObj.Id);
-                                    StringCollection lKeys = new StringCollection { "Tag", "PipeRunFrom", "OtherDWG", "OtherDWGName", "UsedFromTo", "UsedRelatedTo" };
+                                    StringCollection lKeys = new StringCollection { "Tag", "PipeRunFrom", "OtherDWG", "OtherDWGName", "UsedFromTo",
+                                        "UsedRelatedTo", "RowIdFromToOrigin", "DWGNameFromToOrigin",
+                                    };
                                     StringCollection lVals = dlmLines.GetProperties(lineRowId, lKeys, true);
                                     lVals[1] = fromVals[0];
                                     lVals[4] = "true";
+                                    lVals[6] = fromRowId.ToString();
+                                    lVals[7] = docLines.Name;
                                     dbLines.StartTransaction();
                                     dlmLines.SetProperties(lineObj.Id, lKeys, lVals);
                                     dbLines.CommitTransaction();
@@ -238,12 +252,16 @@ namespace Plant3D
                                     foreach (DocumentObject lineObj in pipeLineGroup)
                                     {
                                         int lineRowId = dlmLines.FindAcPpRowId(lineObj.Id);
-                                        StringCollection lKeys = new StringCollection { "Tag", "PipeRunTo", "OtherDWG", "OtherDWGName", "UsedFromTo", "UsedRelatedTo" };
+                                        StringCollection lKeys = new StringCollection { "Tag", "PipeRunTo", "OtherDWG", "OtherDWGName", "UsedFromTo", "UsedRelatedTo",
+                                            "RowIdFromToDestiny", "DWGNameFromToDestiny",
+                                        };
                                         StringCollection lVals = dlmLines.GetProperties(lineRowId, lKeys, true);
                                         {
                                             lVals[1] = toVals[0];
                                             lVals[2] = "false";
                                             lVals[4] = "true";
+                                            lVals[6] = toRowId.ToString();
+                                            lVals[7] = docLines.Name;
                                             dbLines.StartTransaction();
                                             dlmLines.SetProperties(lineObj.Id, lKeys, lVals);
                                             Entity entEdited = (Entity)trTo.GetObject(lineObj.Id, OpenMode.ForWrite);
@@ -323,12 +341,16 @@ namespace Plant3D
                                             formFromTo.listView.Items.Add(item);
                                         });
                                         int lineRowId = dlm.FindAcPpRowId(docObj.Id);
-                                        StringCollection lKeys = new StringCollection { "Tag", "PipeRunFrom", "OtherDWG", "OtherDWGName", "UsedFromTo", "UsedRelatedTo" };
+                                        StringCollection lKeys = new StringCollection { "Tag", "PipeRunFrom", "OtherDWG", "OtherDWGName", "UsedFromTo",
+                                            "UsedRelatedTo", "RowIdFromToOrigin", "DWGNameFromToOrigin",
+                                        };
                                         StringCollection lVals = dlmLines.GetProperties(lineRowId, lKeys, true);
                                         lVals[1] = selectedFrom.Tag;
                                         lVals[2] = "true";
                                         lVals[3] = doc.Name;
                                         lVals[4] = "true";
+                                        lVals[6] = selectedFrom.RowIdRelated.ToString();
+                                        lVals[7] = selectedFrom.BelongingDocument;
                                         dlm.GetPnPDatabase().StartTransaction();
                                         dlm.SetProperties(docObj.Id, lKeys, lVals);
                                         dlm.GetPnPDatabase().CommitTransaction();
@@ -360,7 +382,7 @@ namespace Plant3D
                             {
                                 int equipmentRowId = dlm.FindAcPpRowId(equipment.ObjectId);
 
-                                
+
                                 StringCollection eKeys = new StringCollection { "Tag" };
                                 StringCollection eVals = dlm.GetProperties(equipmentRowId, eKeys, true);
                                 selectedTo = new DocumentObject()
@@ -383,11 +405,12 @@ namespace Plant3D
                                             "Tag",
                                             "PipeRunTo",
                                             "PipeRunFrom",
-                                            "OtherDWG", 
+                                            "OtherDWG",
                                             "OtherDWGName",
-                                            "UsedFromTo", 
+                                            "UsedFromTo",
                                             "UsedRelatedTo",
-                                            "RowIdRelated"
+                                            "RowIdFromToDestiny",
+                                            "DWGNameFromToDestiny",
                                         };
 
                                         StringCollection iVals = dlm.GetProperties(lineRowID, iKeys, true);
@@ -400,6 +423,7 @@ namespace Plant3D
                                                 iVals[4] = doc.Name;
                                                 iVals[5] = "true";
                                                 iVals[7] = selectedTo.RowIdRelated.ToString();
+                                                iVals[8] = doc.Name;
 
                                                 db.StartTransaction();
                                                 dlm.SetProperties(lineID, iKeys, iVals);
@@ -415,6 +439,7 @@ namespace Plant3D
                                             iVals[4] = doc.Name;
                                             iVals[5] = "true";
                                             iVals[7] = selectedTo.RowIdRelated.ToString();
+                                            iVals[8] = doc.Name;
 
                                             db.StartTransaction();
                                             dlm.SetProperties(lineID, iKeys, iVals);
@@ -437,7 +462,8 @@ namespace Plant3D
                                             "OtherDWGName",
                                             "UsedFromTo",
                                             "UsedRelatedTo",
-                                            "RowIdRelated"
+                                            "RowIdFromToDestiny",
+                                            "DWGNameFromToDestiny",
                                         };
                                         StringCollection iVals = dlmLines.GetProperties(lineRowID, iKeys, true);
                                         Log($"countFT = {countFT} messageReplaceRelatedToEquip = {messageReplaceRelatedToEquip.ToString()} DialogResult = {DialogResult.No.ToString()}", "PlantsLog");
@@ -450,6 +476,7 @@ namespace Plant3D
                                                 iVals[4] = doc.Name;
                                                 iVals[5] = "true";
                                                 iVals[7] = selectedTo.RowIdRelated.ToString();
+                                                iVals[8] = doc.Name;
 
                                                 dbLines.StartTransaction();
                                                 //var val = docLines.TransactionManager.StartTransaction();
@@ -467,6 +494,7 @@ namespace Plant3D
                                             iVals[4] = doc.Name;
                                             iVals[5] = "true";
                                             iVals[7] = selectedTo.RowIdRelated.ToString();
+                                            iVals[8] = doc.Name;
 
                                             dbLines.StartTransaction();
                                             //var val = docLines.TransactionManager.StartTransaction();

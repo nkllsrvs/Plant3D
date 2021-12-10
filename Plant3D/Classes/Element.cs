@@ -1,4 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.ProcessPower.DataLinks;
+using Autodesk.ProcessPower.ProjectManager;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,12 +17,21 @@ namespace Plant3D.Classes
         public string RelatedTo { get; set; }
         public string PipeRunFrom { get; set; }
         public string PipeRunTo { get; set; }
-        public Boolean OtherDWG { get; set; }
-        public string OtherDWGName { get; set; }
-        public Boolean HaveInOtherDocRT { get; set; }
-        public Boolean HaveInOtherDocFT { get; set; }
+        public Boolean OtherDWGRT { get; set; }
+        public Boolean OtherDWGFTTo { get; set; }
+        public Boolean OtherDWGFTFrom { get; set; }
+        public string DWGNameRelatedTo { get; set; }
+        public string DWGNameFromToOrigin { get; set; }
+        public string DWGNameFromToDestiny { get; set; }
+        public Boolean HaveRT { get; set; }
+        public Boolean HaveFTTo { get; set; }
+        public Boolean HaveFTFrom { get; set; }
         public string ClassName { get; set; }
         public int RowIdRelated { get; set; }
+        public int RowIdRelatedTo { get; set; }
+        public int RowIdFromToOrigin { get; set; }
+        public int RowIdFromToDestiny { get; set; }
+
     }
 }
 
