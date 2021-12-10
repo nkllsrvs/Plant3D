@@ -723,8 +723,25 @@ namespace Plant3D
                                             //    //}
                                             //}
 
+                                            //System.IO.FileInfo info = new System.IO.FileInfo(element.OtherDWGName);
 
                                             Document otherDoc = Application.DocumentManager.Open(element.OtherDWGName, false);
+                                            Database database = new Database(false, true);
+
+                                            database.ReadDwgFile(element.OtherDWGName, FileOpenMode.OpenForReadAndAllShare, false, null);
+
+                                            PpObjectIdArray ids = dlm.FindAcPpObjectIds(123);
+
+                                            // NOTE: It returns a COLLECTION of AcPpObjectId!
+                                            //     I.e., multiple AcDbObjectIds may be linked to a single RowID
+                                            // Now find the ObjectID for each PpObjectId
+                                            foreach (PpObjectId ppid in ids)
+                                            {
+                                                ObjectId oid = dlm.MakeAcDbObjectId(ppid);
+                                                ed.WriteMessage("\n oid=" + oid.ToString());
+                                            }
+
+
                                             PlantProject projOD = PlantApplication.CurrentProject;
                                             ProjectPartCollection projPartsOD = projOD.ProjectParts;
                                             PnIdProject pnidProjOD = (PnIdProject)projPartsOD["PnId"];
@@ -734,7 +751,7 @@ namespace Plant3D
 
                                             otherDoc.LockDocument();
 
-                                            using (Transaction trOd = otherDoc.Database.TransactionManager.StartOpenCloseTransaction())
+                                            using (Transaction trOd = database.TransactionManager.StartOpenCloseTransaction())
                                             {
                                                 foreach (ObjectId objOD in promptOD.Value.GetObjectIds())
                                                 {

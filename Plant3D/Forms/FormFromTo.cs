@@ -354,10 +354,13 @@ namespace Plant3D
                         using (var tr2 = doc.TransactionManager.StartOpenCloseTransaction())
                         {
                             Entity ent = (Entity)tr2.GetObject(equipment.ObjectId, OpenMode.ForRead);
+
                             //Pegando o nome da classe que aparace no PLants como parametro de filtro entre linha e equipamento
                             if (ent.Id.ObjectClass.DxfName == "ACPPASSET" | ent.Id.ObjectClass.DxfName == "SLINE")
                             {
                                 int equipmentRowId = dlm.FindAcPpRowId(equipment.ObjectId);
+
+                                
                                 StringCollection eKeys = new StringCollection { "Tag" };
                                 StringCollection eVals = dlm.GetProperties(equipmentRowId, eKeys, true);
                                 selectedTo = new DocumentObject()
