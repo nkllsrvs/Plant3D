@@ -20,6 +20,7 @@ namespace Plant3D.Classes
         public Boolean HaveInOtherDocRT { get; set; }
         public Boolean HaveInOtherDocFT { get; set; }
         public string ClassName { get; set; }
+        public int RowIdRelated { get; set; }
     }
 }
 

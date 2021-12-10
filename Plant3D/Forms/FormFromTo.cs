@@ -368,6 +368,7 @@ namespace Plant3D
                                     Id = ent.ObjectId,
                                     BelongingDocument = doc.Name,
                                     OtherDWG = true,
+                                    RowIdRelated = equipmentRowId
                                 };
                                 foreach (ObjectId lineID in Linhas)
                                 {
@@ -382,7 +383,8 @@ namespace Plant3D
                                             "OtherDWG", 
                                             "OtherDWGName",
                                             "UsedFromTo", 
-                                            "UsedRelatedTo"
+                                            "UsedRelatedTo",
+                                            "RowIdRelated"
                                         };
 
                                         StringCollection iVals = dlm.GetProperties(lineRowID, iKeys, true);
@@ -394,6 +396,8 @@ namespace Plant3D
                                                 iVals[3] = "true";
                                                 iVals[4] = doc.Name;
                                                 iVals[5] = "true";
+                                                iVals[7] = selectedTo.RowIdRelated.ToString();
+
                                                 db.StartTransaction();
                                                 dlm.SetProperties(lineID, iKeys, iVals);
                                                 //Entity entEdited = (Entity)tmLinesSecondDWG.GetObject(lineID, OpenMode.ForWrite);
@@ -407,6 +411,8 @@ namespace Plant3D
                                             iVals[3] = "true";
                                             iVals[4] = doc.Name;
                                             iVals[5] = "true";
+                                            iVals[7] = selectedTo.RowIdRelated.ToString();
+
                                             db.StartTransaction();
                                             dlm.SetProperties(lineID, iKeys, iVals);
                                             //Entity entEdited = (Entity)tmLinesSecondDWG.GetObject(lineID, OpenMode.ForWrite);
@@ -439,12 +445,14 @@ namespace Plant3D
                                                 iVals[3] = "true";
                                                 iVals[4] = doc.Name;
                                                 iVals[5] = "true";
+                                                iVals[7] = selectedTo.RowIdRelated.ToString();
+
                                                 dbLines.StartTransaction();
-                                                var val = docLines.TransactionManager.StartTransaction();
+                                                //var val = docLines.TransactionManager.StartTransaction();
                                                 dlmLines.SetProperties(lineID, iKeys, iVals);
                                                 //Entity entEdited = (Entity)tmLinesFirstDWG.GetObject(lineID, OpenMode.ForWrite);
                                                 //ReplacePropertys(entEdited, LinhasOld);
-                                                val.Commit();
+                                                //val.Commit();
                                                 dbLines.CommitTransaction();
                                             }
                                         }
@@ -454,14 +462,16 @@ namespace Plant3D
                                             iVals[3] = "true";
                                             iVals[4] = doc.Name;
                                             iVals[5] = "true";
+                                            iVals[7] = selectedTo.RowIdRelated.ToString();
+
                                             dbLines.StartTransaction();
-                                            var val = docLines.TransactionManager.StartTransaction();
+                                            //var val = docLines.TransactionManager.StartTransaction();
                                             dlmLines.SetProperties(lineID, iKeys, iVals);
                                             //Entity entEdited = (Entity)tmLinesFirstDWG.GetObject(lineID, OpenMode.ForWrite);
                                             //ReplacePropertys(entEdited, LinhasOld);
-                                            val.Commit();
+                                            //val.Commit();
                                             dbLines.CommitTransaction();
-                                            StringCollection test = dlmLines.GetProperties(lineRowID, iKeys, true);
+                                            StringCollection test = dlmLines.GetProperties(lineID, iKeys, true);
                                             Log($"Tag = {test[0]} PipeRunFrom = {test[2]} PipeRunTo = {test[1]}", "PlantsLog");
                                         }
                                     }

@@ -20,6 +20,7 @@ namespace Plant3D.Classes
         public bool Line { get; set; }
         public bool OtherDWG { get; set; }
         public string OtherDWGName { get; set; }
+        public int RowIdRelated  { get; set; }
 
         public DocumentObject()
         {
