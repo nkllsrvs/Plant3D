@@ -656,10 +656,10 @@ namespace Plant3D
                 {
                     //Linha editada com o PipeRunFrom em branco
                     if (String.IsNullOrEmpty(element.PipeRunFrom))
-                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Pipe Run From está vazio!"));
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Pipe Run From do elemento {element.TAG} está vazio!"));
                     //Linha editada com o PipeRunTo em branco
                     if (String.IsNullOrEmpty(element.PipeRunTo))
-                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Pipe Run To está vazio"));
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Pipe Run To do elemento {element.TAG} está vazio"));
 
                     //Linha com PipeRunFrom relacionado a um equipamento inexistente
                     if (!String.IsNullOrEmpty(element.PipeRunFrom) && element.PipeRunFrom != equipamentoNaoEncontrado && !element.OtherDWG && !elements.Any(w => w.TAG == element.PipeRunFrom))
@@ -671,7 +671,7 @@ namespace Plant3D
                         dlm.SetProperties(element.id, objectKeys, objectValues);
                         db.CommitTransaction();
 
-                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Pipe Run From está com o valor \"ELEMENTO NÃO ENCONTRADO\"!"));
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Pipe Run From do elemento {element.TAG} está com o valor \"ELEMENTO NÃO ENCONTRADO\"!"));
                     }
 
                     //Linha com PipeRunTo relacionado a um equipamento inexistente
@@ -684,7 +684,7 @@ namespace Plant3D
                         dlm.SetProperties(rowId, objectKeys, objectValues);
                         db.CommitTransaction();
 
-                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Pipe Run To está com o valor \"ELEMENTO NÃO ENCONTRADO\"!"));
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Pipe Run To do elemento {element.TAG} está com o valor \"ELEMENTO NÃO ENCONTRADO\"!"));
                     }
 
                     //Linha com PipeRunTo relacionado a um equipamento de outro documento, porém inexistente                                
@@ -697,7 +697,7 @@ namespace Plant3D
                         dlm.SetProperties(rowId, objectKeys, objectValues);
                         db.CommitTransaction();
 
-                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Pipe Run To \"{element.PipeRunTo}\" não foi encontrado no documento {element.OtherDWGName}"));
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Pipe Run To do elemento {element.TAG} não foi encontrado no documento {element.OtherDWGName}"));
                     }
                 }
 
@@ -713,7 +713,7 @@ namespace Plant3D
                         dlm.SetProperties(rowId, objectKeys, objectValues);
                         db.CommitTransaction();
 
-                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Related To Equip está com o valor \"ELEMENTO NÃO ENCONTRADO\"!"));
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Related To Equip do elemento {element.TAG} está com o valor \"ELEMENTO NÃO ENCONTRADO\"!"));
                     }
 
                     //Instrumento vinculado a um equipamento de outro documento que não foi encontrado          
@@ -727,9 +727,18 @@ namespace Plant3D
                         dlm.SetProperties(rowId, objectKeys, objectValues);
                         db.CommitTransaction();
 
-                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Related To Equip \"{element.RelatedTo}\" não foi encontrado no documento {element.OtherDWGName}"));
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Related To Equip do elemento {element.TAG} não foi encontrado no documento {element.OtherDWGName}"));
 
                     }
+                }
+                foreach (Element element in elements.Where(w => w.PipeRunFrom == equipamentoNaoEncontrado | w.PipeRunTo == equipamentoNaoEncontrado | w.RelatedTo == equipamentoNaoEncontrado))
+                {
+                    if (element.PipeRunFrom == equipamentoNaoEncontrado)
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Pipe Run From do elemento {element.TAG} está com o valor \"ELEMENTO NÃO ENCONTRADO\"!"));
+                    if (element.PipeRunTo == equipamentoNaoEncontrado)
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Pipe Run To do elemento {element.TAG} está com o valor \"ELEMENTO NÃO ENCONTRADO\"!"));
+                    if (element.RelatedTo == equipamentoNaoEncontrado)
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Related To do elemento {element.TAG} está com o valor \"ELEMENTO NÃO ENCONTRADO\"!"));
                 }
                 tr.Commit();
             }
