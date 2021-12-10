@@ -436,7 +436,8 @@ namespace Plant3D
                                             "OtherDWG",
                                             "OtherDWGName",
                                             "UsedFromTo",
-                                            "UsedRelatedTo"
+                                            "UsedRelatedTo",
+                                            "RowIdRelated"
                                         };
                                         StringCollection iVals = dlmLines.GetProperties(lineRowID, iKeys, true);
                                         Log($"countFT = {countFT} messageReplaceRelatedToEquip = {messageReplaceRelatedToEquip.ToString()} DialogResult = {DialogResult.No.ToString()}", "PlantsLog");

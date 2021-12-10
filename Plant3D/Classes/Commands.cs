@@ -284,7 +284,7 @@ namespace Plant3D
                                     Tag = eVals[0],
                                     UsedRelatedTo = true,
                                     OtherDWG = true,
-                                    OtherDWGName = doc.Name, 
+                                    OtherDWGName = doc.Name,
                                     RowIdRelated = equipmentRowId,
                                 };
                                 try
@@ -581,7 +581,7 @@ namespace Plant3D
                                 Element element = new Element();
                                 element.id = ent.ObjectId;
                                 element.TAG = objectValues[0];
-                                element.RowIdRelated = int.Parse(objectValues[8]);
+                                element.RowIdRelated = !String.IsNullOrEmpty(objectValues[8]) ? Convert.ToInt32(objectValues[8]) : 0;
                                 var teste = ent.GetType().FullName;
                                 try
                                 {
@@ -606,16 +606,14 @@ namespace Plant3D
                                             element.HaveInOtherDocRT = false;
                                             if (element.OtherDWG)
                                             {
-                                                bool exists = OtherDWGValidate(element.RowIdRelated, element.OtherDWGName);
+                                                element.HaveInOtherDocRT = OtherDWGValidate(element.RowIdRelated, element.OtherDWGName, element);
                                             }
-
                                         }
                                         else
                                         {
                                             element.Type = "Equipamento";
                                         }
                                         elements.Add(element);
-
 
                                         break;
                                     case "SLINE":
@@ -633,7 +631,7 @@ namespace Plant3D
 
                                         if (element.OtherDWG)
                                         {
-                                            bool exists = OtherDWGValidate(element.RowIdRelated, element.OtherDWGName);
+                                            element.HaveInOtherDocFT = OtherDWGValidate(element.RowIdRelated, element.OtherDWGName, element);
                                         }
                                         elements.Add(element);
 
@@ -658,10 +656,10 @@ namespace Plant3D
                 {
                     //Linha editada com o PipeRunFrom em branco
                     if (String.IsNullOrEmpty(element.PipeRunFrom))
-                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O campo From está vazio!"));
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Pipe Run From está vazio!"));
                     //Linha editada com o PipeRunTo em branco
                     if (String.IsNullOrEmpty(element.PipeRunTo))
-                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O campo To está vazio!"));
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Pipe Run To está vazio"));
 
                     //Linha com PipeRunFrom relacionado a um equipamento inexistente
                     if (!String.IsNullOrEmpty(element.PipeRunFrom) && element.PipeRunFrom != equipamentoNaoEncontrado && !element.OtherDWG && !elements.Any(w => w.TAG == element.PipeRunFrom))
@@ -673,7 +671,7 @@ namespace Plant3D
                         dlm.SetProperties(element.id, objectKeys, objectValues);
                         db.CommitTransaction();
 
-                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O Equipamento {element.PipeRunFrom} não foi encontrado para a relação From!"));
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Pipe Run From está com o valor \"ELEMENTO NÃO ENCONTRADO\"!"));
                     }
 
                     //Linha com PipeRunTo relacionado a um equipamento inexistente
@@ -681,25 +679,25 @@ namespace Plant3D
                     {
                         int rowId = dlm.FindAcPpRowId(element.id);
                         StringCollection objectValues = dlm.GetProperties(dlm.FindAcPpRowId(element.id), objectKeys, true);
-                        objectValues[6] = "EQUIPAMENTO NÃO ENCONTRADO";
+                        objectValues[6] = "ELEMENTO NÃO ENCONTRADO";
                         db.StartTransaction();
                         dlm.SetProperties(rowId, objectKeys, objectValues);
                         db.CommitTransaction();
 
-                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O Equipamento {element.PipeRunTo} não foi encontrado para a relação To!"));
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Pipe Run To está com o valor \"ELEMENTO NÃO ENCONTRADO\"!"));
                     }
 
                     //Linha com PipeRunTo relacionado a um equipamento de outro documento, porém inexistente                                
                     if (!String.IsNullOrEmpty(element.PipeRunTo) && element.PipeRunTo != equipamentoNaoEncontrado && element.OtherDWG && !element.HaveInOtherDocFT)
                     {
-                        //int rowId = dlm.FindAcPpRowId(element.id);
-                        //StringCollection objectValues = dlm.GetProperties(dlm.FindAcPpRowId(element.id), objectKeys, true);
-                        //objectValues[6] = "EQUIPAMENTO NÃO ENCONTRADO";
-                        //db.StartTransaction();
-                        //dlm.SetProperties(rowId, objectKeys, objectValues);
-                        //db.CommitTransaction();
+                        int rowId = dlm.FindAcPpRowId(element.id);
+                        StringCollection objectValues = dlm.GetProperties(dlm.FindAcPpRowId(element.id), objectKeys, true);
+                        objectValues[6] = "ELEMENTO NÃO ENCONTRADO";
+                        db.StartTransaction();
+                        dlm.SetProperties(rowId, objectKeys, objectValues);
+                        db.CommitTransaction();
 
-                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O Equipamento {element.PipeRunTo} se encontra no documento {element.OtherDWGName}"));
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Pipe Run To \"{element.PipeRunTo}\" não foi encontrado no documento {element.OtherDWGName}"));
                     }
                 }
 
@@ -710,39 +708,33 @@ namespace Plant3D
                     {
                         int rowId = dlm.FindAcPpRowId(element.id);
                         StringCollection objectValues = dlm.GetProperties(dlm.FindAcPpRowId(element.id), objectKeys, true);
-                        objectValues[7] = "EQUIPAMENTO NÃO ENCONTRADO";
+                        objectValues[7] = "ELEMENTO NÃO ENCONTRADO";
                         db.StartTransaction();
                         dlm.SetProperties(rowId, objectKeys, objectValues);
                         db.CommitTransaction();
 
-                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O Equipamento {element.RelatedTo} não foi encontrado!"));
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Related To Equip está com o valor \"ELEMENTO NÃO ENCONTRADO\"!"));
                     }
 
                     //Instrumento vinculado a um equipamento de outro documento que não foi encontrado          
                     if (element.OtherDWG && element.PipeRunFrom != equipamentoNaoEncontrado && !element.HaveInOtherDocRT)
                     {
 
-                        //int rowId = dlm.FindAcPpRowId(element.id);
-                        //StringCollection objectValues = dlm.GetProperties(dlm.FindAcPpRowId(element.id), objectKeys, true);
-                        //objectValues[7] = "EQUIPAMENTO NÃO ENCONTRADO";
-                        //db.StartTransaction();
-                        //dlm.SetProperties(rowId, objectKeys, objectValues);
-                        //db.CommitTransaction();
+                        int rowId = dlm.FindAcPpRowId(element.id);
+                        StringCollection objectValues = dlm.GetProperties(dlm.FindAcPpRowId(element.id), objectKeys, true);
+                        objectValues[7] = "EQUIPAMENTO NÃO ENCONTRADO";
+                        db.StartTransaction();
+                        dlm.SetProperties(rowId, objectKeys, objectValues);
+                        db.CommitTransaction();
 
-                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O Equipamento {element.RelatedTo} se encontra no documento {element.OtherDWGName}"));
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Related To Equip \"{element.RelatedTo}\" não foi encontrado no documento {element.OtherDWGName}"));
 
                     }
-
                 }
-
                 tr.Commit();
-
             }
             string strDWGName = acDoc.Name;
             acDoc.Database.SaveAs(strDWGName, true, DwgVersion.Current, acDoc.Database.SecurityParameters);
-
-
-
 
             if (Erros.Any())
             {
@@ -761,11 +753,11 @@ namespace Plant3D
             }
         }
 
-        public bool OtherDWGValidate(int rowId, string dwgPath)
+        public bool OtherDWGValidate(int rowId, string dwgPath, Element element)
         {
-            Database database = new Database(false, true);
-            database.ReadDwgFile(dwgPath, FileOpenMode.OpenForReadAndAllShare, false, null);
-            DataLinksManager dlm = DataLinksManager.GetManager(database);
+            PlantProject mainPrj = PlantApplication.CurrentProject;
+            Project prj = mainPrj.ProjectParts["PnId"];
+            DataLinksManager dlm = prj.DataLinksManager;
 
             PpObjectIdArray ids = dlm.FindAcPpObjectIds(rowId);
             foreach (PpObjectId ppid in ids)
@@ -775,7 +767,11 @@ namespace Plant3D
                 {
                     try
                     {
-                        return dlm.GetAllProperties(rowId, false) != null;
+                        var allProperties = dlm.GetAllProperties(rowId, false);
+                        if (allProperties != null && allProperties.Any(a => a.Value == element.PipeRunTo))
+                        {
+                            return true;
+                        }
                     }
                     catch (System.Exception ex)
                     {
