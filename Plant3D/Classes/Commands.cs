@@ -39,7 +39,7 @@ namespace Plant3D
 {
     public class Commands : Form
     {
-        private const string equipamentoNaoEncontrado = "EQUIPAMENTO NÃO ENCONTRADO";
+        private const string equipamentoNaoEncontrado = "ELEMENT NOT FOUND";
 
         public static FormRelatedTo formRelateTo = new FormRelatedTo();
         public static FormFromTo formFromTo = new FormFromTo();
@@ -79,7 +79,7 @@ namespace Plant3D
             docInstrumentsRT.LockDocument();
             while (true)
             {
-                instrument = ed.GetEntity("\nSelecione um  Instrumento: ");
+                instrument = ed.GetEntity("\nSelect an Instrument: ");
                 StringCollection iKeys = new StringCollection
                 {
                     "Description",
@@ -99,7 +99,7 @@ namespace Plant3D
                                 if (!String.IsNullOrEmpty(iVals[2]))
                                     countRTE++;
                                 if (InstrumentsRT.Contains(instrument.ObjectId))
-                                    MessageBox.Show("O instrumento já foi selecionado!!");
+                                    MessageBox.Show("The instrument has already been selected!");
                                 else
                                 {
                                     StringCollection keyTag = new StringCollection { "Tag", "RelatedToEquip", "Layer", "RowIdRelatedTo", "DWGNameRelatedTo" };
@@ -125,25 +125,25 @@ namespace Plant3D
                             }
                             else
                             {
-                                MessageBox.Show(dlmInstrumentsRT.GetProperties(dlmInstrumentsRT.FindAcPpRowId(instrument.ObjectId), iKeys, true)[1] + " não é um instrumento!!");
+                                MessageBox.Show(dlmInstrumentsRT.GetProperties(dlmInstrumentsRT.FindAcPpRowId(instrument.ObjectId), iKeys, true)[1] + " it is not an instrument!");
                             }
                             trInstruments.Commit();
                         }
 
                     }
                 }
-                DialogResult messageBox = MessageBox.Show("Deseja selecionar outro Instrumento?", "Related To", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                DialogResult messageBox = MessageBox.Show("Do you want to select another Instrument?", "Related To", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 if (messageBox == DialogResult.No)
                     break;
             }
             if (!(formRelateTo.checkBoxEquipmentOtherDWG.Checked) & InstrumentsRT.Count > 0)
             {
-                PromptEntityResult equipment = ed.GetEntity("\nSelecione um Equipamento ou Linhas: ");
+                PromptEntityResult equipment = ed.GetEntity("\nSelect an Equipment or Lines: ");
                 if (equipment.Status == PromptStatus.OK)
                 {
                     DialogResult messageReplaceRelatedToEquip = new DialogResult();
                     if (countRTE > 0)
-                        messageReplaceRelatedToEquip = MessageBox.Show("Existe um ou mais elementos com RelatedToEquip já preenchidos, deseja substituir o valor atual do atributo?", "Related To", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                        messageReplaceRelatedToEquip = MessageBox.Show("There is one or more elements with RelatedToEquip already filled in, do you want to replace the current value of the attribute?", "Related To", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                     while (true)
                     {
                         using (DocumentLock doclock = docInstrumentsRT.LockDocument())
@@ -235,7 +235,7 @@ namespace Plant3D
                                             dbInstrumentsRT.CommitTransaction();
                                         }
                                     }
-                                    MessageBox.Show("Related To executado com sucesso!!");
+                                    MessageBox.Show("Related To successfully executed!!");
                                     foreach (ListViewItem item in formRelateTo.listView.Items)
                                         formRelateTo.listView.Items.Remove(item);
                                     formRelateTo.listView.Items.Clear();
@@ -247,7 +247,7 @@ namespace Plant3D
                                 }
                                 else
                                 {
-                                    MessageBox.Show("Selecione um equipamento ou linha!!");
+                                    MessageBox.Show("Select an equipment or line!!");
                                 }
                             }
 
@@ -268,12 +268,12 @@ namespace Plant3D
                 Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
                 Editor ed = doc.Editor;
                 doc.LockDocument();
-                PromptEntityResult equipment = ed.GetEntity("\nSelecione um Equipamento ou  Linha: ");
+                PromptEntityResult equipment = ed.GetEntity("\nSelect an Equipment or Line: ");
                 if (equipment.Status == PromptStatus.OK)
                 {
                     DialogResult messageReplaceRelatedToEquip = new DialogResult();
                     if (countRTE > 0)
-                        messageReplaceRelatedToEquip = MessageBox.Show("Existe um ou mais elementos com RelatedToEquip já preenchidos, deseja substituir o valor atual do atributo?", "Related To", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                        messageReplaceRelatedToEquip = MessageBox.Show("There is one or more elements with RelatedToEquip already filled in, do you want to replace the current value of the attribute?", "Related To", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                     while (true)
                     {
                         using (var trEquipment = doc.TransactionManager.StartTransaction())
@@ -349,7 +349,7 @@ namespace Plant3D
                                     }
                                 }
 
-                                MessageBox.Show("Related To executado com sucesso!!");
+                                MessageBox.Show("Related To successfully executed!");
                                 foreach (ListViewItem item in formRelateTo.listView.Items)
                                     formRelateTo.listView.Items.Remove(item);
                                 formRelateTo.listView.Items.Clear();
@@ -361,7 +361,7 @@ namespace Plant3D
                             }
                             else
                             {
-                                MessageBox.Show("Selecione um equipamento ou linha!!");
+                                MessageBox.Show("Select an equipment or line!");
                             }
                         }
                     }
@@ -370,7 +370,7 @@ namespace Plant3D
             }
             else
             {
-                MessageBox.Show("Lista de Instrumentos está vazia, selecione instrumentos!!");
+                MessageBox.Show("Instrument list is empty, select instruments!");
             }
         }
 
@@ -448,9 +448,9 @@ namespace Plant3D
                     }
                     tr.Commit();
                     if (countAlteredLines > 0)
-                        MessageBox.Show(countAlteredLines + " linhas alteradas com sucesso!!", "Update Linetype By Status", MessageBoxButtons.OK, MessageBoxIcon.Question);
+                        MessageBox.Show(countAlteredLines + "lines changed successfully!", "Update Linetype By Status", MessageBoxButtons.OK, MessageBoxIcon.Question);
                     else
-                        MessageBox.Show("Não houve nenhuma alteração!!", "Update Linetype By Status", MessageBoxButtons.OK, MessageBoxIcon.Question);
+                        MessageBox.Show("There was no change!", "Update Linetype By Status", MessageBoxButtons.OK, MessageBoxIcon.Question);
                 } // using
             } // if
 
@@ -649,12 +649,12 @@ namespace Plant3D
                                         element.PipeRunFrom = objectValues[5] /*== "EQUIPAMENTO NÃO ENCONTRADO" ? "" : objectValues[5]*/;
                                         element.OtherDWGFTFrom = objectValues[11] != caminhoDocumentoAtual;
                                         element.DWGNameFromToOrigin = objectValues[11];
-                                        element.HaveFTFrom = Validate(element.RowIdRelated, element.DWGNameFromToOrigin, element.PipeRunFrom);
+                                        element.HaveFTFrom = Validate(element.RowIdFromToOrigin, element.DWGNameFromToOrigin, element.PipeRunFrom);
 
                                         element.PipeRunTo = objectValues[6] /*== "EQUIPAMENTO NÃO ENCONTRADO" ? "" : objectValues[6]*/;
                                         element.OtherDWGFTTo = objectValues[13] != caminhoDocumentoAtual;
                                         element.DWGNameFromToDestiny = objectValues[13];
-                                        element.HaveFTTo = Validate(element.RowIdRelated, element.DWGNameFromToDestiny, element.PipeRunTo);
+                                        element.HaveFTTo = Validate(element.RowIdFromToDestiny, element.DWGNameFromToDestiny, element.PipeRunTo);
 
                                         elements.Add(element);
 
@@ -679,22 +679,22 @@ namespace Plant3D
                 {
                     //Linha editada com o PipeRunFrom em branco
                     if (String.IsNullOrEmpty(element.PipeRunFrom))
-                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Pipe Run From do elemento {element.TAG} está vazio!"));
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"The attribute Pipe Run From is empty!"));
                     //Linha editada com o PipeRunTo em branco
                     if (String.IsNullOrEmpty(element.PipeRunTo))
-                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Pipe Run To do elemento {element.TAG} está vazio"));
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"The Pipe Run To attribute is empty"));
 
                     //Linha com PipeRunFrom relacionado a um equipamento inexistente
                     if (!String.IsNullOrEmpty(element.PipeRunFrom) && element.PipeRunFrom != equipamentoNaoEncontrado && !element.OtherDWGFTFrom && !elements.Any(w => w.TAG == element.PipeRunFrom))
                     {
                         int rowId = dlm.FindAcPpRowId(element.id);
                         StringCollection objectValues = dlm.GetProperties(dlm.FindAcPpRowId(element.id), objectKeys, true);
-                        objectValues[5] = "ELEMENTO NÃO ENCONTRADO";
+                        objectValues[5] = "ELEMENT NOT FOUND";
                         db.StartTransaction();
                         dlm.SetProperties(element.id, objectKeys, objectValues);
                         db.CommitTransaction();
 
-                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Pipe Run From do elemento {element.TAG} está com o valor \"ELEMENTO NÃO ENCONTRADO\"!"));
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"The attribute Pipe Run From ({element.PipeRunFrom}) has the value \"ELEMENT NOT FOUND\"!"));
                     }
 
                     //Linha com PipeRunTo relacionado a um equipamento inexistente
@@ -702,12 +702,12 @@ namespace Plant3D
                     {
                         int rowId = dlm.FindAcPpRowId(element.id);
                         StringCollection objectValues = dlm.GetProperties(dlm.FindAcPpRowId(element.id), objectKeys, true);
-                        objectValues[6] = "ELEMENTO NÃO ENCONTRADO";
+                        objectValues[6] = "ELEMENT NOT FOUND";
                         db.StartTransaction();
                         dlm.SetProperties(rowId, objectKeys, objectValues);
                         db.CommitTransaction();
 
-                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Pipe Run To do elemento {element.TAG} está com o valor \"ELEMENTO NÃO ENCONTRADO\"!"));
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"The attribute Pipe Run From ({element.PipeRunTo}) has the value \"ELEMENT NOT FOUND\"!"));
                     }
 
                     //Linha com PipeRunTo relacionado a um equipamento de outro documento, porém inexistente                                
@@ -715,24 +715,24 @@ namespace Plant3D
                     {
                         int rowId = dlm.FindAcPpRowId(element.id);
                         StringCollection objectValues = dlm.GetProperties(dlm.FindAcPpRowId(element.id), objectKeys, true);
-                        objectValues[6] = "ELEMENTO NÃO ENCONTRADO";
+                        objectValues[6] = "ELEMENT NOT FOUND";
                         db.StartTransaction();
                         dlm.SetProperties(rowId, objectKeys, objectValues);
                         db.CommitTransaction();
 
-                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Pipe Run To do elemento {element.TAG} não foi encontrado no documento {element.DWGNameFromToDestiny}"));
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"The Pipe Run To attribute ({element.PipeRunTo}) was not found in the document {element.DWGNameFromToDestiny}"));
                     }
                     
                     if (!String.IsNullOrEmpty(element.PipeRunFrom) && element.PipeRunFrom != equipamentoNaoEncontrado && element.OtherDWGFTFrom && !element.HaveFTFrom)
                     {
                         int rowId = dlm.FindAcPpRowId(element.id);
                         StringCollection objectValues = dlm.GetProperties(dlm.FindAcPpRowId(element.id), objectKeys, true);
-                        objectValues[6] = "ELEMENTO NÃO ENCONTRADO";
+                        objectValues[6] = "ELEMENT NOT FOUND";
                         db.StartTransaction();
                         dlm.SetProperties(rowId, objectKeys, objectValues);
                         db.CommitTransaction();
 
-                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Pipe Run From do elemento {element.TAG} não foi encontrado no documento {element.DWGNameFromToOrigin}"));
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"The Pipe Run To attribute ({element.PipeRunFrom}) was not found in the document {element.DWGNameFromToOrigin}"));
                     }
                 }
 
@@ -743,12 +743,12 @@ namespace Plant3D
                     {
                         int rowId = dlm.FindAcPpRowId(element.id);
                         StringCollection objectValues = dlm.GetProperties(dlm.FindAcPpRowId(element.id), objectKeys, true);
-                        objectValues[7] = "ELEMENTO NÃO ENCONTRADO";
+                        objectValues[7] = "ELEMENT NOT FOUND";
                         db.StartTransaction();
                         dlm.SetProperties(rowId, objectKeys, objectValues);
                         db.CommitTransaction();
 
-                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Related To Equip do elemento {element.TAG} está com o valor \"ELEMENTO NÃO ENCONTRADO\"!"));
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"The Related To Equip attribute ({element.RelatedTo}) has the value \"ELEMENT NOT FOUND\"!"));
                     }
 
                     //Instrumento vinculado a um equipamento de outro documento que não foi encontrado          
@@ -757,12 +757,12 @@ namespace Plant3D
 
                         int rowId = dlm.FindAcPpRowId(element.id);
                         StringCollection objectValues = dlm.GetProperties(dlm.FindAcPpRowId(element.id), objectKeys, true);
-                        objectValues[7] = "EQUIPAMENTO NÃO ENCONTRADO";
+                        objectValues[7] = "ELEMENT NOT FOUND";
                         db.StartTransaction();
                         dlm.SetProperties(rowId, objectKeys, objectValues);
                         db.CommitTransaction();
 
-                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Related To Equip do elemento {element.TAG} não foi encontrado no documento {element.DWGNameRelatedTo}"));
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"The Related To Equip ({element.RelatedTo}) attribute was not found in the {element.DWGNameRelatedTo} document"));
 
                     }
                 }
@@ -770,11 +770,11 @@ namespace Plant3D
                 foreach (Element element in elements.Where(w => w.PipeRunFrom == equipamentoNaoEncontrado | w.PipeRunTo == equipamentoNaoEncontrado | w.RelatedTo == equipamentoNaoEncontrado))
                 {
                     if (element.PipeRunFrom == equipamentoNaoEncontrado)
-                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Pipe Run From do elemento {element.TAG} está com o valor \"ELEMENTO NÃO ENCONTRADO\"!"));
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"The attribute Pipe Run From has the value \"ELEMENT NOT FOUND\"!"));
                     if (element.PipeRunTo == equipamentoNaoEncontrado)
-                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Pipe Run To do elemento {element.TAG} está com o valor \"ELEMENTO NÃO ENCONTRADO\"!"));
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"The attribute Pipe Run To has the value \"ELEMENT NOT FOUND\"!"));
                     if (element.RelatedTo == equipamentoNaoEncontrado)
-                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"O atributo Related To do elemento {element.TAG} está com o valor \"ELEMENTO NÃO ENCONTRADO\"!"));
+                        Erros.Add(new Inconsistence(element.TAG, element.Type, $"The attribute Related To has the value \"ELEMENT NOT FOUND\"!"));
                 }
                 tr.Commit();
             }
@@ -842,76 +842,6 @@ namespace Plant3D
             return false;
         }
 
-        public void DocBeginDocClose2(object senderObj, DocumentBeginCloseEventArgs docBegClsEvtArgs)
-        {
-            Document acDoc = Application.DocumentManager.MdiActiveDocument;
-            PlantProject proj = PlantApplication.CurrentProject;
-            ProjectPartCollection projParts = proj.ProjectParts;
-            PnIdProject pnidProj = (PnIdProject)projParts["PnId"];
-            DataLinksManager dlm = pnidProj.DataLinksManager;
-            PnPDatabase db = dlm.GetPnPDatabase();
-            DocumentInfo docCompare = new DocumentInfo();
-            docCompare = ReturnDocumentInfo(acDoc);
-            foreach (DocumentInfo doc in documentInfos)
-            {
-                if (doc.Document == docCompare.Document)
-                {
-                    //var excpt1 = doc.DocumentObjects.Except(docCompare.DocumentObjects).ToList();
-                    //var excpt2 = docCompare.DocumentObjects.Except(doc.DocumentObjects).ToList();
-                    //var test2 = doc.DocumentObjects.Distinct().ToList();
-                    //var test3 = docCompare.DocumentObjects.Distinct().ToList();
-                    //var a = doc.DocumentObjects.All(docCompare.DocumentObjects.Contains) && doc.DocumentObjects.Count == docCompare.DocumentObjects.Count;
-                    bool contemTodos = doc.DocumentObjects.All(docCompare.DocumentObjects.Contains);
-                    bool itensRemovidos = doc.DocumentObjects.Count != docCompare.DocumentObjects.Count;
-                    List<DocumentObject> itensAlterados = ReturnTagChanges(doc.UsedDocumentObjects, acDoc);
-                    if (!contemTodos | itensRemovidos)
-                    {
-                        foreach (DocumentObject obj in doc.DocumentObjects.Where(w => w.Instrument == true))
-                        {
-                            DocumentObject itemAlterado = itensAlterados.FirstOrDefault(a => a.Id.Equals(obj.RelatedId));
-                            if (itemAlterado != null)
-                            {
-                                List<DocumentObject> itensAdd = docCompare.DocumentObjects.Except(doc.DocumentObjects).ToList();
-                                List<DocumentObject> itensRemoved = doc.DocumentObjects.Except(docCompare.DocumentObjects).ToList();
-                                string modfies = string.Join("\n", itensRemoved.Select(s => s.Tag));
-                                modfies += " => " + string.Join("\n", itensAdd.Select(s => s.Tag));
-                                string message = $"Houve mudanças no documento!!\n{modfies}\nDeseja refatorar as referências?";
-                                if (System.Windows.Forms.MessageBox.Show(message, "Trigger", System.Windows.Forms.MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
-                                    acDoc.Database.SaveAs(acDoc.Name, true, DwgVersion.Current, acDoc.Database.SecurityParameters);
-                                using (DocumentLock doclock = acDoc.LockDocument())
-                                {
-                                    using (var tr = acDoc.TransactionManager.StartTransaction())
-                                    {
-                                        int rowId = dlm.FindAcPpRowId(obj.Id);
-                                        if (obj.UsedRelatedTo == true)
-                                        {
-                                            StringCollection oKeys = new StringCollection { "Tag", "RelatedToEquip" };
-                                            StringCollection oVals = dlm.GetProperties(rowId, oKeys, true);
-                                            oVals[1] = itemAlterado.Tag;
-                                            db.StartTransaction();
-                                            dlm.SetProperties(rowId, oKeys, oVals);
-                                            db.CommitTransaction();
-                                        }
-                                        if (obj.UsedFromTo == true)
-                                        {
-                                            StringCollection oKeys = new StringCollection { "Tag", "Pipe Run To", "Pipe Run From" };
-                                            StringCollection oVals = dlm.GetProperties(rowId, oKeys, true);
-                                            oVals[1] = itemAlterado.Tag;
-                                            db.StartTransaction();
-                                            dlm.SetProperties(rowId, oKeys, oVals);
-                                            db.CommitTransaction();
-                                        }
-                                        tr.Commit();
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    documentInfos.Remove(docCompare);
-                }
-            }
-        }
         private List<DocumentObject> ReturnTagChanges(List<DocumentObject> usedDocumentObjects, Document acDoc)
         {
             PlantProject proj = PlantApplication.CurrentProject;
@@ -1154,6 +1084,5 @@ namespace Plant3D
             else
                 return false;
         }
-
     }
 }
